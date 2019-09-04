@@ -1,0 +1,1443 @@
+1 GUI
+ 
+
+1.1 DESKTOP X Window선택
+#vi /etc/sysconfig/desktop 
+
+DESKTOP = "GNOME" or "KDE" 
+ 
+
+1.2 X Window에서 해상도 조절
+CTRL + ALT + "+"(Num Lock key) 
+CTRL + ALT + "-" 
+
+ 
+
+ 
+
+1.3 X window 해상도를 설정하려면
+/etc/X11/XF86Config-4 (symbolic link되어 있음) 
+Screen section의 MODE 
+"800*600" "1024*768" "1152*864" 
+ 
+
+1.4 ami실행 후 메뉴가 깨져 있을 때
+#export 해서 LANG 와 XMODIFIERS 변수를 확인하라. 
+
+
+ 
+
+1.5 ami실행 후 한영키를 사용하고 싶은 경우
+xev를 실행해서 한영키의 키코드를 알아낸다. 예를 들어 한영키가 122, 
+한자키가 121이면 /etc/X11/Xmodmap 파일에 다음을 추가시킨다. 
+
+
+! i386 and alpha 
+keycode 22 = BackSpace 
+keycode 107 = Delete 
+keycode 121 = Hangul_Hanja 
+keycode 122 = Hangul 
+X를 재실행하거나 재실행시키고 싶지 않다면 
+#xmodmap /etc/X11/Xmodmap 을 실행 
+
+
+ 
+
+1.6 휠마우스에서 휠이 작동을 안할 때
+휠기능을 작동시키려면  /etc/X11/XF86Config-4  를 수정한다. 
+
+
+Section "InputDevice" 
+Identifier "Mouse0" 
+Driver "mouse" 
+Option "Protocol" "PS/2" 
+Option "Device" "/dev/psaux" 
+Option "ZAxisMapping" "4 5" 
+Option "Emulate3Buttons" "yes" 
+EndSection 
+바로 이 부분 
+ Option   "Protocol" "PS/2"  을 
+ Option   "Protocol" "IMPS/2"  로 고치면 휠을 사용할 수 있다. 만약 다음 부분 
+ Option      "ZAxisMapping" "4 5"  이 없다면 추가시킨다. 
+그리고 X window를 재시작하는 것을 잊지 않도록 한다. 
+
+
+ 
+
+1.7 원격에서 리모트서버의 X application실행시
+서버측: xhost +클라이언트ip (xhost + 는 모든 주소에 대해 원격접속 허용) 
+클라이언트측: export DISPLAY=서버ip:0.0 
+
+
+ 
+
+1.8 폰트서버 설정
+클라이언트측에서 Xmanager를 이용해 리눅스 서버에 접근하려면 서버에 폰트서버가 실행되고 있어야 한다. 폰트서버는 xfs데몬을 말하는 것으로 그냥 띄우면 되고 단지 /etc/X11/XF86Config에서 
+
+
+FontPath "/usr/X11R6/lib/X11/fonts/TrueType" 
+# FontPath "unix/:-1" 
+FontPath "unix/:7100"로 주석부분을 고쳐주면 된다. 그럼 7100포트가 열린다. 그리고 그서버와 포트를 지정하면 폰트서버가 타 x서버에서 사용가능하다. 
+
+
+ 
+
+1.9 KDE 3.x 버전에서 윈도우용 트루타입 폰트를 못 찾는 경우
+from KLTP 
+최근에 나온 레드햇8을 쓰고 있는데요 윈도우용 폰트를 가져다 쓰고 있습니다. 그런데 KDE에서 새로 추가한 윈도우용 트루타입폰트를 찾지 못하는 문제가 있더군요. xfontsel에서도 인식하고 셋팅역시 제대로 되어서 GTK나 Motif로 만들어진 다른 어플리케이션에서는 모두 인식하나 KDE에서는 백묵 글꼴만 나오고 윈도 폰트는 아예글꼴 리스트에 나오지도 않더군요. 해결책이 딴데 있더군요. 
+
+
+KDE가 QT 라이브러리로 만들어진 것이라 "혹시 QT셋팅에 문제가 있는것은 아닐까" 라는 생각을 하고 Qt config를 살펴봤습니다. QT Config에 Anti aliase font지원을 꺼 봤더니 제대로 동작하더군요. 아마도 QT내지는 XFS 자체의 버그인 것 같습니다. 간단히 말씀드리자면 qtconfig3를 실행시켜 Font탭에서 Enable Anti-Aliased Font Support를 꺼 주시고 X를 재시작 하시면 윈도우용 굴림 폰트를 KDE에서 이용하실 수 있습니다. --Kid A 
+
+
+ 
+
+1.10 한텀(hanterm) 타이틀바에 디렉토리 경로 보이게 하기
+자신의 .bash_profile에 다음을 추가하면 한텀의 타이틀바에 <사용자ID>@<호스트명>:<디렉토리명>의 형식으로 나타나게 된다. 
+
+
+function proml 
+{ 
+case $TERM in 
+xterm*) 
+local TITLEBAR='\[\033]0;\u@\h:\w\007\]' 
+;; 
+*) 
+local TITLEBAR='' 
+;; 
+esac 
+PS1="${TITLEBAR}\n] \u@\h ]" 
+} 
+proml 
+ 
+
+2 Pacakge 관리
+ 
+
+2.1 RPM 관련 커맨드
+#rpm -qa : 현재 설치된 package출력 
+#rpm -qil mtools | less : mtools에 관한 package정보 
+#rpm -qif /etc/bashrc : /etc/bashrc파일이 속한 package 
+
+ 
+
+ 
+
+2.2 rpm package설치시 상호의존성이 얽혀있을 땐 한 command로 설치
+#rpm -Uvh [package1] [package2] [packag3] ....... 
+의존성을 무시하고자 할 땐 --nodeps option사용 
+
+ 
+
+ 
+
+2.3 필요없는 rpm지우기
+만약 MySQL을 설치 하였다고 하자. 
+
+
+MySQL-3.23.33-1.i386.rpm* MySQL-devel-3.23.33-1.i386.rpm* 
+MySQL-client-3.23.33-1.i386.rpm* MySQL-shared-3.23.33-1.i386.rpm* 
+
+
+그리고 이것을 지우려면 ? 
+
+
+rpm -e `rpm -qa | grep MySQL` 
+또한 대소문자를 구분하지 못한다면? 
+
+
+rpm -e `rpm -qa | grep -i mysql` 
+이라고 써도 된다. 
+
+
+이때 ` 기호는 숫자 1번 왼쪽에 있는 백쿼터이다. 
+
+
+패키지명과 버젼이 동일한 패키지가 여러개 존재할때 삭제하는 방법 
+
+
+rpm -e 패키지명 --allmatches 
+ 
+
+2.4 레드헷 8.0에서 up2date 사용하기
+from KLTP 
+레드헷 8.0 설치하고 up2date을 사용하려 하니 황당한 에러가 나와서 해결하고 나서 올립니다. 
+레드헷 8.0 에서는 설치후에 [일반관리자용] setup 에서 서비스 보시면, rhnsd 가 있는데 이거 활성화 시켜 주시고요..(그냥 참조용임) 바로 up2date --register 하시면 접속해서 등록해서 바로 사용할 수 있습니다. 
+
+
+/etc/rc.d/init.d/rhnsd restart 하시면 됩니다. 
+
+
+이후 up2date * 하시면 됩니다. 그런데, 이런 에러가 나오시는분.... 
+
+
+There was an SSL error: [('SSL routines', 'SSL3_GET_SERVER_CERTIFICATE', 'certificate verify failed')] 
+이게 SSL 에러냐.. 절대 아닙니당.. 저도 처음에 그런줄알고 패키지 문제 인줄 알고 의존성 찾아보고, 삽질했습니당.결국에 알아낸것은 시간이 일치 하지 않는 다는 결론을... 이건 구글에서 검색했는데, 누군가 시간차를 적어 놓았더군요... 혹시 해서... 
+
+
+rdate -s time.kriss.re.kr 
+해서 다시, up2date --register 해보니... 헐 아주 잘 되네염... --박성훈 
+
+ 
+
+time.kriss.re.kr은 사용하지 마세요. 제가 예전에 서버들 간의 시간동기화를 하기위해서 time.kriss.re.kr 사용했다가 아주 크게 쓴맛을 보았습니다. 표준연의 타임서버가 갑자기 죽고나서 정확한 시간으로 셋팅되는 것이 아니고 OS상에서 존재하는 가장 처음의 시간, 기억은 1960년대의 시간으로 셋팅 되는 바람에 중요한 데이터들간의 시간동기화에 문제가 생겨서 데이터를 몽땅 버린 적이 있습니다. 제가 추천하는 time 서버는 ntp를 사용하는 것입니다. time.datum.com, kr.public.ntp.get-time.net unix 계열의 OS에서는 ntp 관련 S/W를 설치하시면 됩니다. 그러면 이만... --익명 
+
+ 
+
+이번에 레드헷 9.0을 설치하고 업데이트 하려고 하니 위으 에러메세지가 나오더군요! 그래서 시간을 동기화 했는데도 마찬가지 입니다. 그래서 레드헷 사이트에 가니 관련 RPM패키지를 받아 재설치 하라고 하네요 레드헷 사이트에 가서 새로운 up2date 관련 RPM을 받아 새로 설치 하시기 바랍니다. --호종기 
+
+ 
+
+ 
+
+3 Network
+ 
+
+3.1 Network 설정 파일들
+/etc/hosts : localhost 및 server name 
+/etc/resolv.conf : name server 
+/etc/sysconfig/network : HOSTNAME 
+/etc/sysconfig/network-scripts/ifcfg-eth0 : IP, Netmask, Gateway등등 
+설정이 끝났다면 
+ #/etc/rc.d/init.d/network restart  또는 
+ #service network retart  
+
+3.2 급하게 Network설정을 해야할 경우
+#ifconfig eth0 <ip_addr> netmask <netmask> up 
+#route add default gw <gw> 
+#cat > /etc/resolv.conf 
+nameserver <DNS_addr> 
+CTRL-D 
+
+#ping dongwoo.org 
+ 
+
+3.3 하나의 랜카드에 여러개의 ip추가하기
+from KLTP 
+◎아이피추가는 
+1) ifconfig eth0:0 아이피 netmask 아이피 broadcast 아이피 up 
+2) cd /etc/sysconfig/network-scripts 
+3) /etc/sysconfig/network-scripts/에 있는 ifcfg-eth0을 복사, 파일명을 ifcfg-eth0:0 
+4) vi로 열어 Device=eth0:0, ipaddr=원하는 아이피 주소 
+5) ./ifup eth0:0 
+6) /etc/rc.d/init.d/network restart 
+
+
+계속 추가시에는 eth0:1, eth0:2....등등으로 한다. 재부팅해보고 ifconfig를 해봐서 추가되었는지 확인한다. 
+
+
+◎아이피 삭제는 
+1) ifconfig eth0:0 아이피 netmask 아이피 broadcast 아이피 down 
+2) cd /etc/sysconfig/network-scripts 
+3) rm ifcfg-eth0:0 
+4) /etc/rc.d/init.d/network restart 
+
+
+재부팅해보고 ifconfig해봐서 삭제되었는지 확인한다. 참고로 레드햇 8.0에서 셋팅함 
+
+
+ 
+
+3.4 열린 포트를 사용하는 프로세서를 확인하려면
+if #3306 port is opened 
+
+
+#fuser -n tcp 3306 -> show PID 
+#ps -ef | grep [PID] 
+ 
+
+3.5 ping 무시하기
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all 
+echo 0 > /proc/sys/net/ipv4/icmp_echo_ignore_all 
+
+
+ 
+
+3.6 TCP/IP속도 증가시키기
+TCP/IP의 속도를 실제로 증가 시키는 것은 아니구요. 디폴트 값을 낮게 해서, 좀 더 많은 연결이 동시에 제어될 수 있도록 하는 방법이랍니다. 리눅스 박스가 연결을 닫는데 드는 시간을 줄여주고, 불안정한 열결을 끊기전에 시간을 줄여 줍니다. 또한 필요없는 IP 확장을 꺼 놓음으로서 체감 속도를 훨씬 빠르게 해 줄 것입니다. 
+
+
+echo 30 > /proc/sys/net/ipv4/tcp_fin_timeout 
+echo 1800 >/proc/sys/net/ipv4/tcp_keepalive_time 
+echo 0 > tcp_window_scaling 
+echo 0 > tcp_sack 
+echo 0 > tcp_timestamps 
+ 
+
+4 VI
+ 
+
+4.1 vi 에디터 내에서 ^M을 입력하려면
+CTRL + V --> CTRL + M 
+^T ^] 은 각각 CTRL + T CTRL + ] 
+ 
+
+4.2 vi 에데터 내에서 ^M을 없애려면
+:0,%s/^M//g (^M : CTRL-v, CTRL-m) 
+ 
+
+4.3 vi에서 라인끝 빈칸 지우기
+:g/^$/d 
+ 
+
+4.4 vi에서 벨소리 제거
+:set vb 
+
+
+ 
+
+4.5 vi에디터에서 삭제/복사 간편하게
+:10, 20d 
+10번째줄에 가서 ma 누르고 20번째줄에 가서 d'a (삭제) y'a (복사) 
+
+:'a,.co. 
+'a부터 .까지 .밑에 copy 
+ 
+
+4.6 vi에디터에서 어떤 문자열을 찾고자 할 때 대소문자 안가리게 하려면
+:set ic 
+
+
+ 
+
+4.7 vi에디터에서 '숫자'만큼의 컬럼으로 이동
+숫자| 
+
+
+ 
+
+4.8 vi에서 화면 나누기
+:split [file] <-- 수평 
+:vs [file] <-- 수직 
+
+화면간 이동을 하려면 CTRL + w , ijkl 
+ 
+
+4.9 파일 네비게이션
+#vi ./ <--- 현재 디렉토리 내용을 네비게이션 
+
+
+ 
+
+4.10 vi내에서 파일 네비게이션 바 만들기
+:20vs ./ 
+열기를 원하는 파일에 가서 shitf + o 
+
+
+ 
+
+4.11 여러개의 파일 편집하기
+#vi file1 file2 file3 ..... 
+
+:n <---- 뒤의 파일 편집으로 
+:e# <---- 앞의 파일 편집으로 
+ 
+
+4.12 vi로 파일비교
+ #vi -d file1 file2  
+
+ 
+
+4.13 잠시 쉘로 나가기
+CTRL + z 
+
+
+다시 vi로 
+#fg 
+
+
+ 
+
+4.14 vi에서 자동들여쓰기를 안하려면
+:se(t) nocindent 
+:se(t) nosmartindent (nosi) 
+"se(t) noautoindent (noai) 
+
+
+ 
+
+4.15 vim 의 syntax 기능에서 underline 없애기
+리눅스에서 터미널을 열어서 vi 작업을 한다면 syntax 기능을 사용하는데 별다른 어려움이 없을것이다. 하지만 telnet 으로 접속해서 사용하는 경우에 color 를 표시할 수가 없는 경우엔 해당 syntax 가 보통 underline 으로 표시된다. 그런데 이 underline 때문에 소스코드를 보기가 힘들경우가 있다. 
+
+
+이 글에서 다룰 내용은 다음과 같다. highlight 기능 과 colorscheme 사용. 
+
+
+vi 를 연 상태에서 
+
+
+:sy[tax] on 
+을 켠다. 여기서 [] 안의 내용은 옵션이다. 안써도 된다. 그리고 다음과 같이 하면 현재 사용하는 highlight 목록을 살펴 볼수 있다. 
+
+
+:hi[ghlight] 
+이 색깔에 대한 정의는 다음에 정의 되어 있다. 
+
+
+:!echo $VIMRUNTIME/colors 
+위 디렉토리 아래에 가보면 morning.vim, evening.vim 등의 파일들이 보이는데 각각 color scheme 를 정의해 놓은 파일들이다. 다른 color scheme 로 바꾸고 싶다면 다음과 같이 한다. 
+
+
+:colorscheme evening 
+여기서 evening 는 scheme 이름이다. 
+그럼 이제 underline 을 없애도록 하겠다. 현재 telnet 접속하여 vim 을 사용하고 있다는 가정하에 하는 것이다. 콘솔에서 사용하는 사람은 대개 underline 이 나오지 않을것이다. 
+
+
+:hi 
+위와 같이 하면 다음과 같이 출력이 된다. 
+
+
+Type term=underline ctermfg=2 
+Constant term=underline ctermfg=4 guifg=Magenta 
+여기서 Type 이라고 쓰여진 첫 필드는 group-name 이다. 만약 당신이 C 코드를 열고 있다면 Type 은 말그대로 char, int, float... 등과 같은 Type 이다. term 은 color 를 표시할 수 없는 터미널이다. term 에선 underline 으로 표시하겠다는 뜻이다. ctermfg 는 color terminal 이다. fg 는 foreground 이다. 번호는 색깔을 나타낸다. 즉, color 를 표시할 수 있는 터미널에선 2번 컬러로 Type 을 표시한다. 색깔은 숫자가 아니라 직접 명시를 할 수도 있다. ctermfg=blue 이런식이다. 그럼 상수를 표시할때 term 에선 bold 로 표시하도록 해보자. 
+
+
+:hi Constant term=bold ctermfg=4 
+아무런 설정도 하고 싶지 않다면 bold 대신에 NONE 라고 사용하면 된다. 
+
+
+위와 같은 설정들은 ~/.vimrc 에 저장하여 사용할 수도 있다. 
+
+
+shell> cat -n ~/.vimrc 
+
+1 set ic 
+2 set nu 
+3 set softtabstop=4 
+4 set shiftwidth=4 
+5 set formatoptions=croql 
+6 set ruler 
+7 set showmode 
+8 set smartindent 
+9 syntax on 
+10 filetype indent on 
+11 map <F2> :w<cr>:!gcc -Wall % -o %< && ./%<<cr> 
+12 map <F3> :<CR>:!./%<<CR> 
+13 map <F4> :so $VIMRUNTIME/syntax/2html.vim<CR> 
+14 
+15 colorscheme pablo 
+16 hi Type term=NONE ctermfg=2 
+17 hi PreProc term=NONE ctermfg=10 
+18 hi LineNr term=NONE ctermfg=6 
+19 hi Constant term=NONE ctermfg=14 
+15번째 라인부터가 highlight 설정이다. 1번째 라인부터 10번째 라인은 기본적인 설정들에 대한 내용이다. 11번째에서 13번째 라인은 mapping 기능으로 <F2> 를 누르면 C 코드를 컴파일 한후 실행하고 <F3> 를 누르면 컴파일된 바이너리를 실행만 한다. <F4> 를 누르면 현재 파일을 HTML 파일로 변환하여 준다. --linox 
+
+
+ 
+
+4.16 윈도우에서 작성한 한글이 페도라2(Fedora Core2) 에서 깨져보일 때
+윈도우에서 작성한 문서를 페도라2에서 열어보면 한글이 다 깨져보이는 수가 있다. 이는 encoding 차이때문인데 윈도우에서 저장한 파일은 기본적으로 euckr로 인코딩된다. Fedora Core2는 utf-8방식을 사용하기 때문에 파일을 컨버전해야 한다. 방법은 2가지다 
+
+
+1. 파일을 utf-8로 인코딩함 
+
+
+$iconv -f euckr -t utf-8 a.euckr.txt > a.utf-8.txt 
+2. 에디터 프로그램의 보기에서 encoding을 euckr로 바꿔준다. (vi는 지원함) 
+
+
+ 
+
+4.17 즐겨쓰는 option들
+set fileencodings=euc-kr 
+set encoding=cp949 
+set nowrap 
+set listchars=extends:>,precedes:< 
+set shiftwidth=4 
+set tabstop=4 
+set visualbell t_vb= 
+set autoindent 
+set tag=$HOME/tags,$HOME/server/tags 
+set fdm=marker 
+set vb 
+그외 팁으로, dos에서는 줄바뀜이 \r\n 
+unix에서는 \n 
+mac에서는 \r 
+그런데 vi에서 텍스트 파일을 유닉스 스타일로 변환해서 저장할 수 있다. 
+
+
+:set ff=unix 
+:w 
+해주면 dos형태의 파일을 unix로 변환된다. unix, dos, mac을 넣을 수가 있다. vim만의 기능이며 nvi, vi는 안된다. 
+
+
+ 
+
+4.18 more로 파일보다가 vi로 넘어가기
+보통 more로 파일을 보는경우가 많다. 그런데 수정을 하려고 하면 more를 종료하고나서 다시 vi로 들어 그러나 more로 파일을 보다가 키보드에서 v를 입력하면 바로 vi로 전환된다. 다시 빠저나오면 다시 more로 전환된다. 
+
+
+ 
+
+4.19 vi를 hex editor로
+vi는 텍스트 편집기뿐 아니라 hex editor의 기능도 가지고 있다. 
+다음과 같은 커맨드로 hex editor로 변경할 수 있다. 
+
+
+:%!xxd 
+다시 원래 텍스트 편집 기능으로 돌아가려면, 
+
+
+:%!xxd -r 
+ 
+
+5 System 관리
+ 
+
+5.1 Swap공간을 알려주는 명령어 (process check)
+#top 
+
+ 
+
+ 
+
+5.2 현재 디렉토리가 차지하는 용량 보기
+# du -s -h 
+
+
+ 
+
+5.3 run-level을 변경하려면
+#telinit 5 
+
+
+ 
+
+5.4 CPU정보를 알고 싶다면
+#arch 
+
+
+ 
+
+5.5 MEM정보
+#free 
+
+
+ 
+
+5.6 특정 데몬이 띄워져 있는지 확인하려면
+#ps aux | grep httpd 
+
+
+ 
+
+5.7 현재 구동중인 데몬을 트리형식으로 보려면
+#pstree 
+
+
+ 
+
+5.8 시스템 부하상태 보기
+#uptime 
+
+
+ 
+
+5.9 shell을 vi 스타일로
+#set -o vi 
+
+
+ 
+
+5.10 최신 커널버전 알기
+#finger @finger.kernel.org 
+#finger @kernel.org 
+
+ 
+
+ 
+
+5.11 prompt에 full path 표시를 하고싶다면
+#vi /etc/bashrc 
+
+PS1 = [ ..... ] 
+\U : User 
+\h : Host 
+\W : 사용자가 위치하는 경로의 최 하위디렉토리 
+여기서 \W -> \w 
+ 
+
+5.12 log파일에서 내용만 지우기
+#>log_file 
+
+ 
+
+ 
+
+5.13 현재 연결되어 있는 TCP port보기
+#netstat -t (-nlt : 열려있는 포트확인) 
+
+ 
+
+ 
+
+5.14 LILO에서 싱글부팅
+#vmlinuz root=/dev/hda9 single : /dev/hda9에 리눅스로 single booting 
+
+ 
+
+ 
+
+5.15 grub에서 싱글부팅
+- grub메뉴에서 e를 누릅니다. (edit) 
+- edit 화면에서 화살표키로 "kernel /boot/vmlinuz-xxxx" 로 옴깁니다. 
+- 다시 e키를 누르면 명령어 줄이 나옵니다. 끝에 한칸띄우고 single이라 고 적고 
+enter를 누릅니다. 
+kernel /boot/vmlinuz-2.2.17-5mz /dev/hdax single [enter] 
+- 하시고, b를 눌러서 booting을 합니다. 
+ 
+
+5.16 하위 디렉토리까지 문자열 검색하려면
+grep -rl [문자열] * 
+r 옵션이 없다면 
+
+ 
+
+find . * -exec grep -n [문자열] {}\; -print 
+더 짧고도 효과적인 방법 
+
+
+grep "string"'find . -type ' 
+그런데 이는 조건에 맞는 파일의 개수가 많아지면 쉘의 명령행 버퍼의 범위를 벗어나므로 문제가될 소지가 있다. 명령행 버퍼의 오버플로우를 방지하기 위해선 다음과 같이 하면 된다. 
+find . -type f | xargs grep "string" 
+그런데 이 방법은 파일 이름에 공백이 들어갈 경우 문제가 생길 수 있다. 그럼 다음과 같이 해보자. 
+find . -type f -print0 | xargs -0 grep "string" 
+find는 심볼릭 링크된 디렉토리에 대해서는 기본적으로 검색을 실시하지 않으니 -follow옵션을 사용해야할 경우도 있다는 것을 알아둔다. 
+
+
+명령행 버퍼오버플로우를 방지하는 방법은 다음과 같은 방법도 있다. 
+
+
+find . -type f -exec grep -l"string" {}＼; 
+grep에서 '-l'옵션은 string을 포함하는 파일명을 나타내준다. 이런 검색을 특정 파일들에 대해서 행하기 위해서는 -type와 -name옵션을 쓸 수 있다. 
+find . ＼(-type f -name "*＼.html"＼) -exec grep -l "string" {}＼; 
+이것은 html의 확장자를 가지는 모든 파일에 대해서 "string"을 포함하는지 알아보고 포함하고 있는 파일명을 출력해준다. 
+
+
+위의 방법들은 "어떻게 서브디렉토리에 있는 파일들에 대해서 grep을 실행해줄 수 있는가?"하는 문제에 관한 여러 가지 방법들은 매우 유용하긴 하지만 검색을 실시하는 디렉토리에 바이너리 파일이 있을 경우에는 터미널을 제어하지 못하는 문제가 생길 수 있다. 왜냐하면 바이너리 파일의 몇몇 제어 문자들(Control Characters)이 터미널을 그래픽 모드로 바꿔놓을 수 있기 때문이다. 물론 이렇게 되었을 경우 터미널을 다시 바로잡는 방법이 있긴 하지만 아무래도 가장 좋은 방법은 그러한 일이 없도록 처음부터 방지하는 것이 가장 좋을 것이다. 
+이제 화면에 찍혀나올 수 없는 문자들을 모두 없애보자. 어쨌든 읽을 수는 없지만 다음과 같은 명령을 내려보라. 
+
+
+sed -e 's/[^-~][^-~]*//g' 
+이 명령은 화면에 출력될 수 없는 (제어) 문자들을 그냥 스페이스들로 바꿔 버린다. 이 명령은 파이프를 이용하여 쉽게 다른 명령어들과 결합해서 사용할 수 있다. 여기 간단한 쉘 스크립트가 있다. 이것을 grepfind라고 이름붙여서 사용할 수 있다. 
+
+
+#!/bin/sh 
+#save this in a file called grepfind and do a "chmod 755 grepfind" 
+# 
+if test $@ = 0 -o "$1" = "-h" -o "$1" = "-help" ; then 
+echo 'grepfind ─ recursively descends directories and egrep all files ' 
+echo 
+echo 'Usage: grepfind [-help][-h](start_directory] egrep_search_pattern' 
+echo 
+echo 'The surrent directory is used as start_directory if parameter' 
+echo 'start_directory is omitted. The search is case insensitive.' 
+echo 'Multiple occurrences of control characters are replaced by a single' 
+echo 'space. This makes it possible to grep around in files that contain' 
+echo 'binary data and strings without setting the terminal accidently' 
+echo 'to graphics mode.' 
+echo 
+echo 'Example : grepfind/home "hello world" 
+else 
+if ["$2" = "" ];then 
+find . -type f -exec egrep -i "$1" /dev/null {} ＼;|sed -e 's/[^-~][^-~]*//g' 
+else 
+if [-d "$1" ] ;then 
+find $1 -type f -exec egrep -i "$2" /dev/null {} ＼;|sed -e 's/[^-~][^-~]*//g' 
+else 
+echo "ERROR: $1 is not a directory" 
+fi 
+fi 
+fi 
+#_END_OF_grepfind 
+ 
+
+5.17 world writable file 찾기
+#find / -type f -perm -2 -exec ls -lg {} \; 
+world writable directory 찾기 
+
+ 
+
+#find / -type d -perm -2 -exec ls -ldg {} \; 
+ 
+
+5.18 ext2에서 ext3로 업그레이드 하기
+#mke2fs -j /dev/hda[X] (X: disk number) 
+#tune2fs " 
+
+ext3에서 ext2로 다운그레이드 하기 
+#debugfs 
+#open -f -w /dev/hda[X] 
+features 
+features -has_journal -needs_recovery 
+quit 
+ 
+
+5.19 logon기록을 보려면
+#last 
+
+ 
+
+ 
+
+5.20 remote환경에 있는 윈도우 폴더 마운트하기
+/etc/fstab 에 물론 마운트 정보 입력 
+
+ 
+
+//win_pc/win_folder /linux/mount/point smbfs user,noauto,username=Winuser_name 0 0 
+ 
+
+5.21 터미널에서 디렉토리, 파일 색상 변경
+/etc/DIR_COLORS 
+
+
+if you use xterm, 
+/etc/DIR_COLORS.xterm 
+
+
+ 
+
+5.22 서브 디렉토리까지 한번에 생성
+mkdir -p sub/sub1/sub2/ .... 
+
+ 
+
+ 
+
+5.23 alias 적용안하기
+#\rm file1 
+쉘을 빠져나가기까지 alias를 적용 안하려면 
+#unalias rm 
+ 
+
+5.24 이동한 바로 직전의 디렉토리로
+#cd - 
+
+ 
+
+ 
+
+5.25 일정기간 동안 접근하지 않는 파일 삭제하기
+$find /var/spool/mail -atime +5 -exec rm {} \; 
+<--- /var/spool/mail 아래 있는 디렉토리에서 5일동안 접근하지 않는 파일(-atime +5)은 
+삭제하라는 명령어 
+혹은 3일 이전의 파일을 지우고자 한다면 
+
+
+$find /tmp/log/ -mtime +7 -exec rm -rf {} \; 
+ 
+
+5.26 setuid가 설정된 루트쉘 검색
+#find . -user root -perm 4755 -print 
+그렇게 되면 4755 퍼미션이 아니면 문제가 생길 것이다. 이런 경우에는 다음과 같이 명령을 내린다. 
+
+#ls -alR / |grep rws 
+#ls -alR / | grep r-s 
+#ls -alR / |grep -- --s 
+이렇게 하면 루트 쉘을 찾아낼 수 있다. 
+ 
+
+5.27 MySQL Connection Failed: Can't connect to local MySQL server through socket '/var/lib/mysql/mysql.sock' (111) 에러가 나는 경우
+MySQL 데몬 프로세스가 돌아가지 않는 것이며 최신 버전은 ./safe_mysqld -u & 해서 실행해야한다. 
+
+
+그럼에도 불구하고 sql 데몬이 실행이 안되고 /var/log/mysql.log에 다음과 같은 메시지가 표출될 경우가 있다. 
+
+
+040720 15:57:28 /usr/libexec/mysqld: Table 'mysql.host' doesn't exist 
+040720 15:57:28 mysqld ended 
+이것은 DB를 설치하고 data base를 생성하지 않았기 때문이다. 다음의 커맨드로 DB를 생성시키도록 한다. 
+$mysql_install_db 
+mysql이라는 DB를 생성하고 그 안에 user와 host 정보를 가지게 된다. 그럼에도 에러가 나타난다면 퍼미션 문제일 가능성이 크다. /var/lib/mysql안의 내용을 mysql 소유자로 권한을 변경시켜서 데몬을 구동시켜 본다. 
+$chown -R mysql.mysql /var/lib/mysql 
+
+
+ 
+
+5.28 특정 유저만 su 허락하기
+. 휠 그룹에 등록 
+
+
+ vi /etc/group ------------   wheel:x:10:root,wantedid  
+
+2. su 권한 제한 
+
+
+chgrp wheel /bin/su 
+chmoe 4770 /bin/su 
+ 
+
+5.29 작업중 로그인 막기
+시스템을 공사중일 때, root 이외의 다른 사용자를 로그인 못하게 해야 할 때가 있죠? 
+그럴 때는, /etc/nologin 이라는 파일을 만들어, 
+공사중 또는 Under Construction이라는 공지를 넣으면 됩니다. 
+
+
+ 
+
+5.30 크기가 가장 큰 파일, 디렉토리 찾기
+가장 큰 디렉토리를 찾으려면, 
+
+
+du -S | sort -n 
+가장 큰 파일을 찾으려면, 
+
+
+ls -lR | sort +4n 
+ 
+
+5.31 현재 디렉토리의 크기만을 파악할때
+[root@dev2 local]# du -c -h --max-depth=0 * 
+6.4M apache 
+35M bin 
+43M dns 
+1.7M doc 
+42k etc 
+1.0k games 
+42k geektalkd 
+1.1M gnuws 
+1.1M include 
+41k info 
+19M jakarta-tomcat-3.2.3 
+0 jre 
+15M jre118_v3 
+25M lib 
+62k libexec 
+1011k man 
+1.3M mm.mysql.jdbc-1.2c 
+937k sbin 
+3.8M share 
+1.8M shoutcast-1-8-3-linux-glibc6 
+5.2M ssl 
+159M total 
+ 
+
+5.32 시스템 정보 감추기
+/etc/inetd.conf 파일을 열어서, 
+
+
+telnet stream tcp nowait root /usr/sbin/tcpd in.telnetd -h 
+ 
+
+5.33 메모리를 가장 많이 잡아먹는 프로세스 알아내기
+ps -aux | sort +4n 
+또는 
+
+
+ps -aux | sort +5n 
+ 
+
+5.34 FTP로 들어온 사용자 확인하기
+ftpwho 
+ftpcount 
+
+
+ 
+
+5.35 원하지 않는 사용자 죽이기
+[root@dream /root]# skill -KILL sunny 
+위의 명령을 내리면 sunny 라는 사용자를 완전히 추방시킬수 있습니다. 
+그런데 이렇게 완전히 추방시키는게 아니구, 특정 터미널에 접속해있는 사용자만 추방시켜야 할 때도 있겠죠? 
+그럴때는 
+
+
+[root@dream /root]# skill -KILL -v pts/14 
+이런식으로 하면 된다 그럼 pts/14 에 연결되어 있는 사용자가 죽게 됩니다. 
+
+
+ 
+
+5.36 몇일 이상된 파일만 mv또는 cp
+#find ./ -mtime +10 | awk ' { print "mv "$1" ./babo" } ' | sh 
+find의 -mtime +10은 수정된지 10일 이상인 것만 찾는다. 이것을 이용해 나온 파일들을 ./babo 디렉토리 아래로 move 
+
+
+ 
+
+5.37 터미널에서 백스페이스를 누르면 ^H 와 같은 이상한 문자가 출력되는 현상
+이 문제는 터미널에서 백스페이스를 어떠한 방식으로 인식하느냐의 문제에서 발생한다. 일반적으로 백스페이스는 ^?와 ^H로 나타내어지는데 터미널에서 ^H만을 백스페이스로 간주한다면, 이와 같은 문제가 발생하게 됩니다. 보통 그 자리에서 CTRL + h를 백스페이스 대용으로 써도 되고 export TERM="vt100" 로 터미널을 설정해도 되고 stty erase ^H 로 키보드 입력값을 조정해도 된다. 
+
+
+ 
+
+5.38 텔넷이나 ftp 외부 사용시 root로 접속 가능하게 하는 방법
+레드헷계열은 공통이다. 
+
+
+telnet 
+/etc/securetty 
+이파일은 root가 로그인가능한 터미널(tty)장치들을 나열해 둔 것이다. 
+tty1 
+tty2 
+tty3 
+tty4 
+tty5 
+tty6 
+tty7 
+tty8 
+
+
+이 장치명은 가상터미널을 의미하는 것으로 root로 이런 가상터미널을 통한 접속이 허용된다는 것을뜻한다. 그리고 
+ttyp0 
+ttyp1 
+ttyp2 
+ttyp3 
+
+
+등은 pseudo 터미널을 통해서 root의 접속이 가능함을 뜻하므로 원격지에서 root로 접속을 막으려면
+다음설정과 같이 이 pseudo터미널을 모두 주석처리하면 된다. 
+그리고, 이 /etc/securetty파일에 다음과 같은 것을 볼 수도 있을 것입니다. 
+ttyS0 
+ttyS1 
+ttyS2 
+ttyS3 
+
+
+등은 시리얼라인 또는 모뎀을 통한 root의 접속을 허용한다는 것을 뜻한다. 
+
+
+FTP 
+나의 경우 ProFtp 를 사용하고 있는데 proftp 의 경우 루트접속을 가능케 하려면 
+/etc/proftpd/ftpusers 파일을 여어서 root 를 주석처리해주면 된다. 
+
+
+SSH 
+나는 텔넷은 사용하지 않고 ssh 을 열어두고있다. 텔넷보다는 보안상 좀더 안정적이라고할수있겠다. 
+ssh 의 경우 7.1 버전까지는 기본적으로 root 접속이 가능하다. 
+하지만 7.3버전에서는 접속이 안되니 ssh 에서 루트 접속이 가능하게하려면 ssh 설정파일인 
+
+/etc/ssh/sshd_config 
+
+파일을 열어서 PermitRootLogin 부분을 yes 로 해주시면 된다. 
+
+
+PermitRootLogin yes 
+
+ 
+
+5.39 여러 파일 안에 있는 내용중 특정단어를 바꾸고 싶을 때
+1. $ sed -e 's/aaaa/bbbb/g' < a.php > b.php 
+하면 b.php 로 바뀐 파일이 나온다네요 
+
+
+2. find 와 perl 의 조합으로 가능합니다. 
+find / -name 'aaa.php' -type f -exec perl -pi -e 's/aaa/bbb/g' {} \; 
+
+3. 하위 디렉토리까지 찾아서 파일 내의 특정한 내용을 바꾸는 명령입니다. 
+find . -name *.html | awk '{ print "cat "$1" | sed "s/바꾸고싶은말/바뀔말/g" >"$1 }' | sh 
+
+저는 이런식으로 하고 있습니다.. 
+find . -name *.html -exec perl -pi -e 's/바뀌고/바뀔/g' {}\;  위에서 찾을때 '*.html' 식으로 해야할 수도 있다. 
+
+
+ 
+
+5.40 윈도우 디렉토리 마운트후 한글 디렉토리가 깨져보일 때
+윈도우 디렉토리를 그냥 마운트하면 한글로 된 파일이나 디렉토리가 ??로 나타나게 된다. 이때 다음과 같이 마운트를 하면 한글 디렉토리가 제대로 보인다. 
+
+
+#mount -t vfat -o iocharset=cp949 /dev/hd* /mnt/win 
+
+Feodra Core2 이상에서는 한글 인코딩 방식이 UTF8 방식을 쓰므로 iochoarset=utf8 이라고 해줘야 한글 폴더가 제대로 보인다. 
+
+ 
+
+ 
+
+5.41 tail 명령어 활용
+# tail 
+man tail 로 자세한 사용법을 알 수 있다. 가장 많이 사용하는 옵션으로는 -f 가 있는데 기본적으로 끝에서 10 줄까지를 보여준다. tail 은 계속 크기가 변하는 파일을 모니터링 할때 유용한 명령어인데 보안적으로나 기타 여러가지에 있어서 아주 유용한 명령어이다. 실제 본인이 보안 프로젝트를 하면서 tail 은 상당히 강조를 했다. 
+
+
+tail -f /var/log/messages 
+messages 파일은 누가 뭐라고 해도 가장 중요한 log 파일이다. 실제 항상 실행시켜놓고 있는 명령어이다. 또한 몇몇 중요한 log 파일들이 있는데 secure, xferlog 등등이 있는데 /etc/syslog.conf 파일에서 모든 log 를 한 파일로 남기게 해서 하나의 파일만 모니터링을 하고 있으면 좋을 것이다. 
+일단 sendmail 이 시작되지 않을 경우를 예를 들어 보자. 창을 두개을 열고 하나의 창에서 tail -f /var/log/maillog를 실행한다. 그리고 다른 창에서 sendmail 을 재시작 시켜보자. 그러면 tail -f 를 실행한 곳에서 maillog 에 기록되는 상황이 계속 출력이 될것이다. 이것을 이용하면 에러 대처에 많은 도움이 될수 있을 것이다. 
+
+
+tail 명령어에서 두번째로 많이 쓰는 옵션은 -n 일 것이다. 
+-n 옵션은 원하는 수 라인 만큼 값을 출력하는 것이다. -c 는 bytes 만큼. 
+
+tail 의 반대 명령어는 head 이다. head 명령어는 앞에서 부터 보여주는 명령어이다. 
+
+
+ 
+
+5.42 shell prompt 변경하기
+일단 prompt 는 PS1 이라는 환경 변수를 이용한다. 즉 root 권한이 있다면 /etc/bashrc나 /etc/profile 에서 PS1 변수가 지정이 되어 있는것을 수정하여 전체 유저의 prompt 를 수정할수 있다. 만약 개인 유저가 prompt 를 수정하고 싶다면 계정 홈의 .bashrc 의 제일 마지막 라인에 PS1="" 을 설정해 주면 된다. PS1 에 사용되는 예약어에 대해서는 아래를 참고 하도록 하면 된다. 
+
+
+\t 현재 시간을 HH:MM:SS 형식으로 표시 
+\d 날자를 "요일 월 일" 형식으로 표시 (예, "Tue May 26") 
+\n 개행문자 
+\s 쉘의 이름, $0 의 베이스 이름 (마지막 슬래쉬 뒷 부분) 
+\w 현재 작업 디렉토리 
+\W 현재 작업 디렉토리의 베이스 이름 
+\u 현재 사용자의 사용자명 
+\h 호스트 이름 
+\# 이 명령의 명령 번호 
+\! 이 명령의 히스토리 번호 
+\$ 유효 UID가 0 이면 if the effective UID is 0, a #, 그렇지 않으면 $ 
+\nnn 팔진수 nnn에 해당하는 문자 
+\\ 백슬래쉬 
+\[ 비출력 문자의 시퀀스를 시작한다. 프롬프트에 터미널 제어 시퀀스를 넣을 때 사용한다. 
+\] 비출력 문자의 시퀀스를 마친다. 
+ 
+
+5.43 kernel 파라미터 조정하기
+보통 커널의 파라미터를 조정할때 proc 에서 echo 를 이용하여 redirect로 직접 쓰는 경우가 많았다. 이렇게 조정을 할 경우에는 또 rc.local 같은 파일에 따로 기입을 해 줘야 하는 불편함이 있었다. RedHat 6.2 이후 배포판에는 sysctl 이라는 package가 추가되어 이것들을 관리를 할수 있게 되었다. 일단 조정할수 있는 모든 parameter 들은 
+
+
+$ sysctl -a 
+명령으로 확인을 할수가 있다. 그리고 특정값을 수정하기 위해서는 /etc/sysctl.conf 에 해당 키(이건 sysctl -a 명령에서 리스트를 확인할수 있다)와 키값을 지정한 다음 
+
+
+$ sysctl -p 
+명령으로 바로 적용을 시킬수 있다. 물론 sysctl.conf 에 기입이 되면 부팅시 마다 자동으로 적용이 된다. 
+만약 잠시만 바꾸어 보고 싶다면 
+
+
+$ sysctl -w net.ipv4.icmp_echo_ignore_all=0 
+과 같이 직접 값을 넣어 줄수도 있다. 이럴 경우에는 부팅이 되어 있는 순간만 적용이 된다. -p 옵션은 sysctl.conf 가 아닌 다른 파일을 설정 파일로 지정을 할수 있게 한다. 옵션값이 없으면 default 로 /etc/sysctl.conf 를 읽어 들이며 따로 path 를 지정하면 해당 path 에있는 파일을 읽어 들인다. 
+
+
+ 
+
+5.44 사용자별 du -h 값 보기
+du 4.0p 이상 
+
+
+du -h --max-depth=1 /home/ | less 
+ 
+
+5.45 하룻동안 만들어진 파일 검색하기
+find / -ctime -1 
+ 
+
+5.46 apache 설정 파일 문법 오류 검색
+httpd.conf를 설정한 후에 쉘에서 
+
+
+bash# httpd -t 
+명령을 실행해 보도록 한다. 그러면 apache가 자체적으로 httpd.conf에서 에러가 있는지 없는지를 살펴 보게 된다. 
+
+
+ 
+
+5.47 레드햇 패키지 버전을 알고 싶을 때
+#cat /etc/redhat-release 
+
+
+ 
+
+5.48 새로운 배포본 설치를 위한 Multi LILO
+리눅스를 오래 사용하다 보면 나름대로 입맛에 맞게 튜닝이 되어 있을 것이다. 이때 새로운 배포본이나 호기심을 자극하는 작업때문에 리눅스를 새로이 설치할 경우가 많다. 이럴 경우 중요 세팅 파일이나 작업 데이타 파일등을 백업을 해놓고 새롭게 리눅스를 설치할 텐데 간혹 다시 이전 상태로 복귀해야할 상황에 부딪히곤 한다. 이때 원래 이전 셋팅으로 되돌리기 위해선 상당히 번거로운 작업을 해야하는데 이때 Multi LILO를 이용하면 편리하다. 
+
+
+먼저 최초 리눅스 설치시 하드디스크가 하나라면 5GB 정도 나누어 비워 둔다. 혹은 여분의 하드 디스크가 있으면 더 좋다. 
+이후 최신 배포본이나 호기심을 자극하는 새로운 배포본이 나왔을 경우 설치를 한다. 물론 비워둔 5GB나 여분의 하드디스크에 설치를 하는데 이때 중요한 것은 LILO를 설치할 때 해당 파티션의 부트섹터에 설치를 해야한다는 것이다. 
+예를 들어 하드 디스크가 하나일 경우 다음과 같이 파티션 테이블이 구성되어 있다고 하자. 
+
+
+/dev/hda 
+/dev/hda1 : MS 시스템 
+/dev/hda2 : Linux 시스템 
+/dev/hda2 : /home ... 
+/dev/hda3 : 확장 파티션 
+/dev/hda4 : 비워둔 5GB 영역 
+/dev/hda5 : swap 파티션 
+/dev/hda6 : MS 영역 
+이중 /dev/hda4에 새 배포본을 설치하며 LILO 또한 /dev/hda4에 설치를 한다. 그리고 설치하는 새 배포본의 swap 영역을 기존이 리눅스에서 사용하는 영역인 /dev/hda5를 사용하면 된다. 만약 여분의 하드디시크인 /dev/hdb에 설치를 한다면, LILO 또한 /dev/hdb에 설치하면 된다 . 이때도 swap영역을 /dev/hda5 로 사용해도 된다. 
+설치가 끝나면, 현재 쓰고 있는 기존의 리눅스에서 LILO에 다음과 같은 항목을 추가한다. 
+
+
+other=/dev/hda4 # or other=/dev/hdb1 
+label=newLinux # <Ctrl + D>를 눌러 종료 
+그리고 /sbin/lilo 명령으로 반영시키도록 한다. 
+부팅을 하면 새로운 이미지(메뉴)가 생기는 것을 볼 수 있다. 
+부가적으로 LILO상에서 이전 LILO로 전환하고 싶으면 새로 설치한 배포본으로 로긴한 후 다음과 같이 재갱신 후 다시 재부팅하여 새롭게 설치한 LILO로 와서 native 이미지를 지정하면 다시 원래의 LILO로 로딩할 수 있다. 
+
+
+other=/dev/hda 
+label=native # <Ctrl + D>를 눌러 종료 
+ 
+
+5.49 Rebooting 키 제한을 위한 설정
+리눅스에서는 일반 유저 권한일지라도 콘솔에서 <Ctrl + Alt + Del> (이하 CAD)를 누르면 재부팅이 가능하다. 이를 무시하게 하려면 /etc/inittab을 다음과 같이 열어서, 
+
+
+[root@choco root]#vi +/CTRL-ALT_DELETE /etc/inittab 
+
+# Trap CTRL-ALT-DELETE 
+ca::ctrlaltdel:/sbin/shutdown -t3 -r now 
+여기서 두 번째 열을 주석 처리한다. 
+
+
+#ca::ctrlaltdel:/sbin/shutdown -t3 -r now 
+이렇게 하면 어떤 유저도 CAD를 사용할 수 없게 된다. 
+그러나 이렇게 하면 root도 CAD를 사용할 수 없기 때문에 선택적으로 CAD를 허용하게 하면 좋을 것이다. 
+만약 root와 choco에게만 CAD를 사용할 수 있게 하려면 /etc/inittab의 CTRL-ALT-DELETE 항목을 다음과 같이 수정한다. 
+
+
+ca::ctrlaltdel:/sbin/shutdown -a -t3 -r now 
+그리고 CAD 신호 입력시 권한 비교 데이타 파일을 생성한다. 
+
+
+[root@choco root]#cat > /etc/shutdown.allow 
+root 
+choco # ctrl + D를 눌러 중료 
+그리고 수퍼프로세스에게 /etc/inittab을 갱신시킨다. 
+
+
+[root@choco root]#init q 
+이후부터는 CAD 신호가 들어오면 init에 의해 shutdown은 실행되고 -a 옵션에 의해 먼저 /etc/shutdown.allow 파일이 있는지 확인을 하고 그 파일안에 있는 유저와 /var/run/utmp 파일을 바탕으로 가상 콘솔에 로그인한 유저를 비교한다. 그래서 일치하면 셧다운이 일어나고 그렇지 않으면 권한없음 메시지를 출력하게 된다. 
+
+
+ 
+
+5.50 하드디스크 I/O 튜닝
+DMA 기능을 셋팅하는 것으로 하드 디스크의 액세스 속도를 확연하게 올릴 수 있다. 
+먼저 메인보드의 칩셋이나 방식에 따라 커널 컴파일에 옵션을 추가해야 I/O 속도개선을 위해 커널 수준의 지원을 받을 수 있다. 
+ATA/IDE/MFMRLL support -> IDE, ATA and ATAPI Block Devices 항목에서 다음의 네 옵션을 체크한다. 
+
+
+[*] Generic PCI IDE Chipset supoort 
+[*] Generic PCI bus-master DMA support 
+[*] Use PCI DMA by default when available 
+/* 이하 각자의 메인보드 칩셋에 맞게 설정 */ 
+[*] VIA82CXXX chipset support 
+그리고 하드디스크의 정보출력/셋팅/성능측정등의 작업을 위한 유틸리티인 hdparm을 이용해서 I/O 셋팅을 한다. 플래그 옵션은 -c를 이용해서 I/O를 32비트로, -d 옵션을 써서 dma 기능을 활성화 시킨다. 
+
+
+[root@choco root]#hdparm --help 
+-c * get/set IDE 32-bit IO setting 
+-d * get/set using_dma flag 
+.... 
+[root@choco root]#hdparm -c 1 /dev/hda 
+[root@choco root]#hdparm -d 1 /dev/hda 
+간혹 특정 스펙의 하드디스크가 DMA 기능을 제대로 지원하지 못할 경우 시스템이 잦은 크래쉬가 발생할 수 있다. 이렇게 불안한 증상을 보일 때는 다음과 같이 비활성화 시킨다. 
+
+
+[root@choco root]#hdparm -c 0 /dev/hda 
+[root@choco root]#hdparm -d 0 /dev/hda 
+hdparm에서는 -t 옵션이 일반적인 하드디스크의 상태를 나타낸다. 이것보다 좀더 세부적인 벤치마킹을 가능케 하는 유틸이 liobento이다. 
+
+
+[root@choco root]#liobento -d /dev/hda 
+부팅시 자동으로 I/O 32비트, on_dma가 활성화시키려면 다음과 같이 한다. 
+
+
+[root@choco root]#echo "hdparm -c 1 -d 1 1> /dev/null 2>&1" >> /etc/rc.d/rc.local 
+최근에 출시되는 배포본에서는 기본적으로 DMA모드를 활성화시키지만 개인이 커널을 새롭게 업그레이드하거나 하드디스크의 성능을 제어하려면 알고 있어야 한다. 
+
+
+ 
+
+5.51 Core 파일 디버깅
+Core파일은 어떤 프로그램이 갑자기 dump core로 종료될 때 만들어진다. Core는 하드디스크에 씌워진 메모리내의 프로그램 정보를 담고 있어 왜 프로그램이 죽었는지 조사할 수 있다. 
+다음과 같이 -core 옵션으로 core가 발생한 프로르램의 path와 이유를 알 수 있다. 
+
+
+$gdb -core core 
+그리고 core를 야기시킨 함수를 조사하려면 다음과 같이 커맨드를 친다. 
+
+
+$gdb path/to/program -core core 
+ 
+
+5.52 CPU부하와 메모리 사용 정보
+일반적으로 프로세스와 시스템에 관한 수많은 정보들은 /proc 디렉토리에서 찾을 수 있다. top을 통해 볼 수 있는 평균부하량(load average)를 얻으려면 다음을 보며 된다. 
+
+
+cat /proc/loadavg 
+특정 프로세스에 의한 메모리 사용 정보는 /proc/stat에서 찾을 수 있다. 더 자세한 정보는 proc 메뉴얼을 확인하라 
+
+
+man 5 proc 
+ 
+
+5.53 Fedora Core2에서 한글 인코딩 바꾸기
+Feodra2를 깔고나면 기본적으로 인코딩이 utf-8로 설정되어 있다. 이 설정대로 쓰게되면 pstree나 ntsysv같은 쉘 기반의 화면들이 마구 깨져나온다. 한글 인코딩을 euck로 바꿔줘야 한다. 
+# vi ~/.bashrc 에서 다음을 입력한다. 
+
+
+export LC_ALL=ko_KR.eucKR 
+export LANG=ko_KR.eucKR 
+x윈도우의 터미널을 쓴다면 그놈터미널에서 euc_kr 로 설정하면 된다. 
+
+
+ 
+
+5.54 Fedora2에서 한글man page 깨지는 현상에 대한 해결책
+#export LANG=ko_KR.eucKR (i18n~~~ 파일에서 바꿔놓으면 더 좋다.) 
+/etc/man.config에서 
+
+
+: PAGER /usr/bin/less -is 
+을 
+
+
+: PAGER /usr/bin/less -isr 
+로 고친다. 
+
+ 
+
+/etc/man.config 에서 
+
+
+KNROFF LANG=ko_KR.eucKR /usr/bin/nroff -Tkorean -mandoc 
+식으로 LANG 값을 앞에 넣어주면 깨지던 문제가 제대로 잘 나온다고 한다. man-1.5m2 에서는 위와같이 할 경우, 한글로 나오긴 하지만, man.config의 일부 내용이 출력되는 현상이 있다고.. 
+출처 : http://dasomnetwork.com/~leedw/mywiki/moin.cgi/_b3_aa_c0_c7_20_b8_ae_b4_aa_bd_ba_20_c6_c1
+]]> 2005-01-19 18:07:37http://blog.paran.com/simsh/3597646amanda : 백업 클라이언트인 amanda 데몬 
+
+
+amandaidx : amanda 서버의 패키지 서비스 중 하나인 amandaidx 데몬 
+
+
+amd : auto mount daemon, 시스템의 요청이 있는 경우에 자동으로 장치와 NFS 호스트를 마운트해 주는 데몬. 
+네트워크의 설정이 잘못된 경우에는 부팅을 하는 도중에 문제를 일으킬수 있으므로 처음에서 꺼두는 것이 좋다. 
+
+
+amidxtape : amand 서버에 패키지 서비스 중 하나인 amidxtape 데몬 
+
+
+anacron : 시간에 따라 지정한 프로그램을 정기적으로 실행하는 데몬. cron과 같은 기능을 하지만 계속 켜두지 않는 컴터에서 사요하는 데몬 
+
+
+apmd : 베터리 상태를 감시하고 syslog(8)에 기록하며 시스템을 끄기도 하는 데몬 
+
+
+arpwatch : 이더넷 카드와 ip 어드레스의 설정 관계를 유지하는 데몬 
+
+
+atd : 특정 시간 또는 시스템 부하가 적을때 지정된 명령을 실행시키는 데 
+
+
+autofs : 파일 시스템을 사용하고자 할때 자동으로 마운트 시켜주는 데몬 
+
+
+chargen : chargen의 TCP 버전 서버 
+
+
+chargen-upd : chargen의 UDP 버전 서버 
+
+
+ciped : ip address를 암호화하는 CIPE 데몬 
+
+
+crond : cron을 실행시키는 데몬, cron은 지정한 프로그램을 특정 시간에 주기적으로 실행시키는 유닉스 표준 프로그램 
+
+
+daytime : daytime의 TCP 버전 서버. daytime은 클라이언트의 질의에 응답하여 아스키 형태로 현재 시간과 날짜를 출력하는 데몬. TCP 포트 13을 사용 
+
+
+daytime-udp : daytime의 UDP 버전 서버. UDP포트 13을 사용 
+
+
+dhcpd : Dynamic host configuration protocol server daemon. 동적 호스트 제어 프로토콜 서버 데몬. 
+BOOTP와 DHCP가 포함된 데몬으로 클라이언트들이 부팅할때 자동으로 동적 IP 어드레스와 네트워크 정보를 가질수 있게 해줌. 
+
+
+echo : echo 의 TCP 버전 서버 
+
+
+echo-udp : echo 의 UDP 버전 서버 
+
+
+finger : finger 리퀘스트에 응답하는 서버. finger는 사용자에 대한 로그인 네임, 디렉토리, 쉘과 최종 로그인 시간에 대한 정보를 볼수 있게 하는 프로토콜 
+
+
+gated : gated(라우팅 데몬) 을 시작하거나 종 
+
+
+gpm : MC(midnight command) 와 같은 텍스트 기반 리눅스용 애플리케이션에서 마우스를 쓸수 있게 해주는 데몬. 
+콘솔에서 마우스를 이용한 팝업 메뉴와 복사/ 붙이기 기능도 지원 
+
+
+httpd : 웹 서비스를 위한 아파치 데몬. html파일과 cgi를 사용가능하게 함 
+
+
+identd : 특별한 TCP 연결에서 사용자의 신원을 결정해 주는 데몬. TCP 포트번호를 주면 연결된 서버 시스템 소유자를 확인할수 있는 문자열을 돌려줌 
+
+
+imap : 원격 사용자가 imap 클라이언트(Pine, netscape communicator)를 이용하여 자신의 메일에 접근할수 있게 하는 서비스 
+
+
+imaps : 원격 사용자가 SSL을 지원하는 imap 클라이언트(netscape communicator, fetchmail 등)를 이용하여 자신의 메일에 접근할수 있게 하는 서비 
+
+
+innd : 유즈넷 뉴스 서버를 이용하여 지역 뉴스 서버를 설정할수 있는 데몬 
+
+
+ipchains : 패킷 필터링 파이어월을 자동으로 실행하는 데몬 
+
+
+ipop2 : 원격 사용자가 pop2 클라이언트를 이용하여 메일에 접근할수 있게 하는 서비스 
+
+
+ipop3 : 원격 사용자가 pop3 클라이언트를 이용하여 메일에 접근할수 있게 하는 서비스 
+
+
+irda : irda 가 정상적으로 동작하도록 해 주는 데몬 
+
+
+keytable : /etc/sysconfig/keytable로 키보드 유형을 변환할수 있게 하는 서비스. 
+한텀에서 kbdconfig 프로그램을 실행하여 키보드 유형을 변환할수 있다. 대부분의 시스템에서 keytable 데몬은 실행시켜 두어야 한다. 
+
+
+kudzu : 부팅시 새롭게 추가된 하드웨어를 설정할 수 있게 hardware probe를 실행시키는 데몬 
+
+
+linuxconf : 시스템 설정을 유지하기 위해 부팅시에 다양한 태스크의 실행을 정렬시키는 데몬. 
+
+
+linuxconf-web : 웹을 통해 linuxconf를 실행할수 있게 연결을 허용하는 데몬 
+
+
+lpd : 프린터(line printer)가 정상적으로 동작하도록 해 주는 프린트 서비스 데몬 
+
+
+mars-nwe : netware IPX 프로토콜을 사용하는 클라이언트에게 리눅스 머신에서 파일과 프린트 서버를 호환시켜 주는 데몬 
+
+
+mcserv : midnight command(MC) 서버이다. MC끼리 네트워크를 공유한다 
+
+
+mysqld : 매우 빠르고 안정적인 mysql 데이타 베이스 서버 데몬이다 
+
+
+named : 도메인 네임과 ip어드레스를 해석하기 위한 DNS서버(BIND) 데몬. 로컬 호스트에서 DNS서버를 운영할때만 실행 시킨다. 
+
+
+netfs : 삼바, 네트워크 파일 시스템(NFS), NCP(netware)등의 마운트와 언마운트에 관여하는 데몬. 
+
+
+network : 네트워크 인터페이스의 설정을 시스템 부팅시 커널에 적재시키는 데몬. 
+
+
+nfs : TCP/IP 네트워크에서 파일을 공유할수 있게 하는 데몬. /etc/exports 파일에서 설정한 NFS 서버가 기동할수 있게 해 준다. 
+
+
+nfslock : NFS파일을 locking 한다. 
+
+
+nscd : NIS/NS 를 사용할수 있게 하는 데몬. nscd는 실행중인 프로그램의 그룹을 살피고 패스워드를 변경하거나 다음 질의를 위해 결과를 캐시하는 데몬이다. 
+
+
+ntalk : 서로 다른 시스템끼리 채팅이 가능하게 ntalk 연결을 허용하는 서버 
+
+
+ntpd : NTPv4데몬 
+
+
+pcmcia : 휴대용 PC에서 이더넷이나 모뎀을 쓸수 있게 하는 데몬. 
+
+
+pop3s : SSL을 지원하는 pop3클라이언트를 사용하여 메일에 접근할수 있게 하는 서비스이다. 
+
+
+portmap : RPC(NFS, NIS, mcsev등) 연결을 관리하기 위한 포트 매핑 데몬으로 RPC를 사용하는 프로그램을 실행하기 위해서는 반드시 선택하여야 하는 데몬. 
+
+
+postgresql : postgresql 디비에 관한 데몬 
+
+
+pppoe : adsl서비스에 연결시켜 주는 데몬 
+
+
+proftpd : 쉬운설정, 보안성, 단순성에 초점을 맞춘 개선된 ftp 서버 데몬 
+
+
+pxe : 부팅전 실행환경 서버. 다른 PXE기반 머신에 네트워크 부팅을 제공한다 
+
+
+random : 시스템에 필요한 난수 발생 및 저장 데몬 
+
+
+rawdevices : HDD 파티션과 같은 블론 디바이스를 위한 스크립트. /etc/sysconfig/rewdevices 파일을 편집하여 원시 디비아스를 블론 디바이스로 매핑할수 있다. 
+
+
+reconfig : /etc/reconfigSys 파일이 존재하면 재설정을 실행하는 데몬 
+
+
+rexec : rexec(3) 루틴을 위한 서버 데몬. 인증된 사용자 이름과 패스워드로 원격 실행을 제공하는 서버이다. 
+
+
+rlogin : rlogin 프로그램을 위한 서버 데몬. 신뢰할수 있는 호스트로부터 특권화된 포트 번호에 기반한 인증을 통해 원격 로그인을 제공한다. 
+
+
+routed : RIP 프로토콜을 통해 업데이트된 자동 IP 라우팅 테이블 설정 데몬 
+
+
+rsh : rshd 서버는 rcmd 루틴을 위한 서버이며 따라서 rsh 프로그램을 위한 서버이다. 신뢰할수 있는 호스트로부터 특권화된 포트번호에 기반한 인증 통해 원격 실행을 제공한다. 
+
+
+rstat : 네트워크에 연결된 사요자에게 그 네트워크 상의 머신에 대한 퍼포먼스 매트릭스를 회수할수 있게 해주는 프로토콜 
+
+
+rsync : 컴퓨터간 자료 공유를 위해서 사용되는 rsync에 대한 데몬이다. 
+
+
+rusersd : 네트워크에 특정 사용자가 있는 검색해 주는 데몬. 
+
+
+rwalld : 시스템에 동작중인 모든 터미널에 메시지를 표시할수 있게 해 주는 프로토콜 
+
+
+rwhod : 원격 접속자의 목록을 볼수 있게 해주는 데몬. finger와 비슷한 기능을 한다. 
+
+
+sendmail : 메일을 다른 호스트로 전송하는 메일 전송(Mail Transport Agent)데몬 
+
+
+smb : SMB 네트워크 서비스를 제공하기 위한 삼바 서버(smbd와 nmbd)데몬 
+
+
+snmpd : SNMP(Simple Network Management Protocol)데몬 
+
+
+squid : HTTP, FTP, gopher와 같은 프로토콜을 사용할때 캐싱 속도를 높이는 데몬. 
+
+
+sshd : openssh 서버 데몬 
+
+
+swat : 삼바 웹 관리 툴, 삼바 서버의 설정을 위해 swat를 사용하며, 웹 브라우저를 통해 901포트로 접속한다. 
+
+
+syslog : 많은 데몬들이 로그 메세지를 다양한 시스템 로그파일에 기록하는데 사용하는 데몬. syslog는 항상 실행되는 것이 좋다. 
+
+
+talk : 다른 시스템에 접속한 사용자로 부터 채팅 요구에 응답하여 터미널의 내용을 다른 사용자에게 보내서 대화할수 있게 하는 데몬. 
+
+
+telnet : telnet 세션을 제공하는 서버. 인증을 위해 사용자 이름과 패스워드를 사용한다. 
+
+
+tftp : 파일 전송을 위한 프로토콜. tftp프로토콜은 어떤 OS에서는 부팅 디스켓이 없는 워크스테이션이나 네트워크 인식 프린터를 위한 설정 파일의 다운로드, 설치 프로세스의 시작을 위해 가끔 이용된다. 
+
+
+time : rdate 데몬에 의해 사용되는 RFC 868 시간 서버의 TCP 버전 
+
+
+time-udp : rdate 데몬에 의해 사용되는 RFC 868시간 서버의 UDP 버전 
+
+
+webmin : webmin 관리자 서버 데몬 
+
+
+xfs : 부팅과 셧다운시 X 폰트 서버를 시작하거나 종료시키는 데몬 
+
+
+xinetd : inetd 데몬을 대체하는 강력한 데몬. telnet, ftp 등과 같은 서비스를 처리하는 슈퍼 데몬. 
+
+
+ypbind : NIS/YP 클라이언트에서 실행되는 데몬으로 NIS도메인을 바인드한다. 
+NIS클라이언트로 동작하기 위해서는 glibc에 기반한 시스템에서 실행되어 한다. 그러나 NIS를 사용하지 않는 시스템에서는 실행하지 말아야 한다. 
+
+
+yppasswd : NIS클라이언트 사용자의 패스워드를 변경할수 있게 해 주는 데몬 
+
+
+ypserv : 표준 NIS/YP 네트워크 프로토콜 서버. 호스트 네임, 사용자 네임과 다른 정보 데이타베이스를 네트워크를 통하여 배포하는 것은 허용한다. 
+ypserv데몬은 클라이언트에서는 필요하지 않으며 NIS 서버에서 실행된다.
