@@ -1,0 +1,61 @@
+Desktop Environment
+
+	GNOME Desktop Environment
+	KDE(K Desktop Environment)
+
+
+Applications
+
+	Authoring and Publishing
+	Editors
+	Engineering and Scientific
+	Games and Entertainment
+	Graphical Internet
+	Graphics
+	Office/Productivity
+
+
+Development
+
+	Development Libraries
+	Development Tools
+	Eclipse
+	GNOME Software Development
+	Java Development
+	KDE Software Development
+	Legacy Software Development
+	Ruby
+	X Software Development
+
+
+Servers
+
+	DNS Name Server
+	FTP Server
+	Legacy Network Server
+	Mail Server
+	MySQL Database
+	Network Servers
+	News Server
+	PostgreSQL Database
+	Printing Support
+	Server Configuration Tools
+	Web Server
+	Windows File Server
+
+
+Base System
+
+	Administration Tools
+	Base
+	Dial-up Networking Support
+	Java
+	Legacy Software Support
+	System Tools
+	Virtualization
+	X Window System
+
+
+Languages
+
+	Korean/English/etc.

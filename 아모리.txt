@@ -1,0 +1,28 @@
+
+
+mv rootfs-web-20070308.gz /tmp
+
+cd /tmp
+
+gzip ?d rootfs-web-20070308.gz
+
+mount ?o loop ?t ext3 rootfs-web-20070308 /mnt
+
+ 
+
+
+X:\BONS-GM\Dept\ tomcat_lib.tar 파일을 아래의 이미지에 포함되어 있는 
+tomcat home (/usr/local/ )에  overwriting 하여 주세요
+
+(필요한 lib 관련 파일이 있습니다.)
+
+ 
+
+X:\BONS-GM\Dept\ set-catalina-opts.sh -> script를 실행하여 주세요. 
+
+(일정 공간에 넣고 예를 들어 /home/tomcat/bin/) 그리고 시작 script에 추가
+
+/etc/rc.d/rc.local파일에 스크립트 라인 추가 -> /home/tomcat/bin/ set-catalina-opts.sh)
+
+ 
+

@@ -1,0 +1,275 @@
+작성자 : 좋은진호(truefeel, http://coffeenix.net/)
+작성일 : 2003.10.01(수)
+수정일 : 2004.01.08(목), chroot_list_enable 글 추가
+
+이 글은 7월에 썼던 'vsftpd에서 한글파일로그와 lastlog 로긴확인하기'를 기초로 작성하였다.
+
+1. vsftpd FTP 서버에 대해
+
+vsftpd는 UNIX 시스템에서 사용할 수 있는 free FTP 서버(라이센스는 GPL)이다.
+vsftpd가 내세우고 있는 것은 보안, 성능, 안정성이다. 지금까지 vsftpd의 자체 보안 문제가 있어
+보안권고가 나온 적은 없다.(Redhat의 rpm 패키지중에 tcp_wrappers 지원없이 만들어져서 업데이트
+rpm은 나온 적 있음)
+
+* 지원 및 테스트된 OS
+
+- Linux (Redhat, SuSE, Debian)
+- Solaris (버전에 따라 IPv6나 inet_aton함수때문에 설치가 잘 안될 수 있음)
+- FreeBSD, OpenBSD
+- HP-UX
+- IRIX
+
+* 주요 기능
+
+- 가상 IP별 별도의 환경 설정 기능 (설정파일의 listen_address= 이용)
+- 가상 사용자 설정
+- 전송 대역폭 지정
+- PAM 지원 (버전 1.2.0부터는 PAM을 통한 wtmp에 로긴 로그를 남김)
+- xferlog 표준 로그 파일보다 상세한 자체 로그 파일 형식 지원
+- Standalone 방식과 inetd(xinetd)를 통한 운영 모두 지원
+- IP별 다른 환경 파일 지정 기능 (tcp_wrappers와 함께 사용할 때)
+- ...
+
+2. vsftpd 설치
+
+※ 설치는 Redhat 기준. 솔라리스의 PAM에 대한 것은 README.solaris 파일 참조한다.
+
+http://vsftpd.beasts.org/ 에서 최신버전(현재 1.2.0)의 소스를 받아온다.
+
+-------------------------------------------------------------
+# tar xvfz vsftpd-1.2.0.tar.gz
+# cd vsftpd-1.2.0
+-------------------------------------------------------------
+
+한글로 된 파일명을 전송할 때 로그에 파일명이 ???? 로 남지 않도록
+logging.c 파일을 연 후 140번째 줄의
+
+str_replace_unprintable(p_str, '?');
+
+를 다음처럼 주석 처리한다.
+
+/* str_replace_unprintable(p_str, '?'); */
+
+또한 tcp_wrappers를 통한 접속제어를 사용하려면 builddefs.h 에서
+
+#undef VSF_BUILD_TCPWRAPPERS 를
+#define VSF_BUILD_TCPWRAPPERS 로 바꾼다.
+
+-------------------------------------------------------------
+# make
+# make install　(vsftpd 데몬, man page,　xinetd 용 설정 파일 설치)
+# cp vsftpd.conf /etc (환경설정 파일 복사)
+# chmod 600 /etc/vsftpd.conf
+# cp RedHat/vsftpd.pam /etc/pam.d/vsftpd (PAM 설정 파일 복사)
+-------------------------------------------------------------
+
+/etc/pam.d/vsftpd 첫번째 줄에 다음과 같이 있다.
+
+pam_listfile.so item=user sense=deny file=/etc/ftpusers onerr=succeed
+
+즉, /etc/ftpusers 파일에 존재하는 ID는 접속할 수 없게된다.(sense=deny)
+
+-------------------------------------------------------------
+# FTP 접속을 허용하지 않을 ID를 등록한다.
+# /etc/passwd를 참조해서 설치할 서버의 환경에 맞게 등록
+root
+bin
+daemon
+adm
+lp
+sync
+shutdown
+halt
+mail
+news
+uucp
+operator
+games
+nobody
+smmsp
+xfs
+gdm
+mysql
+-------------------------------------------------------------
+
+3. vsftpd.conf 의 주요 설정
+
+-------------------------------------------------------------
+# anonymous 사용자의 접속 허용 여부 (default = YES)
+# 공개된 형태의 FTP 서버로 운영할 것이 아니라면 NO로 한다.
+anonymous_enable=NO
+# 로컬 계정 사용자의 접속 허용 여부 (default = NO)
+local_enable=YES
+
+# write 명령어 허용 여부 (defualt = NO)
+write_enable=YES
+# 로컬 계정 사용자용 umask (default = 077)
+local_umask=022
+
+# anonymous 사용자가 파일을 업로드 할 수 있는지 여부 (default = NO)
+# anon_upload_enable=YES
+# anonymous 사용자의 디렉토리 생성 허용 여부 (default = NO)
+# anon_mkdir_write_enable=YES
+
+# 파일 전송 로그를 남길 것인지 여부 (default = YES)
+xferlog_enable=YES
+# xferlog 표준 포맷으로 로그를 남길지 여부 (기본 설정파일은 YES)
+# 아래에서 NO로 설정했을 때를 설명함
+xferlog_std_format=YES
+# 파일 전송 로그 파일명
+xferlog_file=/var/log/vsftpd.log
+
+# FTP 서버 접속할 때 로긴 메시지 (default = vsFTPd 버전번호)
+# 한글 사용 가능
+# ftpd_banner=Welcome to blah FTP service.
+
+# 사용자의 홈디렉토리를 벗어나지 못하도록 제한하기 위한 설정 (default=NO)
+# 제한이 필요할 경우 YES로 바꾼 후 제한할 사용자 ID를 chroot_list_file= 에 설정한 파일에
+# 지정한다. 
+# chroot_local_user= 설정과 관련이 있으니 '3. 문제 해결'을 꼭 읽어보라.
+#
+# chroot_list_enable=YES 
+# chroot_list_file=/etc/vsftpd.chroot_list
+
+# -------------------------------------------------------------------
+# 기본 설정 파일에는 없는 설정값으로 필요한 설정만 추가한다.
+# ※ 중요한 설정은 굵은 글씨로 표시
+# -------------------------------------------------------------------
+
+# PAM 파일명을 지정 (설치할 때 /etc/pam.d/vsftpd명으로 복사함)
+pam_service_name=vsftpd
+
+# wtmp에 로그 남기기 (YES로 해야만 last 명령어로 접속 여부 확인 가능)
+session_support=YES
+
+# 사용자가 자신의 home directory를 벗어나지 못하도록 설정
+chroot_local_user=YES
+
+# 새로운 디렉토리에 들어갔을 때 뿌려줄 환경 메시지를 저장한 파일명
+# message_file=.message
+
+# xferlog 형식으로 log를 남기려면 (위에서 이미 YES로 했음)
+# xferlog_std_format=NO
+#
+#　 - xferlog 표준 포맷은 로긴, 디렉토리 생성등의 로그를 남기지 않음
+#　　 그러나 vsftpd 스타일 로그는 이를 포함한 보다 상세한 로그를 남김
+#　 - vsftpd 스타일 로그 예
+#
+#　 Sun Jul 12 01:38:32 2003 [pid 31200] CONNECT: Client "127.0.0.1"
+#　 Sun Jul 12 01:38:34 2003 [pid 31199] [truefeel] FAIL LOGIN: Client "127.0.0.1"
+#　 Sun Jul 12 01:38:38 2003 [pid 31199] [truefeel] OK LOGIN: Client "127.0.0.1"
+#　 Sun Jul 12 01:38:41 2003 [pid 31201] [truefeel] OK MKDIR: Client "127.0.0.1", "/mp3"
+#　 Sun Jul 12 01:39:06 2003 [pid 31201] [truefeel] OK UPLOAD: Client "127.0.0.1", "/델리
+#　 스파이스 5집 - [04]키치죠지의 검은 고양이.mp3", 6855473 bytes, 3857.39Kbyte/sec
+
+# 전송속도 제한 (0은 제한없음, 단위는 초당 bytes)
+anon_max_rate=0
+local_max_rate=0
+trans_chunk_size=0
+
+# 최대 접속 설정 (단 xinetd를 통하지 않고 standalone으로 동작할 때만 사용 가능)
+# standalone을 위해서는 listen=YES 추가하고 별도로 vsftpd를 띄워야 함
+#
+# max_clients=최대 접속자 수, max_per_ip=IP당 접속 수
+# max_clients=100
+# max_per_ip=3
+
+# Standalone 으로 운영할 때 listen=YES. 포트 변경을 원할 경우 listen_port 설정
+# 디폴트 포트는 21번 포트이다.
+# listen=YES
+# listen_port=21
+-------------------------------------------------------------
+
+필요한 설정이 끝났으면 xinetd를 재실행한다.
+
+-------------------------------------------------------------
+# /etc/rc.d/init.d/xinetd restart
+-------------------------------------------------------------
+
+4. 문제 해결
+
+1) ftpwho 같은 명령은 있나?
+　 또한 last를 해도 접속된 걸 확인할 수가 없는데 방법이 없나?
+
+　ftpwho 형태의 명령은 없으며 임시적으로 다음 명령어 등으로 확인할 수 있다.
+
+　# ps -ef|grep vsftpd
+　# fuser -v ftp/tcp
+
+　vsftpd v1.2.0이상부터 PAM을 통해 wtmp에 로그를 남기므로 last로 접속여부를 확인할 수 있다.
+
+2) 한글 파일명이 전송될 때는 vsftpd.log 에 ???? 로 남는다. 해결책은?
+
+　vsftpd는 출력할 수 없다고 판단하는
+　ASCII 코드 31 이하, 128~159, 177 문자를 모두 ? 로 바꿔서 저장을 한다.
+　따라서 이 부분을 처리하지 않고 저장하도록 소스를 수정한 후 컴파일하면 해결된다.
+
+3) 사용자가 홈디렉토리를 못 벗어나게 하고 싶는데?
+
+/etc/vsftpd.conf에 다음을 추가하면, 모든 사용자는 자신의 홈디렉토리만 접근할 수 있다.
+
+chroot_local_user=YES
+
+또한 특정 사용자로만 제한을 하고 싶다면 다음과 같이 한다. /etc/vsftpd.chroot_list에는 제한할
+사용자 ID를 한줄에 하나씩 나열하면 된다.
+
+chroot_list_enable=YES
+chroot_list_file=/etc/vsftpd.chroot_list
+
+주의할 것은 chroot_local_user=YES와 chroot_list_enable=YES를 함께 사용할 경우에는
+/etc/vsftpd.chroot_list에 포함된 사용자 ID만 제한없이 홈디렉토리를 벗어날 수 있다.
+즉, 반대로 작용한다.
+
+standalone으로 FTP서버가 동작중이면 재실행 필요. standalone에 대해서는 6)번에서.
+
+4) root로 접속할 수는 없나?
+
+　가능하면 root 접속은 허용하지 않기를 바란다.
+　/etc/ftpusers 파일에서 root를 빼면 접속이 가능하다.
+
+5) ID/비밀번호가 정확히 맞는데 로긴할 때 자꾸 530 Login incorrect. 라고 나온다.
+
+　/etc/ftpusers (또는 vsftpd.ftpusers)에 등록된 사용자인지 확인한다.
+　여기에 등록된 사용자는 로긴할 수 없다. 이럴 때 /var/log/messages에 다음과 같은 로그가 남는다.
+
+　Aug 16 22:21:52 truefeel vsftpd: PAM-listfile: Refused user xxxxxxxx for service vsftpd
+
+6) standalone으로 운영하고 싶다.
+　 (즉, apache나 sendmail처럼 xinetd 통하지 않고 운영을 원한다.)
+
+　/etc/xinetd.d/vsftpd (vsftpd가 아닌 다른 파일명일 수 있음) 에서 disable = yes 로 변경하여
+　xinetd로 서비스 하지 않도록 설정한다. xinetd 를 재실행하면 이제 xinetd를 통한 ftp 서비스는 종료된다.
+
+　레드햇의 경우 /etc/rc.d/init.d/xinetd restart
+
+　이제 vsftpd 데몬를 실행한다. (소스로 설치시 기본 경로는 /usr/local/sbin)
+
+　# /usr/local/sbin/vsftpd &
+
+7) 다른 포트(기본 21번)를 사용하고 싶다. (예를 들어 11121번 포트를 원할 때)
+
+　* xinetd를 이용하는 경우
+
+　 /etc/service 에 'ftp2　 11121/tcp' 한 줄을 추가한다.
+　 그리고 /etc/xinetd.d/vsftpd (vsftpd가 아닌 ftp와 같은 다른 파일명일 수 있음) 에서
+　 service ftp 를 service ftp2로 바꾸고, xinetd 를 재실행한다.
+
+　* standalone으로 운영하는 경우
+
+　 /etc/vsftpd.conf 에서 listen_port=11121 을 추가하고 vsftpd 서버를 재실행한다.
+
+　바뀐 포트로 운영중인지 확인은 netstat -atnp(리눅스) 또는 netstat -an(그 이외 유닉스)
+
+8) 업로드 파일 크기를 제한하는 방법은 없나요? 이를테면 5MB이상의 파일은 업로드 못한다든지.
+
+현재 1.2.1버전까지 vsftpd 자체에 설정하는 방법은 없습니다.
+
+5. 참고할만한 문서
+
+* vsftpd 1.2.0 설치 문서
+　ftp://vsftpd.beasts.org/users/cevans/untar/vsftpd-1.2.0/INSTALL
+* vsftpd.conf man page
+* vsftpd에서 한글파일로그와 lastlog 로긴확인하기 (좋은진호)
+　http://coffeenix.net/board_view.php?bd_code=4
+* vsftpd에서 전송속도 제한 (bandwidth limit) (좋은진호)
+　http://coffeenix.net/board_view.php?bd_code=21 

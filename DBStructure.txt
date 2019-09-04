@@ -1,0 +1,5378 @@
+-- phpMyAdmin SQL Dump
+-- version 2.6.1-pl3
+-- http://www.phpmyadmin.net
+-- 
+-- Host: localhost
+-- Generation Time: Dec 13, 2006 at 12:55 PM
+-- Server version: 4.1.21
+-- PHP Version: 5.0.4
+-- 
+-- Database: `isupport2`
+-- 
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_archive`
+-- 
+
+CREATE TABLE `isupport_afkwiki_archive` (
+  `ar_namespace` int(11) NOT NULL default '0',
+  `ar_title` varchar(255) binary NOT NULL default '',
+  `ar_text` mediumblob NOT NULL,
+  `ar_comment` tinyblob NOT NULL,
+  `ar_user` int(5) unsigned NOT NULL default '0',
+  `ar_user_text` varchar(255) binary NOT NULL default '',
+  `ar_timestamp` varchar(14) binary NOT NULL default '',
+  `ar_minor_edit` tinyint(1) NOT NULL default '0',
+  `ar_flags` tinyblob NOT NULL,
+  `ar_rev_id` int(8) unsigned default NULL,
+  `ar_text_id` int(8) unsigned default NULL,
+  KEY `name_title_timestamp` (`ar_namespace`,`ar_title`,`ar_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_categorylinks`
+-- 
+
+CREATE TABLE `isupport_afkwiki_categorylinks` (
+  `cl_from` int(8) unsigned NOT NULL default '0',
+  `cl_to` varchar(255) binary NOT NULL default '',
+  `cl_sortkey` varchar(86) binary NOT NULL default '',
+  `cl_timestamp` timestamp NOT NULL,
+  UNIQUE KEY `cl_from` (`cl_from`,`cl_to`),
+  KEY `cl_sortkey` (`cl_to`,`cl_sortkey`),
+  KEY `cl_timestamp` (`cl_to`,`cl_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_externallinks`
+-- 
+
+CREATE TABLE `isupport_afkwiki_externallinks` (
+  `el_from` int(8) unsigned NOT NULL default '0',
+  `el_to` blob NOT NULL,
+  `el_index` blob NOT NULL,
+  KEY `el_from` (`el_from`,`el_to`(40)),
+  KEY `el_to` (`el_to`(60),`el_from`),
+  KEY `el_index` (`el_index`(60))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_hitcounter`
+-- 
+
+CREATE TABLE `isupport_afkwiki_hitcounter` (
+  `hc_id` int(10) unsigned NOT NULL default '0'
+) TYPE=HEAP MAX_ROWS=25000;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_image`
+-- 
+
+CREATE TABLE `isupport_afkwiki_image` (
+  `img_name` varchar(255) binary NOT NULL default '',
+  `img_size` int(8) unsigned NOT NULL default '0',
+  `img_width` int(5) NOT NULL default '0',
+  `img_height` int(5) NOT NULL default '0',
+  `img_metadata` mediumblob NOT NULL,
+  `img_bits` int(3) NOT NULL default '0',
+  `img_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE') default NULL,
+  `img_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart') NOT NULL default 'unknown',
+  `img_minor_mime` varchar(32) NOT NULL default 'unknown',
+  `img_description` tinyblob NOT NULL,
+  `img_user` int(5) unsigned NOT NULL default '0',
+  `img_user_text` varchar(255) binary NOT NULL default '',
+  `img_timestamp` varchar(14) binary NOT NULL default '',
+  PRIMARY KEY  (`img_name`),
+  KEY `img_size` (`img_size`),
+  KEY `img_timestamp` (`img_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_imagelinks`
+-- 
+
+CREATE TABLE `isupport_afkwiki_imagelinks` (
+  `il_from` int(8) unsigned NOT NULL default '0',
+  `il_to` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `il_from` (`il_from`,`il_to`),
+  KEY `il_to` (`il_to`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_interwiki`
+-- 
+
+CREATE TABLE `isupport_afkwiki_interwiki` (
+  `iw_prefix` char(32) NOT NULL default '',
+  `iw_url` char(127) NOT NULL default '',
+  `iw_local` tinyint(1) NOT NULL default '0',
+  `iw_trans` tinyint(1) NOT NULL default '0',
+  UNIQUE KEY `iw_prefix` (`iw_prefix`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_ipblocks`
+-- 
+
+CREATE TABLE `isupport_afkwiki_ipblocks` (
+  `ipb_id` int(8) NOT NULL auto_increment,
+  `ipb_address` varchar(40) binary NOT NULL default '',
+  `ipb_user` int(8) unsigned NOT NULL default '0',
+  `ipb_by` int(8) unsigned NOT NULL default '0',
+  `ipb_reason` tinyblob NOT NULL,
+  `ipb_timestamp` varchar(14) binary NOT NULL default '',
+  `ipb_auto` tinyint(1) NOT NULL default '0',
+  `ipb_expiry` varchar(14) binary NOT NULL default '',
+  `ipb_range_start` varchar(32) NOT NULL default '',
+  `ipb_range_end` varchar(32) NOT NULL default '',
+  PRIMARY KEY  (`ipb_id`),
+  KEY `ipb_address` (`ipb_address`),
+  KEY `ipb_user` (`ipb_user`),
+  KEY `ipb_range` (`ipb_range_start`(8),`ipb_range_end`(8))
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_job`
+-- 
+
+CREATE TABLE `isupport_afkwiki_job` (
+  `job_id` int(9) unsigned NOT NULL auto_increment,
+  `job_cmd` varchar(255) NOT NULL default '',
+  `job_namespace` int(11) NOT NULL default '0',
+  `job_title` varchar(255) binary NOT NULL default '',
+  `job_params` blob NOT NULL,
+  PRIMARY KEY  (`job_id`),
+  KEY `job_cmd` (`job_cmd`,`job_namespace`,`job_title`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_logging`
+-- 
+
+CREATE TABLE `isupport_afkwiki_logging` (
+  `log_type` varchar(10) NOT NULL default '',
+  `log_action` varchar(10) NOT NULL default '',
+  `log_timestamp` varchar(14) NOT NULL default '19700101000000',
+  `log_user` int(10) unsigned NOT NULL default '0',
+  `log_namespace` int(11) NOT NULL default '0',
+  `log_title` varchar(255) binary NOT NULL default '',
+  `log_comment` varchar(255) NOT NULL default '',
+  `log_params` blob NOT NULL,
+  KEY `type_time` (`log_type`,`log_timestamp`),
+  KEY `user_time` (`log_user`,`log_timestamp`),
+  KEY `page_time` (`log_namespace`,`log_title`,`log_timestamp`),
+  KEY `times` (`log_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_math`
+-- 
+
+CREATE TABLE `isupport_afkwiki_math` (
+  `math_inputhash` varchar(16) NOT NULL default '',
+  `math_outputhash` varchar(16) NOT NULL default '',
+  `math_html_conservativeness` tinyint(1) NOT NULL default '0',
+  `math_html` text,
+  `math_mathml` text,
+  UNIQUE KEY `math_inputhash` (`math_inputhash`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_objectcache`
+-- 
+
+CREATE TABLE `isupport_afkwiki_objectcache` (
+  `keyname` varchar(255) binary NOT NULL default '',
+  `value` mediumblob,
+  `exptime` datetime default NULL,
+  UNIQUE KEY `keyname` (`keyname`),
+  KEY `exptime` (`exptime`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_oldimage`
+-- 
+
+CREATE TABLE `isupport_afkwiki_oldimage` (
+  `oi_name` varchar(255) binary NOT NULL default '',
+  `oi_archive_name` varchar(255) binary NOT NULL default '',
+  `oi_size` int(8) unsigned NOT NULL default '0',
+  `oi_width` int(5) NOT NULL default '0',
+  `oi_height` int(5) NOT NULL default '0',
+  `oi_bits` int(3) NOT NULL default '0',
+  `oi_description` tinyblob NOT NULL,
+  `oi_user` int(5) unsigned NOT NULL default '0',
+  `oi_user_text` varchar(255) binary NOT NULL default '',
+  `oi_timestamp` varchar(14) binary NOT NULL default '',
+  KEY `oi_name` (`oi_name`(10))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_page`
+-- 
+
+CREATE TABLE `isupport_afkwiki_page` (
+  `page_id` int(8) unsigned NOT NULL auto_increment,
+  `page_namespace` int(11) NOT NULL default '0',
+  `page_title` varchar(255) binary NOT NULL default '',
+  `page_restrictions` tinyblob NOT NULL,
+  `page_counter` bigint(20) unsigned NOT NULL default '0',
+  `page_is_redirect` tinyint(1) unsigned NOT NULL default '0',
+  `page_is_new` tinyint(1) unsigned NOT NULL default '0',
+  `page_random` double unsigned NOT NULL default '0',
+  `page_touched` varchar(14) binary NOT NULL default '',
+  `page_latest` int(8) unsigned NOT NULL default '0',
+  `page_len` int(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`page_id`),
+  UNIQUE KEY `name_title` (`page_namespace`,`page_title`),
+  KEY `page_random` (`page_random`),
+  KEY `page_len` (`page_len`)
+) TYPE=MyISAM AUTO_INCREMENT=70 AUTO_INCREMENT=70 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_pagelinks`
+-- 
+
+CREATE TABLE `isupport_afkwiki_pagelinks` (
+  `pl_from` int(8) unsigned NOT NULL default '0',
+  `pl_namespace` int(11) NOT NULL default '0',
+  `pl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `pl_from` (`pl_from`,`pl_namespace`,`pl_title`),
+  KEY `pl_namespace` (`pl_namespace`,`pl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_querycache`
+-- 
+
+CREATE TABLE `isupport_afkwiki_querycache` (
+  `qc_type` char(32) NOT NULL default '',
+  `qc_value` int(5) unsigned NOT NULL default '0',
+  `qc_namespace` int(11) NOT NULL default '0',
+  `qc_title` char(255) binary NOT NULL default '',
+  KEY `qc_type` (`qc_type`,`qc_value`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_recentchanges`
+-- 
+
+CREATE TABLE `isupport_afkwiki_recentchanges` (
+  `rc_id` int(8) NOT NULL auto_increment,
+  `rc_timestamp` varchar(14) binary NOT NULL default '',
+  `rc_cur_time` varchar(14) binary NOT NULL default '',
+  `rc_user` int(10) unsigned NOT NULL default '0',
+  `rc_user_text` varchar(255) binary NOT NULL default '',
+  `rc_namespace` int(11) NOT NULL default '0',
+  `rc_title` varchar(255) binary NOT NULL default '',
+  `rc_comment` varchar(255) binary NOT NULL default '',
+  `rc_minor` tinyint(3) unsigned NOT NULL default '0',
+  `rc_bot` tinyint(3) unsigned NOT NULL default '0',
+  `rc_new` tinyint(3) unsigned NOT NULL default '0',
+  `rc_cur_id` int(10) unsigned NOT NULL default '0',
+  `rc_this_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_last_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_type` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_ns` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_title` varchar(255) binary NOT NULL default '',
+  `rc_patrolled` tinyint(3) unsigned NOT NULL default '0',
+  `rc_ip` varchar(15) NOT NULL default '',
+  PRIMARY KEY  (`rc_id`),
+  KEY `rc_timestamp` (`rc_timestamp`),
+  KEY `rc_namespace_title` (`rc_namespace`,`rc_title`),
+  KEY `rc_cur_id` (`rc_cur_id`),
+  KEY `new_name_timestamp` (`rc_new`,`rc_namespace`,`rc_timestamp`),
+  KEY `rc_ip` (`rc_ip`)
+) TYPE=MyISAM AUTO_INCREMENT=126 AUTO_INCREMENT=126 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_revision`
+-- 
+
+CREATE TABLE `isupport_afkwiki_revision` (
+  `rev_id` int(8) unsigned NOT NULL auto_increment,
+  `rev_page` int(8) unsigned NOT NULL default '0',
+  `rev_text_id` int(8) unsigned NOT NULL default '0',
+  `rev_comment` tinyblob NOT NULL,
+  `rev_user` int(5) unsigned NOT NULL default '0',
+  `rev_user_text` varchar(255) binary NOT NULL default '',
+  `rev_timestamp` varchar(14) binary NOT NULL default '',
+  `rev_minor_edit` tinyint(1) unsigned NOT NULL default '0',
+  `rev_deleted` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`rev_page`,`rev_id`),
+  UNIQUE KEY `rev_id` (`rev_id`),
+  KEY `rev_timestamp` (`rev_timestamp`),
+  KEY `page_timestamp` (`rev_page`,`rev_timestamp`),
+  KEY `user_timestamp` (`rev_user`,`rev_timestamp`),
+  KEY `usertext_timestamp` (`rev_user_text`,`rev_timestamp`)
+) TYPE=MyISAM AUTO_INCREMENT=121 AUTO_INCREMENT=121 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_searchindex`
+-- 
+
+CREATE TABLE `isupport_afkwiki_searchindex` (
+  `si_page` int(8) unsigned NOT NULL default '0',
+  `si_title` varchar(255) NOT NULL default '',
+  `si_text` mediumtext NOT NULL,
+  UNIQUE KEY `si_page` (`si_page`),
+  FULLTEXT KEY `si_title` (`si_title`),
+  FULLTEXT KEY `si_text` (`si_text`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_site_stats`
+-- 
+
+CREATE TABLE `isupport_afkwiki_site_stats` (
+  `ss_row_id` int(8) unsigned NOT NULL default '0',
+  `ss_total_views` bigint(20) unsigned default '0',
+  `ss_total_edits` bigint(20) unsigned default '0',
+  `ss_good_articles` bigint(20) unsigned default '0',
+  `ss_total_pages` bigint(20) default '-1',
+  `ss_users` bigint(20) default '-1',
+  `ss_admins` int(10) default '-1',
+  `ss_images` int(10) default '0',
+  UNIQUE KEY `ss_row_id` (`ss_row_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_templatelinks`
+-- 
+
+CREATE TABLE `isupport_afkwiki_templatelinks` (
+  `tl_from` int(8) unsigned NOT NULL default '0',
+  `tl_namespace` int(11) NOT NULL default '0',
+  `tl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `tl_from` (`tl_from`,`tl_namespace`,`tl_title`),
+  KEY `tl_namespace` (`tl_namespace`,`tl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_text`
+-- 
+
+CREATE TABLE `isupport_afkwiki_text` (
+  `old_id` int(8) unsigned NOT NULL auto_increment,
+  `old_text` mediumblob NOT NULL,
+  `old_flags` tinyblob NOT NULL,
+  PRIMARY KEY  (`old_id`)
+) TYPE=MyISAM AUTO_INCREMENT=121 AUTO_INCREMENT=121 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_trackbacks`
+-- 
+
+CREATE TABLE `isupport_afkwiki_trackbacks` (
+  `tb_id` int(11) NOT NULL auto_increment,
+  `tb_page` int(11) default NULL,
+  `tb_title` varchar(255) NOT NULL default '',
+  `tb_url` varchar(255) NOT NULL default '',
+  `tb_ex` text,
+  `tb_name` varchar(255) default NULL,
+  PRIMARY KEY  (`tb_id`),
+  KEY `tb_page` (`tb_page`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_transcache`
+-- 
+
+CREATE TABLE `isupport_afkwiki_transcache` (
+  `tc_url` varchar(255) NOT NULL default '',
+  `tc_contents` text,
+  `tc_time` int(11) NOT NULL default '0',
+  UNIQUE KEY `tc_url_idx` (`tc_url`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_user`
+-- 
+
+CREATE TABLE `isupport_afkwiki_user` (
+  `user_id` int(5) unsigned NOT NULL auto_increment,
+  `user_name` varchar(255) binary NOT NULL default '',
+  `user_real_name` varchar(255) binary NOT NULL default '',
+  `user_password` tinyblob NOT NULL,
+  `user_newpassword` tinyblob NOT NULL,
+  `user_email` tinytext NOT NULL,
+  `user_options` blob NOT NULL,
+  `user_touched` varchar(14) binary NOT NULL default '',
+  `user_token` varchar(32) binary NOT NULL default '',
+  `user_email_authenticated` varchar(14) binary default NULL,
+  `user_email_token` varchar(32) binary default NULL,
+  `user_email_token_expires` varchar(14) binary default NULL,
+  `user_registration` varchar(14) binary default NULL,
+  PRIMARY KEY  (`user_id`),
+  UNIQUE KEY `user_name` (`user_name`),
+  KEY `user_email_token` (`user_email_token`)
+) TYPE=MyISAM AUTO_INCREMENT=58 AUTO_INCREMENT=58 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_user_groups`
+-- 
+
+CREATE TABLE `isupport_afkwiki_user_groups` (
+  `ug_user` int(5) unsigned NOT NULL default '0',
+  `ug_group` char(16) NOT NULL default '',
+  PRIMARY KEY  (`ug_user`,`ug_group`),
+  KEY `ug_group` (`ug_group`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_user_newtalk`
+-- 
+
+CREATE TABLE `isupport_afkwiki_user_newtalk` (
+  `user_id` int(5) NOT NULL default '0',
+  `user_ip` varchar(40) NOT NULL default '',
+  KEY `user_id` (`user_id`),
+  KEY `user_ip` (`user_ip`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_validate`
+-- 
+
+CREATE TABLE `isupport_afkwiki_validate` (
+  `val_user` int(11) NOT NULL default '0',
+  `val_page` int(11) unsigned NOT NULL default '0',
+  `val_revision` int(11) unsigned NOT NULL default '0',
+  `val_type` int(11) unsigned NOT NULL default '0',
+  `val_value` int(11) default '0',
+  `val_comment` varchar(255) NOT NULL default '',
+  `val_ip` varchar(20) NOT NULL default '',
+  KEY `val_user` (`val_user`,`val_revision`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_afkwiki_watchlist`
+-- 
+
+CREATE TABLE `isupport_afkwiki_watchlist` (
+  `wl_user` int(5) unsigned NOT NULL default '0',
+  `wl_namespace` int(11) NOT NULL default '0',
+  `wl_title` varchar(255) binary NOT NULL default '',
+  `wl_notificationtimestamp` varchar(14) binary default NULL,
+  UNIQUE KEY `wl_user` (`wl_user`,`wl_namespace`,`wl_title`),
+  KEY `namespace_title` (`wl_namespace`,`wl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_avatar`
+-- 
+
+CREATE TABLE `isupport_avatar` (
+  `avatar_id` mediumint(8) unsigned NOT NULL auto_increment,
+  `avatar_file` varchar(30) NOT NULL default '',
+  `avatar_name` varchar(100) NOT NULL default '',
+  `avatar_mimetype` varchar(30) NOT NULL default '',
+  `avatar_created` int(10) NOT NULL default '0',
+  `avatar_display` tinyint(1) unsigned NOT NULL default '0',
+  `avatar_weight` smallint(5) unsigned NOT NULL default '0',
+  `avatar_type` char(1) NOT NULL default '',
+  PRIMARY KEY  (`avatar_id`),
+  KEY `avatar_type` (`avatar_type`,`avatar_display`)
+) TYPE=MyISAM AUTO_INCREMENT=83 AUTO_INCREMENT=83 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_avatar_user_link`
+-- 
+
+CREATE TABLE `isupport_avatar_user_link` (
+  `avatar_id` mediumint(8) unsigned NOT NULL default '0',
+  `user_id` mediumint(8) unsigned NOT NULL default '0',
+  KEY `avatar_user_id` (`avatar_id`,`user_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_banner`
+-- 
+
+CREATE TABLE `isupport_banner` (
+  `bid` smallint(5) unsigned NOT NULL auto_increment,
+  `cid` tinyint(3) unsigned NOT NULL default '0',
+  `imptotal` mediumint(8) unsigned NOT NULL default '0',
+  `impmade` mediumint(8) unsigned NOT NULL default '0',
+  `clicks` mediumint(8) unsigned NOT NULL default '0',
+  `imageurl` varchar(255) NOT NULL default '',
+  `clickurl` varchar(255) NOT NULL default '',
+  `date` int(10) NOT NULL default '0',
+  `htmlbanner` tinyint(1) NOT NULL default '0',
+  `htmlcode` text NOT NULL,
+  PRIMARY KEY  (`bid`),
+  KEY `idxbannercid` (`cid`),
+  KEY `idxbannerbidcid` (`bid`,`cid`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_bannerclient`
+-- 
+
+CREATE TABLE `isupport_bannerclient` (
+  `cid` smallint(5) unsigned NOT NULL auto_increment,
+  `name` varchar(60) NOT NULL default '',
+  `contact` varchar(60) NOT NULL default '',
+  `email` varchar(60) NOT NULL default '',
+  `login` varchar(10) NOT NULL default '',
+  `passwd` varchar(10) NOT NULL default '',
+  `extrainfo` text NOT NULL,
+  PRIMARY KEY  (`cid`),
+  KEY `login` (`login`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_bannerfinish`
+-- 
+
+CREATE TABLE `isupport_bannerfinish` (
+  `bid` smallint(5) unsigned NOT NULL auto_increment,
+  `cid` smallint(5) unsigned NOT NULL default '0',
+  `impressions` mediumint(8) unsigned NOT NULL default '0',
+  `clicks` mediumint(8) unsigned NOT NULL default '0',
+  `datestart` int(10) unsigned NOT NULL default '0',
+  `dateend` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`bid`),
+  KEY `cid` (`cid`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_archive`
+-- 
+
+CREATE TABLE `isupport_billingwiki_archive` (
+  `ar_namespace` int(11) NOT NULL default '0',
+  `ar_title` varchar(255) binary NOT NULL default '',
+  `ar_text` mediumblob NOT NULL,
+  `ar_comment` tinyblob NOT NULL,
+  `ar_user` int(5) unsigned NOT NULL default '0',
+  `ar_user_text` varchar(255) binary NOT NULL default '',
+  `ar_timestamp` varchar(14) binary NOT NULL default '',
+  `ar_minor_edit` tinyint(1) NOT NULL default '0',
+  `ar_flags` tinyblob NOT NULL,
+  `ar_rev_id` int(8) unsigned default NULL,
+  `ar_text_id` int(8) unsigned default NULL,
+  KEY `name_title_timestamp` (`ar_namespace`,`ar_title`,`ar_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_categorylinks`
+-- 
+
+CREATE TABLE `isupport_billingwiki_categorylinks` (
+  `cl_from` int(8) unsigned NOT NULL default '0',
+  `cl_to` varchar(255) binary NOT NULL default '',
+  `cl_sortkey` varchar(86) binary NOT NULL default '',
+  `cl_timestamp` timestamp NOT NULL,
+  UNIQUE KEY `cl_from` (`cl_from`,`cl_to`),
+  KEY `cl_sortkey` (`cl_to`,`cl_sortkey`),
+  KEY `cl_timestamp` (`cl_to`,`cl_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_externallinks`
+-- 
+
+CREATE TABLE `isupport_billingwiki_externallinks` (
+  `el_from` int(8) unsigned NOT NULL default '0',
+  `el_to` blob NOT NULL,
+  `el_index` blob NOT NULL,
+  KEY `el_from` (`el_from`,`el_to`(40)),
+  KEY `el_to` (`el_to`(60),`el_from`),
+  KEY `el_index` (`el_index`(60))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_hitcounter`
+-- 
+
+CREATE TABLE `isupport_billingwiki_hitcounter` (
+  `hc_id` int(10) unsigned NOT NULL default '0'
+) TYPE=HEAP MAX_ROWS=25000;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_image`
+-- 
+
+CREATE TABLE `isupport_billingwiki_image` (
+  `img_name` varchar(255) binary NOT NULL default '',
+  `img_size` int(8) unsigned NOT NULL default '0',
+  `img_width` int(5) NOT NULL default '0',
+  `img_height` int(5) NOT NULL default '0',
+  `img_metadata` mediumblob NOT NULL,
+  `img_bits` int(3) NOT NULL default '0',
+  `img_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE') default NULL,
+  `img_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart') NOT NULL default 'unknown',
+  `img_minor_mime` varchar(32) NOT NULL default 'unknown',
+  `img_description` tinyblob NOT NULL,
+  `img_user` int(5) unsigned NOT NULL default '0',
+  `img_user_text` varchar(255) binary NOT NULL default '',
+  `img_timestamp` varchar(14) binary NOT NULL default '',
+  PRIMARY KEY  (`img_name`),
+  KEY `img_size` (`img_size`),
+  KEY `img_timestamp` (`img_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_imagelinks`
+-- 
+
+CREATE TABLE `isupport_billingwiki_imagelinks` (
+  `il_from` int(8) unsigned NOT NULL default '0',
+  `il_to` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `il_from` (`il_from`,`il_to`),
+  KEY `il_to` (`il_to`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_interwiki`
+-- 
+
+CREATE TABLE `isupport_billingwiki_interwiki` (
+  `iw_prefix` char(32) NOT NULL default '',
+  `iw_url` char(127) NOT NULL default '',
+  `iw_local` tinyint(1) NOT NULL default '0',
+  `iw_trans` tinyint(1) NOT NULL default '0',
+  UNIQUE KEY `iw_prefix` (`iw_prefix`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_ipblocks`
+-- 
+
+CREATE TABLE `isupport_billingwiki_ipblocks` (
+  `ipb_id` int(8) NOT NULL auto_increment,
+  `ipb_address` varchar(40) binary NOT NULL default '',
+  `ipb_user` int(8) unsigned NOT NULL default '0',
+  `ipb_by` int(8) unsigned NOT NULL default '0',
+  `ipb_reason` tinyblob NOT NULL,
+  `ipb_timestamp` varchar(14) binary NOT NULL default '',
+  `ipb_auto` tinyint(1) NOT NULL default '0',
+  `ipb_expiry` varchar(14) binary NOT NULL default '',
+  `ipb_range_start` varchar(32) NOT NULL default '',
+  `ipb_range_end` varchar(32) NOT NULL default '',
+  PRIMARY KEY  (`ipb_id`),
+  KEY `ipb_address` (`ipb_address`),
+  KEY `ipb_user` (`ipb_user`),
+  KEY `ipb_range` (`ipb_range_start`(8),`ipb_range_end`(8))
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_job`
+-- 
+
+CREATE TABLE `isupport_billingwiki_job` (
+  `job_id` int(9) unsigned NOT NULL auto_increment,
+  `job_cmd` varchar(255) NOT NULL default '',
+  `job_namespace` int(11) NOT NULL default '0',
+  `job_title` varchar(255) binary NOT NULL default '',
+  `job_params` blob NOT NULL,
+  PRIMARY KEY  (`job_id`),
+  KEY `job_cmd` (`job_cmd`,`job_namespace`,`job_title`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_logging`
+-- 
+
+CREATE TABLE `isupport_billingwiki_logging` (
+  `log_type` varchar(10) NOT NULL default '',
+  `log_action` varchar(10) NOT NULL default '',
+  `log_timestamp` varchar(14) NOT NULL default '19700101000000',
+  `log_user` int(10) unsigned NOT NULL default '0',
+  `log_namespace` int(11) NOT NULL default '0',
+  `log_title` varchar(255) binary NOT NULL default '',
+  `log_comment` varchar(255) NOT NULL default '',
+  `log_params` blob NOT NULL,
+  KEY `type_time` (`log_type`,`log_timestamp`),
+  KEY `user_time` (`log_user`,`log_timestamp`),
+  KEY `page_time` (`log_namespace`,`log_title`,`log_timestamp`),
+  KEY `times` (`log_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_math`
+-- 
+
+CREATE TABLE `isupport_billingwiki_math` (
+  `math_inputhash` varchar(16) NOT NULL default '',
+  `math_outputhash` varchar(16) NOT NULL default '',
+  `math_html_conservativeness` tinyint(1) NOT NULL default '0',
+  `math_html` text,
+  `math_mathml` text,
+  UNIQUE KEY `math_inputhash` (`math_inputhash`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_objectcache`
+-- 
+
+CREATE TABLE `isupport_billingwiki_objectcache` (
+  `keyname` varchar(255) binary NOT NULL default '',
+  `value` mediumblob,
+  `exptime` datetime default NULL,
+  UNIQUE KEY `keyname` (`keyname`),
+  KEY `exptime` (`exptime`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_oldimage`
+-- 
+
+CREATE TABLE `isupport_billingwiki_oldimage` (
+  `oi_name` varchar(255) binary NOT NULL default '',
+  `oi_archive_name` varchar(255) binary NOT NULL default '',
+  `oi_size` int(8) unsigned NOT NULL default '0',
+  `oi_width` int(5) NOT NULL default '0',
+  `oi_height` int(5) NOT NULL default '0',
+  `oi_bits` int(3) NOT NULL default '0',
+  `oi_description` tinyblob NOT NULL,
+  `oi_user` int(5) unsigned NOT NULL default '0',
+  `oi_user_text` varchar(255) binary NOT NULL default '',
+  `oi_timestamp` varchar(14) binary NOT NULL default '',
+  KEY `oi_name` (`oi_name`(10))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_page`
+-- 
+
+CREATE TABLE `isupport_billingwiki_page` (
+  `page_id` int(8) unsigned NOT NULL auto_increment,
+  `page_namespace` int(11) NOT NULL default '0',
+  `page_title` varchar(255) binary NOT NULL default '',
+  `page_restrictions` tinyblob NOT NULL,
+  `page_counter` bigint(20) unsigned NOT NULL default '0',
+  `page_is_redirect` tinyint(1) unsigned NOT NULL default '0',
+  `page_is_new` tinyint(1) unsigned NOT NULL default '0',
+  `page_random` double unsigned NOT NULL default '0',
+  `page_touched` varchar(14) binary NOT NULL default '',
+  `page_latest` int(8) unsigned NOT NULL default '0',
+  `page_len` int(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`page_id`),
+  UNIQUE KEY `name_title` (`page_namespace`,`page_title`),
+  KEY `page_random` (`page_random`),
+  KEY `page_len` (`page_len`)
+) TYPE=MyISAM AUTO_INCREMENT=104 AUTO_INCREMENT=104 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_pagelinks`
+-- 
+
+CREATE TABLE `isupport_billingwiki_pagelinks` (
+  `pl_from` int(8) unsigned NOT NULL default '0',
+  `pl_namespace` int(11) NOT NULL default '0',
+  `pl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `pl_from` (`pl_from`,`pl_namespace`,`pl_title`),
+  KEY `pl_namespace` (`pl_namespace`,`pl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_querycache`
+-- 
+
+CREATE TABLE `isupport_billingwiki_querycache` (
+  `qc_type` char(32) NOT NULL default '',
+  `qc_value` int(5) unsigned NOT NULL default '0',
+  `qc_namespace` int(11) NOT NULL default '0',
+  `qc_title` char(255) binary NOT NULL default '',
+  KEY `qc_type` (`qc_type`,`qc_value`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_recentchanges`
+-- 
+
+CREATE TABLE `isupport_billingwiki_recentchanges` (
+  `rc_id` int(8) NOT NULL auto_increment,
+  `rc_timestamp` varchar(14) binary NOT NULL default '',
+  `rc_cur_time` varchar(14) binary NOT NULL default '',
+  `rc_user` int(10) unsigned NOT NULL default '0',
+  `rc_user_text` varchar(255) binary NOT NULL default '',
+  `rc_namespace` int(11) NOT NULL default '0',
+  `rc_title` varchar(255) binary NOT NULL default '',
+  `rc_comment` varchar(255) binary NOT NULL default '',
+  `rc_minor` tinyint(3) unsigned NOT NULL default '0',
+  `rc_bot` tinyint(3) unsigned NOT NULL default '0',
+  `rc_new` tinyint(3) unsigned NOT NULL default '0',
+  `rc_cur_id` int(10) unsigned NOT NULL default '0',
+  `rc_this_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_last_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_type` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_ns` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_title` varchar(255) binary NOT NULL default '',
+  `rc_patrolled` tinyint(3) unsigned NOT NULL default '0',
+  `rc_ip` varchar(15) NOT NULL default '',
+  PRIMARY KEY  (`rc_id`),
+  KEY `rc_timestamp` (`rc_timestamp`),
+  KEY `rc_namespace_title` (`rc_namespace`,`rc_title`),
+  KEY `rc_cur_id` (`rc_cur_id`),
+  KEY `new_name_timestamp` (`rc_new`,`rc_namespace`,`rc_timestamp`),
+  KEY `rc_ip` (`rc_ip`)
+) TYPE=MyISAM AUTO_INCREMENT=168 AUTO_INCREMENT=168 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_revision`
+-- 
+
+CREATE TABLE `isupport_billingwiki_revision` (
+  `rev_id` int(8) unsigned NOT NULL auto_increment,
+  `rev_page` int(8) unsigned NOT NULL default '0',
+  `rev_text_id` int(8) unsigned NOT NULL default '0',
+  `rev_comment` tinyblob NOT NULL,
+  `rev_user` int(5) unsigned NOT NULL default '0',
+  `rev_user_text` varchar(255) binary NOT NULL default '',
+  `rev_timestamp` varchar(14) binary NOT NULL default '',
+  `rev_minor_edit` tinyint(1) unsigned NOT NULL default '0',
+  `rev_deleted` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`rev_page`,`rev_id`),
+  UNIQUE KEY `rev_id` (`rev_id`),
+  KEY `rev_timestamp` (`rev_timestamp`),
+  KEY `page_timestamp` (`rev_page`,`rev_timestamp`),
+  KEY `user_timestamp` (`rev_user`,`rev_timestamp`),
+  KEY `usertext_timestamp` (`rev_user_text`,`rev_timestamp`)
+) TYPE=MyISAM AUTO_INCREMENT=148 AUTO_INCREMENT=148 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_searchindex`
+-- 
+
+CREATE TABLE `isupport_billingwiki_searchindex` (
+  `si_page` int(8) unsigned NOT NULL default '0',
+  `si_title` varchar(255) NOT NULL default '',
+  `si_text` mediumtext NOT NULL,
+  UNIQUE KEY `si_page` (`si_page`),
+  FULLTEXT KEY `si_title` (`si_title`),
+  FULLTEXT KEY `si_text` (`si_text`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_site_stats`
+-- 
+
+CREATE TABLE `isupport_billingwiki_site_stats` (
+  `ss_row_id` int(8) unsigned NOT NULL default '0',
+  `ss_total_views` bigint(20) unsigned default '0',
+  `ss_total_edits` bigint(20) unsigned default '0',
+  `ss_good_articles` bigint(20) unsigned default '0',
+  `ss_total_pages` bigint(20) default '-1',
+  `ss_users` bigint(20) default '-1',
+  `ss_admins` int(10) default '-1',
+  `ss_images` int(10) default '0',
+  UNIQUE KEY `ss_row_id` (`ss_row_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_templatelinks`
+-- 
+
+CREATE TABLE `isupport_billingwiki_templatelinks` (
+  `tl_from` int(8) unsigned NOT NULL default '0',
+  `tl_namespace` int(11) NOT NULL default '0',
+  `tl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `tl_from` (`tl_from`,`tl_namespace`,`tl_title`),
+  KEY `tl_namespace` (`tl_namespace`,`tl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_text`
+-- 
+
+CREATE TABLE `isupport_billingwiki_text` (
+  `old_id` int(8) unsigned NOT NULL auto_increment,
+  `old_text` mediumblob NOT NULL,
+  `old_flags` tinyblob NOT NULL,
+  PRIMARY KEY  (`old_id`)
+) TYPE=MyISAM AUTO_INCREMENT=147 AUTO_INCREMENT=147 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_trackbacks`
+-- 
+
+CREATE TABLE `isupport_billingwiki_trackbacks` (
+  `tb_id` int(11) NOT NULL auto_increment,
+  `tb_page` int(11) default NULL,
+  `tb_title` varchar(255) NOT NULL default '',
+  `tb_url` varchar(255) NOT NULL default '',
+  `tb_ex` text,
+  `tb_name` varchar(255) default NULL,
+  PRIMARY KEY  (`tb_id`),
+  KEY `tb_page` (`tb_page`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_transcache`
+-- 
+
+CREATE TABLE `isupport_billingwiki_transcache` (
+  `tc_url` varchar(255) NOT NULL default '',
+  `tc_contents` text,
+  `tc_time` int(11) NOT NULL default '0',
+  UNIQUE KEY `tc_url_idx` (`tc_url`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_user`
+-- 
+
+CREATE TABLE `isupport_billingwiki_user` (
+  `user_id` int(5) unsigned NOT NULL auto_increment,
+  `user_name` varchar(255) binary NOT NULL default '',
+  `user_real_name` varchar(255) binary NOT NULL default '',
+  `user_password` tinyblob NOT NULL,
+  `user_newpassword` tinyblob NOT NULL,
+  `user_email` tinytext NOT NULL,
+  `user_options` blob NOT NULL,
+  `user_touched` varchar(14) binary NOT NULL default '',
+  `user_token` varchar(32) binary NOT NULL default '',
+  `user_email_authenticated` varchar(14) binary default NULL,
+  `user_email_token` varchar(32) binary default NULL,
+  `user_email_token_expires` varchar(14) binary default NULL,
+  `user_registration` varchar(14) binary default NULL,
+  PRIMARY KEY  (`user_id`),
+  UNIQUE KEY `user_name` (`user_name`),
+  KEY `user_email_token` (`user_email_token`)
+) TYPE=MyISAM AUTO_INCREMENT=7 AUTO_INCREMENT=7 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_user_groups`
+-- 
+
+CREATE TABLE `isupport_billingwiki_user_groups` (
+  `ug_user` int(5) unsigned NOT NULL default '0',
+  `ug_group` char(16) NOT NULL default '',
+  PRIMARY KEY  (`ug_user`,`ug_group`),
+  KEY `ug_group` (`ug_group`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_user_newtalk`
+-- 
+
+CREATE TABLE `isupport_billingwiki_user_newtalk` (
+  `user_id` int(5) NOT NULL default '0',
+  `user_ip` varchar(40) NOT NULL default '',
+  KEY `user_id` (`user_id`),
+  KEY `user_ip` (`user_ip`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_validate`
+-- 
+
+CREATE TABLE `isupport_billingwiki_validate` (
+  `val_user` int(11) NOT NULL default '0',
+  `val_page` int(11) unsigned NOT NULL default '0',
+  `val_revision` int(11) unsigned NOT NULL default '0',
+  `val_type` int(11) unsigned NOT NULL default '0',
+  `val_value` int(11) default '0',
+  `val_comment` varchar(255) NOT NULL default '',
+  `val_ip` varchar(20) NOT NULL default '',
+  KEY `val_user` (`val_user`,`val_revision`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_billingwiki_watchlist`
+-- 
+
+CREATE TABLE `isupport_billingwiki_watchlist` (
+  `wl_user` int(5) unsigned NOT NULL default '0',
+  `wl_namespace` int(11) NOT NULL default '0',
+  `wl_title` varchar(255) binary NOT NULL default '',
+  `wl_notificationtimestamp` varchar(14) binary default NULL,
+  UNIQUE KEY `wl_user` (`wl_user`,`wl_namespace`,`wl_title`),
+  KEY `namespace_title` (`wl_namespace`,`wl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_block_module_link`
+-- 
+
+CREATE TABLE `isupport_block_module_link` (
+  `block_id` mediumint(8) unsigned NOT NULL default '0',
+  `module_id` smallint(5) NOT NULL default '0',
+  KEY `module_id` (`module_id`),
+  KEY `block_id` (`block_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_bookmark`
+-- 
+
+CREATE TABLE `isupport_bookmark` (
+  `uid` mediumint(8) NOT NULL default '0',
+  `BookmarkURL` varchar(255) NOT NULL default '',
+  `BookmarkTitle` varchar(255) NOT NULL default '',
+  `BookmarkComment` varchar(255) default NULL,
+  `BookmarkWeight` tinyint(3) unsigned NOT NULL default '1',
+  `BookmarkType` tinyint(3) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`uid`,`BookmarkURL`),
+  KEY `lookup` (`BookmarkWeight`,`BookmarkComment`,`BookmarkTitle`,`uid`,`BookmarkURL`,`BookmarkType`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_bstats`
+-- 
+
+CREATE TABLE `isupport_bstats` (
+  `option` varchar(255) NOT NULL default '',
+  `value` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`option`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_bstats_pagerequests`
+-- 
+
+CREATE TABLE `isupport_bstats_pagerequests` (
+  `prID` bigint(20) unsigned NOT NULL auto_increment,
+  `TIMESTAMP` datetime NOT NULL default '0000-00-00 00:00:00',
+  `USER` mediumint(8) unsigned NOT NULL default '0',
+  `REQUEST_URI` varchar(255) NOT NULL default '',
+  `REMOTE_ADDR` varchar(255) NOT NULL default '',
+  `HTTP_REFERER` varchar(255) default NULL,
+  `USERGROUPS` varchar(255) default NULL,
+  PRIMARY KEY  (`prID`),
+  KEY `prID` (`TIMESTAMP`,`prID`,`USER`,`REQUEST_URI`,`REMOTE_ADDR`,`HTTP_REFERER`)
+) TYPE=MyISAM AUTO_INCREMENT=95 AUTO_INCREMENT=95 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_bstats_redirects`
+-- 
+
+CREATE TABLE `isupport_bstats_redirects` (
+  `Target` varchar(255) NOT NULL default '',
+  `Count` int(10) NOT NULL default '0',
+  `LASTVISIT` datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`Target`),
+  KEY `Target_2` (`Count`,`Target`,`LASTVISIT`),
+  FULLTEXT KEY `Target` (`Target`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_bstats_searches`
+-- 
+
+CREATE TABLE `isupport_bstats_searches` (
+  `sid` int(11) NOT NULL auto_increment,
+  `timestamp` datetime NOT NULL default '0000-00-00 00:00:00',
+  `searchstring` varchar(255) NOT NULL default '',
+  `andor` varchar(5) NOT NULL default '',
+  `modules` varchar(255) NOT NULL default '',
+  `username` varchar(255) NOT NULL default '',
+  `usergroups` varchar(255) NOT NULL default '',
+  `resultCount` bigint(20) default NULL,
+  UNIQUE KEY `sid` (`sid`),
+  KEY `searchstring_2` (`searchstring`),
+  KEY `timestamp_2` (`timestamp`),
+  KEY `resultCount` (`resultCount`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_bstats_searchsurveys`
+-- 
+
+CREATE TABLE `isupport_bstats_searchsurveys` (
+  `SurveyID` mediumint(8) unsigned NOT NULL auto_increment,
+  `SurveySendDate` datetime NOT NULL default '0000-00-00 00:00:00',
+  `SurveyUser` varchar(255) NOT NULL default '',
+  `SurveyTimestamps` text NOT NULL,
+  `SurveyQueries` text NOT NULL,
+  PRIMARY KEY  (`SurveyID`),
+  KEY `SurveyUser` (`SurveyUser`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_bstatus_sections`
+-- 
+
+CREATE TABLE `isupport_bstatus_sections` (
+  `ID` smallint(5) unsigned NOT NULL auto_increment,
+  `Section` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`ID`)
+) TYPE=MyISAM AUTO_INCREMENT=4 AUTO_INCREMENT=4 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_bstatus_status`
+-- 
+
+CREATE TABLE `isupport_bstatus_status` (
+  `ID` bigint(20) unsigned NOT NULL auto_increment,
+  `SID` smallint(5) unsigned NOT NULL default '0',
+  `Status` tinyint(3) unsigned NOT NULL default '0',
+  `Time` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `Comment` varchar(255) NOT NULL default '',
+  `uid` mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`ID`)
+) TYPE=MyISAM AUTO_INCREMENT=10 AUTO_INCREMENT=10 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_bsurveygm`
+-- 
+
+CREATE TABLE `isupport_bsurveygm` (
+  `userid` mediumint(8) NOT NULL default '0',
+  `timestamp` datetime NOT NULL default '0000-00-00 00:00:00',
+  `result` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`userid`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_config`
+-- 
+
+CREATE TABLE `isupport_config` (
+  `conf_id` smallint(5) unsigned NOT NULL auto_increment,
+  `conf_modid` smallint(5) unsigned NOT NULL default '0',
+  `conf_catid` smallint(5) unsigned NOT NULL default '0',
+  `conf_name` varchar(25) NOT NULL default '',
+  `conf_title` varchar(30) NOT NULL default '',
+  `conf_value` text NOT NULL,
+  `conf_desc` varchar(30) NOT NULL default '',
+  `conf_formtype` varchar(15) NOT NULL default '',
+  `conf_valuetype` varchar(10) NOT NULL default '',
+  `conf_order` smallint(5) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`conf_id`),
+  KEY `conf_mod_cat_id` (`conf_modid`,`conf_catid`),
+  KEY `conf_title` (`conf_title`),
+  KEY `conf_title_2` (`conf_title`)
+) TYPE=MyISAM AUTO_INCREMENT=1048 AUTO_INCREMENT=1048 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_configcategory`
+-- 
+
+CREATE TABLE `isupport_configcategory` (
+  `confcat_id` smallint(5) unsigned NOT NULL auto_increment,
+  `confcat_name` varchar(25) NOT NULL default '',
+  `confcat_order` smallint(5) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`confcat_id`)
+) TYPE=MyISAM AUTO_INCREMENT=8 AUTO_INCREMENT=8 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_configoption`
+-- 
+
+CREATE TABLE `isupport_configoption` (
+  `confop_id` mediumint(8) unsigned NOT NULL auto_increment,
+  `confop_name` varchar(255) NOT NULL default '',
+  `confop_value` varchar(255) NOT NULL default '',
+  `conf_id` smallint(5) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`confop_id`),
+  KEY `conf_id` (`conf_id`)
+) TYPE=MyISAM AUTO_INCREMENT=1169 AUTO_INCREMENT=1169 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_archive`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_archive` (
+  `ar_namespace` int(11) NOT NULL default '0',
+  `ar_title` varchar(255) binary NOT NULL default '',
+  `ar_text` mediumblob NOT NULL,
+  `ar_comment` tinyblob NOT NULL,
+  `ar_user` int(5) unsigned NOT NULL default '0',
+  `ar_user_text` varchar(255) binary NOT NULL default '',
+  `ar_timestamp` varchar(14) binary NOT NULL default '',
+  `ar_minor_edit` tinyint(1) NOT NULL default '0',
+  `ar_flags` tinyblob NOT NULL,
+  `ar_rev_id` int(8) unsigned default NULL,
+  `ar_text_id` int(8) unsigned default NULL,
+  KEY `name_title_timestamp` (`ar_namespace`,`ar_title`,`ar_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_categorylinks`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_categorylinks` (
+  `cl_from` int(8) unsigned NOT NULL default '0',
+  `cl_to` varchar(255) binary NOT NULL default '',
+  `cl_sortkey` varchar(86) binary NOT NULL default '',
+  `cl_timestamp` timestamp NOT NULL,
+  UNIQUE KEY `cl_from` (`cl_from`,`cl_to`),
+  KEY `cl_sortkey` (`cl_to`,`cl_sortkey`),
+  KEY `cl_timestamp` (`cl_to`,`cl_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_externallinks`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_externallinks` (
+  `el_from` int(8) unsigned NOT NULL default '0',
+  `el_to` blob NOT NULL,
+  `el_index` blob NOT NULL,
+  KEY `el_from` (`el_from`,`el_to`(40)),
+  KEY `el_to` (`el_to`(60),`el_from`),
+  KEY `el_index` (`el_index`(60))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_hitcounter`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_hitcounter` (
+  `hc_id` int(10) unsigned NOT NULL default '0'
+) TYPE=HEAP MAX_ROWS=25000;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_image`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_image` (
+  `img_name` varchar(255) binary NOT NULL default '',
+  `img_size` int(8) unsigned NOT NULL default '0',
+  `img_width` int(5) NOT NULL default '0',
+  `img_height` int(5) NOT NULL default '0',
+  `img_metadata` mediumblob NOT NULL,
+  `img_bits` int(3) NOT NULL default '0',
+  `img_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE') default NULL,
+  `img_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart') NOT NULL default 'unknown',
+  `img_minor_mime` varchar(32) NOT NULL default 'unknown',
+  `img_description` tinyblob NOT NULL,
+  `img_user` int(5) unsigned NOT NULL default '0',
+  `img_user_text` varchar(255) binary NOT NULL default '',
+  `img_timestamp` varchar(14) binary NOT NULL default '',
+  PRIMARY KEY  (`img_name`),
+  KEY `img_size` (`img_size`),
+  KEY `img_timestamp` (`img_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_imagelinks`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_imagelinks` (
+  `il_from` int(8) unsigned NOT NULL default '0',
+  `il_to` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `il_from` (`il_from`,`il_to`),
+  KEY `il_to` (`il_to`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_interwiki`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_interwiki` (
+  `iw_prefix` char(32) NOT NULL default '',
+  `iw_url` char(127) NOT NULL default '',
+  `iw_local` tinyint(1) NOT NULL default '0',
+  `iw_trans` tinyint(1) NOT NULL default '0',
+  UNIQUE KEY `iw_prefix` (`iw_prefix`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_ipblocks`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_ipblocks` (
+  `ipb_id` int(8) NOT NULL auto_increment,
+  `ipb_address` varchar(40) binary NOT NULL default '',
+  `ipb_user` int(8) unsigned NOT NULL default '0',
+  `ipb_by` int(8) unsigned NOT NULL default '0',
+  `ipb_reason` tinyblob NOT NULL,
+  `ipb_timestamp` varchar(14) binary NOT NULL default '',
+  `ipb_auto` tinyint(1) NOT NULL default '0',
+  `ipb_expiry` varchar(14) binary NOT NULL default '',
+  `ipb_range_start` varchar(32) NOT NULL default '',
+  `ipb_range_end` varchar(32) NOT NULL default '',
+  PRIMARY KEY  (`ipb_id`),
+  KEY `ipb_address` (`ipb_address`),
+  KEY `ipb_user` (`ipb_user`),
+  KEY `ipb_range` (`ipb_range_start`(8),`ipb_range_end`(8))
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_job`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_job` (
+  `job_id` int(9) unsigned NOT NULL auto_increment,
+  `job_cmd` varchar(255) NOT NULL default '',
+  `job_namespace` int(11) NOT NULL default '0',
+  `job_title` varchar(255) binary NOT NULL default '',
+  `job_params` blob NOT NULL,
+  PRIMARY KEY  (`job_id`),
+  KEY `job_cmd` (`job_cmd`,`job_namespace`,`job_title`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_logging`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_logging` (
+  `log_type` varchar(10) NOT NULL default '',
+  `log_action` varchar(10) NOT NULL default '',
+  `log_timestamp` varchar(14) NOT NULL default '19700101000000',
+  `log_user` int(10) unsigned NOT NULL default '0',
+  `log_namespace` int(11) NOT NULL default '0',
+  `log_title` varchar(255) binary NOT NULL default '',
+  `log_comment` varchar(255) NOT NULL default '',
+  `log_params` blob NOT NULL,
+  KEY `type_time` (`log_type`,`log_timestamp`),
+  KEY `user_time` (`log_user`,`log_timestamp`),
+  KEY `page_time` (`log_namespace`,`log_title`,`log_timestamp`),
+  KEY `times` (`log_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_math`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_math` (
+  `math_inputhash` varchar(16) NOT NULL default '',
+  `math_outputhash` varchar(16) NOT NULL default '',
+  `math_html_conservativeness` tinyint(1) NOT NULL default '0',
+  `math_html` text,
+  `math_mathml` text,
+  UNIQUE KEY `math_inputhash` (`math_inputhash`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_objectcache`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_objectcache` (
+  `keyname` varchar(255) binary NOT NULL default '',
+  `value` mediumblob,
+  `exptime` datetime default NULL,
+  UNIQUE KEY `keyname` (`keyname`),
+  KEY `exptime` (`exptime`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_oldimage`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_oldimage` (
+  `oi_name` varchar(255) binary NOT NULL default '',
+  `oi_archive_name` varchar(255) binary NOT NULL default '',
+  `oi_size` int(8) unsigned NOT NULL default '0',
+  `oi_width` int(5) NOT NULL default '0',
+  `oi_height` int(5) NOT NULL default '0',
+  `oi_bits` int(3) NOT NULL default '0',
+  `oi_description` tinyblob NOT NULL,
+  `oi_user` int(5) unsigned NOT NULL default '0',
+  `oi_user_text` varchar(255) binary NOT NULL default '',
+  `oi_timestamp` varchar(14) binary NOT NULL default '',
+  KEY `oi_name` (`oi_name`(10))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_page`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_page` (
+  `page_id` int(8) unsigned NOT NULL auto_increment,
+  `page_namespace` int(11) NOT NULL default '0',
+  `page_title` varchar(255) binary NOT NULL default '',
+  `page_restrictions` tinyblob NOT NULL,
+  `page_counter` bigint(20) unsigned NOT NULL default '0',
+  `page_is_redirect` tinyint(1) unsigned NOT NULL default '0',
+  `page_is_new` tinyint(1) unsigned NOT NULL default '0',
+  `page_random` double unsigned NOT NULL default '0',
+  `page_touched` varchar(14) binary NOT NULL default '',
+  `page_latest` int(8) unsigned NOT NULL default '0',
+  `page_len` int(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`page_id`),
+  UNIQUE KEY `name_title` (`page_namespace`,`page_title`),
+  KEY `page_random` (`page_random`),
+  KEY `page_len` (`page_len`)
+) TYPE=MyISAM AUTO_INCREMENT=36 AUTO_INCREMENT=36 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_pagelinks`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_pagelinks` (
+  `pl_from` int(8) unsigned NOT NULL default '0',
+  `pl_namespace` int(11) NOT NULL default '0',
+  `pl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `pl_from` (`pl_from`,`pl_namespace`,`pl_title`),
+  KEY `pl_namespace` (`pl_namespace`,`pl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_querycache`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_querycache` (
+  `qc_type` char(32) NOT NULL default '',
+  `qc_value` int(5) unsigned NOT NULL default '0',
+  `qc_namespace` int(11) NOT NULL default '0',
+  `qc_title` char(255) binary NOT NULL default '',
+  KEY `qc_type` (`qc_type`,`qc_value`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_recentchanges`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_recentchanges` (
+  `rc_id` int(8) NOT NULL auto_increment,
+  `rc_timestamp` varchar(14) binary NOT NULL default '',
+  `rc_cur_time` varchar(14) binary NOT NULL default '',
+  `rc_user` int(10) unsigned NOT NULL default '0',
+  `rc_user_text` varchar(255) binary NOT NULL default '',
+  `rc_namespace` int(11) NOT NULL default '0',
+  `rc_title` varchar(255) binary NOT NULL default '',
+  `rc_comment` varchar(255) binary NOT NULL default '',
+  `rc_minor` tinyint(3) unsigned NOT NULL default '0',
+  `rc_bot` tinyint(3) unsigned NOT NULL default '0',
+  `rc_new` tinyint(3) unsigned NOT NULL default '0',
+  `rc_cur_id` int(10) unsigned NOT NULL default '0',
+  `rc_this_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_last_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_type` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_ns` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_title` varchar(255) binary NOT NULL default '',
+  `rc_patrolled` tinyint(3) unsigned NOT NULL default '0',
+  `rc_ip` varchar(15) NOT NULL default '',
+  PRIMARY KEY  (`rc_id`),
+  KEY `rc_timestamp` (`rc_timestamp`),
+  KEY `rc_namespace_title` (`rc_namespace`,`rc_title`),
+  KEY `rc_cur_id` (`rc_cur_id`),
+  KEY `new_name_timestamp` (`rc_new`,`rc_namespace`,`rc_timestamp`),
+  KEY `rc_ip` (`rc_ip`)
+) TYPE=MyISAM AUTO_INCREMENT=44 AUTO_INCREMENT=44 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_revision`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_revision` (
+  `rev_id` int(8) unsigned NOT NULL auto_increment,
+  `rev_page` int(8) unsigned NOT NULL default '0',
+  `rev_text_id` int(8) unsigned NOT NULL default '0',
+  `rev_comment` tinyblob NOT NULL,
+  `rev_user` int(5) unsigned NOT NULL default '0',
+  `rev_user_text` varchar(255) binary NOT NULL default '',
+  `rev_timestamp` varchar(14) binary NOT NULL default '',
+  `rev_minor_edit` tinyint(1) unsigned NOT NULL default '0',
+  `rev_deleted` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`rev_page`,`rev_id`),
+  UNIQUE KEY `rev_id` (`rev_id`),
+  KEY `rev_timestamp` (`rev_timestamp`),
+  KEY `page_timestamp` (`rev_page`,`rev_timestamp`),
+  KEY `user_timestamp` (`rev_user`,`rev_timestamp`),
+  KEY `usertext_timestamp` (`rev_user_text`,`rev_timestamp`)
+) TYPE=MyISAM AUTO_INCREMENT=42 AUTO_INCREMENT=42 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_searchindex`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_searchindex` (
+  `si_page` int(8) unsigned NOT NULL default '0',
+  `si_title` varchar(255) NOT NULL default '',
+  `si_text` mediumtext NOT NULL,
+  UNIQUE KEY `si_page` (`si_page`),
+  FULLTEXT KEY `si_title` (`si_title`),
+  FULLTEXT KEY `si_text` (`si_text`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_site_stats`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_site_stats` (
+  `ss_row_id` int(8) unsigned NOT NULL default '0',
+  `ss_total_views` bigint(20) unsigned default '0',
+  `ss_total_edits` bigint(20) unsigned default '0',
+  `ss_good_articles` bigint(20) unsigned default '0',
+  `ss_total_pages` bigint(20) default '-1',
+  `ss_users` bigint(20) default '-1',
+  `ss_admins` int(10) default '-1',
+  `ss_images` int(10) default '0',
+  UNIQUE KEY `ss_row_id` (`ss_row_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_templatelinks`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_templatelinks` (
+  `tl_from` int(8) unsigned NOT NULL default '0',
+  `tl_namespace` int(11) NOT NULL default '0',
+  `tl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `tl_from` (`tl_from`,`tl_namespace`,`tl_title`),
+  KEY `tl_namespace` (`tl_namespace`,`tl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_text`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_text` (
+  `old_id` int(8) unsigned NOT NULL auto_increment,
+  `old_text` mediumblob NOT NULL,
+  `old_flags` tinyblob NOT NULL,
+  PRIMARY KEY  (`old_id`)
+) TYPE=MyISAM AUTO_INCREMENT=42 AUTO_INCREMENT=42 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_trackbacks`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_trackbacks` (
+  `tb_id` int(11) NOT NULL auto_increment,
+  `tb_page` int(11) default NULL,
+  `tb_title` varchar(255) NOT NULL default '',
+  `tb_url` varchar(255) NOT NULL default '',
+  `tb_ex` text,
+  `tb_name` varchar(255) default NULL,
+  PRIMARY KEY  (`tb_id`),
+  KEY `tb_page` (`tb_page`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_transcache`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_transcache` (
+  `tc_url` varchar(255) NOT NULL default '',
+  `tc_contents` text,
+  `tc_time` int(11) NOT NULL default '0',
+  UNIQUE KEY `tc_url_idx` (`tc_url`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_user`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_user` (
+  `user_id` int(5) unsigned NOT NULL auto_increment,
+  `user_name` varchar(255) binary NOT NULL default '',
+  `user_real_name` varchar(255) binary NOT NULL default '',
+  `user_password` tinyblob NOT NULL,
+  `user_newpassword` tinyblob NOT NULL,
+  `user_email` tinytext NOT NULL,
+  `user_options` blob NOT NULL,
+  `user_touched` varchar(14) binary NOT NULL default '',
+  `user_token` varchar(32) binary NOT NULL default '',
+  `user_email_authenticated` varchar(14) binary default NULL,
+  `user_email_token` varchar(32) binary default NULL,
+  `user_email_token_expires` varchar(14) binary default NULL,
+  `user_registration` varchar(14) binary default NULL,
+  PRIMARY KEY  (`user_id`),
+  UNIQUE KEY `user_name` (`user_name`),
+  KEY `user_email_token` (`user_email_token`)
+) TYPE=MyISAM AUTO_INCREMENT=7 AUTO_INCREMENT=7 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_user_groups`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_user_groups` (
+  `ug_user` int(5) unsigned NOT NULL default '0',
+  `ug_group` char(16) NOT NULL default '',
+  PRIMARY KEY  (`ug_user`,`ug_group`),
+  KEY `ug_group` (`ug_group`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_user_newtalk`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_user_newtalk` (
+  `user_id` int(5) NOT NULL default '0',
+  `user_ip` varchar(40) NOT NULL default '',
+  KEY `user_id` (`user_id`),
+  KEY `user_ip` (`user_ip`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_validate`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_validate` (
+  `val_user` int(11) NOT NULL default '0',
+  `val_page` int(11) unsigned NOT NULL default '0',
+  `val_revision` int(11) unsigned NOT NULL default '0',
+  `val_type` int(11) unsigned NOT NULL default '0',
+  `val_value` int(11) default '0',
+  `val_comment` varchar(255) NOT NULL default '',
+  `val_ip` varchar(20) NOT NULL default '',
+  KEY `val_user` (`val_user`,`val_revision`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_csforumwiki_watchlist`
+-- 
+
+CREATE TABLE `isupport_csforumwiki_watchlist` (
+  `wl_user` int(5) unsigned NOT NULL default '0',
+  `wl_namespace` int(11) NOT NULL default '0',
+  `wl_title` varchar(255) binary NOT NULL default '',
+  `wl_notificationtimestamp` varchar(14) binary default NULL,
+  UNIQUE KEY `wl_user` (`wl_user`,`wl_namespace`,`wl_title`),
+  KEY `namespace_title` (`wl_namespace`,`wl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_archive`
+-- 
+
+CREATE TABLE `isupport_cswiki_archive` (
+  `ar_namespace` int(11) NOT NULL default '0',
+  `ar_title` varchar(255) binary NOT NULL default '',
+  `ar_text` mediumblob NOT NULL,
+  `ar_comment` tinyblob NOT NULL,
+  `ar_user` int(5) unsigned NOT NULL default '0',
+  `ar_user_text` varchar(255) binary NOT NULL default '',
+  `ar_timestamp` varchar(14) binary NOT NULL default '',
+  `ar_minor_edit` tinyint(1) NOT NULL default '0',
+  `ar_flags` tinyblob NOT NULL,
+  `ar_rev_id` int(8) unsigned default NULL,
+  `ar_text_id` int(8) unsigned default NULL,
+  KEY `name_title_timestamp` (`ar_namespace`,`ar_title`,`ar_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_categorylinks`
+-- 
+
+CREATE TABLE `isupport_cswiki_categorylinks` (
+  `cl_from` int(8) unsigned NOT NULL default '0',
+  `cl_to` varchar(255) binary NOT NULL default '',
+  `cl_sortkey` varchar(86) binary NOT NULL default '',
+  `cl_timestamp` timestamp NOT NULL,
+  UNIQUE KEY `cl_from` (`cl_from`,`cl_to`),
+  KEY `cl_sortkey` (`cl_to`,`cl_sortkey`),
+  KEY `cl_timestamp` (`cl_to`,`cl_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_externallinks`
+-- 
+
+CREATE TABLE `isupport_cswiki_externallinks` (
+  `el_from` int(8) unsigned NOT NULL default '0',
+  `el_to` blob NOT NULL,
+  `el_index` blob NOT NULL,
+  KEY `el_from` (`el_from`,`el_to`(40)),
+  KEY `el_to` (`el_to`(60),`el_from`),
+  KEY `el_index` (`el_index`(60))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_hitcounter`
+-- 
+
+CREATE TABLE `isupport_cswiki_hitcounter` (
+  `hc_id` int(10) unsigned NOT NULL default '0'
+) TYPE=HEAP MAX_ROWS=25000;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_image`
+-- 
+
+CREATE TABLE `isupport_cswiki_image` (
+  `img_name` varchar(255) binary NOT NULL default '',
+  `img_size` int(8) unsigned NOT NULL default '0',
+  `img_width` int(5) NOT NULL default '0',
+  `img_height` int(5) NOT NULL default '0',
+  `img_metadata` mediumblob NOT NULL,
+  `img_bits` int(3) NOT NULL default '0',
+  `img_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE') default NULL,
+  `img_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart') NOT NULL default 'unknown',
+  `img_minor_mime` varchar(32) NOT NULL default 'unknown',
+  `img_description` tinyblob NOT NULL,
+  `img_user` int(5) unsigned NOT NULL default '0',
+  `img_user_text` varchar(255) binary NOT NULL default '',
+  `img_timestamp` varchar(14) binary NOT NULL default '',
+  PRIMARY KEY  (`img_name`),
+  KEY `img_size` (`img_size`),
+  KEY `img_timestamp` (`img_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_imagelinks`
+-- 
+
+CREATE TABLE `isupport_cswiki_imagelinks` (
+  `il_from` int(8) unsigned NOT NULL default '0',
+  `il_to` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `il_from` (`il_from`,`il_to`),
+  KEY `il_to` (`il_to`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_interwiki`
+-- 
+
+CREATE TABLE `isupport_cswiki_interwiki` (
+  `iw_prefix` char(32) NOT NULL default '',
+  `iw_url` char(127) NOT NULL default '',
+  `iw_local` tinyint(1) NOT NULL default '0',
+  `iw_trans` tinyint(1) NOT NULL default '0',
+  UNIQUE KEY `iw_prefix` (`iw_prefix`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_ipblocks`
+-- 
+
+CREATE TABLE `isupport_cswiki_ipblocks` (
+  `ipb_id` int(8) NOT NULL auto_increment,
+  `ipb_address` varchar(40) binary NOT NULL default '',
+  `ipb_user` int(8) unsigned NOT NULL default '0',
+  `ipb_by` int(8) unsigned NOT NULL default '0',
+  `ipb_reason` tinyblob NOT NULL,
+  `ipb_timestamp` varchar(14) binary NOT NULL default '',
+  `ipb_auto` tinyint(1) NOT NULL default '0',
+  `ipb_expiry` varchar(14) binary NOT NULL default '',
+  `ipb_range_start` varchar(32) NOT NULL default '',
+  `ipb_range_end` varchar(32) NOT NULL default '',
+  PRIMARY KEY  (`ipb_id`),
+  KEY `ipb_address` (`ipb_address`),
+  KEY `ipb_user` (`ipb_user`),
+  KEY `ipb_range` (`ipb_range_start`(8),`ipb_range_end`(8))
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_job`
+-- 
+
+CREATE TABLE `isupport_cswiki_job` (
+  `job_id` int(9) unsigned NOT NULL auto_increment,
+  `job_cmd` varchar(255) NOT NULL default '',
+  `job_namespace` int(11) NOT NULL default '0',
+  `job_title` varchar(255) binary NOT NULL default '',
+  `job_params` blob NOT NULL,
+  PRIMARY KEY  (`job_id`),
+  KEY `job_cmd` (`job_cmd`,`job_namespace`,`job_title`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_logging`
+-- 
+
+CREATE TABLE `isupport_cswiki_logging` (
+  `log_type` varchar(10) NOT NULL default '',
+  `log_action` varchar(10) NOT NULL default '',
+  `log_timestamp` varchar(14) NOT NULL default '19700101000000',
+  `log_user` int(10) unsigned NOT NULL default '0',
+  `log_namespace` int(11) NOT NULL default '0',
+  `log_title` varchar(255) binary NOT NULL default '',
+  `log_comment` varchar(255) NOT NULL default '',
+  `log_params` blob NOT NULL,
+  KEY `type_time` (`log_type`,`log_timestamp`),
+  KEY `user_time` (`log_user`,`log_timestamp`),
+  KEY `page_time` (`log_namespace`,`log_title`,`log_timestamp`),
+  KEY `times` (`log_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_math`
+-- 
+
+CREATE TABLE `isupport_cswiki_math` (
+  `math_inputhash` varchar(16) NOT NULL default '',
+  `math_outputhash` varchar(16) NOT NULL default '',
+  `math_html_conservativeness` tinyint(1) NOT NULL default '0',
+  `math_html` text,
+  `math_mathml` text,
+  UNIQUE KEY `math_inputhash` (`math_inputhash`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_objectcache`
+-- 
+
+CREATE TABLE `isupport_cswiki_objectcache` (
+  `keyname` varchar(255) binary NOT NULL default '',
+  `value` mediumblob,
+  `exptime` datetime default NULL,
+  UNIQUE KEY `keyname` (`keyname`),
+  KEY `exptime` (`exptime`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_oldimage`
+-- 
+
+CREATE TABLE `isupport_cswiki_oldimage` (
+  `oi_name` varchar(255) binary NOT NULL default '',
+  `oi_archive_name` varchar(255) binary NOT NULL default '',
+  `oi_size` int(8) unsigned NOT NULL default '0',
+  `oi_width` int(5) NOT NULL default '0',
+  `oi_height` int(5) NOT NULL default '0',
+  `oi_bits` int(3) NOT NULL default '0',
+  `oi_description` tinyblob NOT NULL,
+  `oi_user` int(5) unsigned NOT NULL default '0',
+  `oi_user_text` varchar(255) binary NOT NULL default '',
+  `oi_timestamp` varchar(14) binary NOT NULL default '',
+  KEY `oi_name` (`oi_name`(10))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_page`
+-- 
+
+CREATE TABLE `isupport_cswiki_page` (
+  `page_id` int(8) unsigned NOT NULL auto_increment,
+  `page_namespace` int(11) NOT NULL default '0',
+  `page_title` varchar(255) binary NOT NULL default '',
+  `page_restrictions` tinyblob NOT NULL,
+  `page_counter` bigint(20) unsigned NOT NULL default '0',
+  `page_is_redirect` tinyint(1) unsigned NOT NULL default '0',
+  `page_is_new` tinyint(1) unsigned NOT NULL default '0',
+  `page_random` double unsigned NOT NULL default '0',
+  `page_touched` varchar(14) binary NOT NULL default '',
+  `page_latest` int(8) unsigned NOT NULL default '0',
+  `page_len` int(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`page_id`),
+  UNIQUE KEY `name_title` (`page_namespace`,`page_title`),
+  KEY `page_random` (`page_random`),
+  KEY `page_len` (`page_len`)
+) TYPE=MyISAM AUTO_INCREMENT=210 AUTO_INCREMENT=210 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_pagelinks`
+-- 
+
+CREATE TABLE `isupport_cswiki_pagelinks` (
+  `pl_from` int(8) unsigned NOT NULL default '0',
+  `pl_namespace` int(11) NOT NULL default '0',
+  `pl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `pl_from` (`pl_from`,`pl_namespace`,`pl_title`),
+  KEY `pl_namespace` (`pl_namespace`,`pl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_querycache`
+-- 
+
+CREATE TABLE `isupport_cswiki_querycache` (
+  `qc_type` char(32) NOT NULL default '',
+  `qc_value` int(5) unsigned NOT NULL default '0',
+  `qc_namespace` int(11) NOT NULL default '0',
+  `qc_title` char(255) binary NOT NULL default '',
+  KEY `qc_type` (`qc_type`,`qc_value`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_recentchanges`
+-- 
+
+CREATE TABLE `isupport_cswiki_recentchanges` (
+  `rc_id` int(8) NOT NULL auto_increment,
+  `rc_timestamp` varchar(14) binary NOT NULL default '',
+  `rc_cur_time` varchar(14) binary NOT NULL default '',
+  `rc_user` int(10) unsigned NOT NULL default '0',
+  `rc_user_text` varchar(255) binary NOT NULL default '',
+  `rc_namespace` int(11) NOT NULL default '0',
+  `rc_title` varchar(255) binary NOT NULL default '',
+  `rc_comment` varchar(255) binary NOT NULL default '',
+  `rc_minor` tinyint(3) unsigned NOT NULL default '0',
+  `rc_bot` tinyint(3) unsigned NOT NULL default '0',
+  `rc_new` tinyint(3) unsigned NOT NULL default '0',
+  `rc_cur_id` int(10) unsigned NOT NULL default '0',
+  `rc_this_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_last_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_type` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_ns` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_title` varchar(255) binary NOT NULL default '',
+  `rc_patrolled` tinyint(3) unsigned NOT NULL default '0',
+  `rc_ip` varchar(15) NOT NULL default '',
+  PRIMARY KEY  (`rc_id`),
+  KEY `rc_timestamp` (`rc_timestamp`),
+  KEY `rc_namespace_title` (`rc_namespace`,`rc_title`),
+  KEY `rc_cur_id` (`rc_cur_id`),
+  KEY `new_name_timestamp` (`rc_new`,`rc_namespace`,`rc_timestamp`),
+  KEY `rc_ip` (`rc_ip`)
+) TYPE=MyISAM AUTO_INCREMENT=329 AUTO_INCREMENT=329 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_revision`
+-- 
+
+CREATE TABLE `isupport_cswiki_revision` (
+  `rev_id` int(8) unsigned NOT NULL auto_increment,
+  `rev_page` int(8) unsigned NOT NULL default '0',
+  `rev_text_id` int(8) unsigned NOT NULL default '0',
+  `rev_comment` tinyblob NOT NULL,
+  `rev_user` int(5) unsigned NOT NULL default '0',
+  `rev_user_text` varchar(255) binary NOT NULL default '',
+  `rev_timestamp` varchar(14) binary NOT NULL default '',
+  `rev_minor_edit` tinyint(1) unsigned NOT NULL default '0',
+  `rev_deleted` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`rev_page`,`rev_id`),
+  UNIQUE KEY `rev_id` (`rev_id`),
+  KEY `rev_timestamp` (`rev_timestamp`),
+  KEY `page_timestamp` (`rev_page`,`rev_timestamp`),
+  KEY `user_timestamp` (`rev_user`,`rev_timestamp`),
+  KEY `usertext_timestamp` (`rev_user_text`,`rev_timestamp`)
+) TYPE=MyISAM AUTO_INCREMENT=327 AUTO_INCREMENT=327 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_searchindex`
+-- 
+
+CREATE TABLE `isupport_cswiki_searchindex` (
+  `si_page` int(8) unsigned NOT NULL default '0',
+  `si_title` varchar(255) NOT NULL default '',
+  `si_text` mediumtext NOT NULL,
+  UNIQUE KEY `si_page` (`si_page`),
+  FULLTEXT KEY `si_title` (`si_title`),
+  FULLTEXT KEY `si_text` (`si_text`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_site_stats`
+-- 
+
+CREATE TABLE `isupport_cswiki_site_stats` (
+  `ss_row_id` int(8) unsigned NOT NULL default '0',
+  `ss_total_views` bigint(20) unsigned default '0',
+  `ss_total_edits` bigint(20) unsigned default '0',
+  `ss_good_articles` bigint(20) unsigned default '0',
+  `ss_total_pages` bigint(20) default '-1',
+  `ss_users` bigint(20) default '-1',
+  `ss_admins` int(10) default '-1',
+  `ss_images` int(10) default '0',
+  UNIQUE KEY `ss_row_id` (`ss_row_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_templatelinks`
+-- 
+
+CREATE TABLE `isupport_cswiki_templatelinks` (
+  `tl_from` int(8) unsigned NOT NULL default '0',
+  `tl_namespace` int(11) NOT NULL default '0',
+  `tl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `tl_from` (`tl_from`,`tl_namespace`,`tl_title`),
+  KEY `tl_namespace` (`tl_namespace`,`tl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_text`
+-- 
+
+CREATE TABLE `isupport_cswiki_text` (
+  `old_id` int(8) unsigned NOT NULL auto_increment,
+  `old_text` mediumblob NOT NULL,
+  `old_flags` tinyblob NOT NULL,
+  PRIMARY KEY  (`old_id`)
+) TYPE=MyISAM AUTO_INCREMENT=322 AUTO_INCREMENT=322 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_trackbacks`
+-- 
+
+CREATE TABLE `isupport_cswiki_trackbacks` (
+  `tb_id` int(11) NOT NULL auto_increment,
+  `tb_page` int(11) default NULL,
+  `tb_title` varchar(255) NOT NULL default '',
+  `tb_url` varchar(255) NOT NULL default '',
+  `tb_ex` text,
+  `tb_name` varchar(255) default NULL,
+  PRIMARY KEY  (`tb_id`),
+  KEY `tb_page` (`tb_page`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_transcache`
+-- 
+
+CREATE TABLE `isupport_cswiki_transcache` (
+  `tc_url` varchar(255) NOT NULL default '',
+  `tc_contents` text,
+  `tc_time` int(11) NOT NULL default '0',
+  UNIQUE KEY `tc_url_idx` (`tc_url`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_user`
+-- 
+
+CREATE TABLE `isupport_cswiki_user` (
+  `user_id` int(5) unsigned NOT NULL auto_increment,
+  `user_name` varchar(255) binary NOT NULL default '',
+  `user_real_name` varchar(255) binary NOT NULL default '',
+  `user_password` tinyblob NOT NULL,
+  `user_newpassword` tinyblob NOT NULL,
+  `user_email` tinytext NOT NULL,
+  `user_options` blob NOT NULL,
+  `user_touched` varchar(14) binary NOT NULL default '',
+  `user_token` varchar(32) binary NOT NULL default '',
+  `user_email_authenticated` varchar(14) binary default NULL,
+  `user_email_token` varchar(32) binary default NULL,
+  `user_email_token_expires` varchar(14) binary default NULL,
+  `user_registration` varchar(14) binary default NULL,
+  PRIMARY KEY  (`user_id`),
+  UNIQUE KEY `user_name` (`user_name`),
+  KEY `user_email_token` (`user_email_token`)
+) TYPE=MyISAM AUTO_INCREMENT=114 AUTO_INCREMENT=114 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_user_groups`
+-- 
+
+CREATE TABLE `isupport_cswiki_user_groups` (
+  `ug_user` int(5) unsigned NOT NULL default '0',
+  `ug_group` char(16) NOT NULL default '',
+  PRIMARY KEY  (`ug_user`,`ug_group`),
+  KEY `ug_group` (`ug_group`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_user_newtalk`
+-- 
+
+CREATE TABLE `isupport_cswiki_user_newtalk` (
+  `user_id` int(5) NOT NULL default '0',
+  `user_ip` varchar(40) NOT NULL default '',
+  KEY `user_id` (`user_id`),
+  KEY `user_ip` (`user_ip`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_validate`
+-- 
+
+CREATE TABLE `isupport_cswiki_validate` (
+  `val_user` int(11) NOT NULL default '0',
+  `val_page` int(11) unsigned NOT NULL default '0',
+  `val_revision` int(11) unsigned NOT NULL default '0',
+  `val_type` int(11) unsigned NOT NULL default '0',
+  `val_value` int(11) default '0',
+  `val_comment` varchar(255) NOT NULL default '',
+  `val_ip` varchar(20) NOT NULL default '',
+  KEY `val_user` (`val_user`,`val_revision`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_cswiki_watchlist`
+-- 
+
+CREATE TABLE `isupport_cswiki_watchlist` (
+  `wl_user` int(5) unsigned NOT NULL default '0',
+  `wl_namespace` int(11) NOT NULL default '0',
+  `wl_title` varchar(255) binary NOT NULL default '',
+  `wl_notificationtimestamp` varchar(14) binary default NULL,
+  UNIQUE KEY `wl_user` (`wl_user`,`wl_namespace`,`wl_title`),
+  KEY `namespace_title` (`wl_namespace`,`wl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_docmanager_configs`
+-- 
+
+CREATE TABLE `isupport_docmanager_configs` (
+  `configs_id` int(10) NOT NULL auto_increment,
+  `configs_path` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`configs_id`)
+) TYPE=MyISAM AUTO_INCREMENT=2 COMMENT='Configs Table' AUTO_INCREMENT=2 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_docmanager_files`
+-- 
+
+CREATE TABLE `isupport_docmanager_files` (
+  `files_id` int(10) NOT NULL auto_increment,
+  `files_name` varchar(255) NOT NULL default '',
+  `files_nameondisk` varchar(255) NOT NULL default '',
+  `files_type` varchar(10) NOT NULL default '',
+  `files_space` int(10) NOT NULL default '0',
+  `files_createddate` int(10) unsigned NOT NULL default '0',
+  `files_modificationdate` int(10) unsigned NOT NULL default '0',
+  `files_owner` mediumint(8) NOT NULL default '0',
+  `files_usermod` mediumint(8) NOT NULL default '0',
+  `files_foldersid` int(10) NOT NULL default '0',
+  `files_downcount` int(10) NOT NULL default '0',
+  `files_description` text,
+  PRIMARY KEY  (`files_id`),
+  KEY `files_downcount` (`files_downcount`),
+  KEY `files_id` (`files_name`,`files_foldersid`,`files_id`)
+) TYPE=MyISAM AUTO_INCREMENT=307 COMMENT='Files Table' AUTO_INCREMENT=307 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_docmanager_folders`
+-- 
+
+CREATE TABLE `isupport_docmanager_folders` (
+  `folders_id` int(10) NOT NULL auto_increment,
+  `folders_name` varchar(255) NOT NULL default '',
+  `folders_nameondisk` varchar(255) NOT NULL default '',
+  `folders_createddate` int(10) unsigned NOT NULL default '0',
+  `folders_modificationdate` int(10) unsigned NOT NULL default '0',
+  `folders_inheritrights` tinyint(1) NOT NULL default '0',
+  `folders_hidden` tinyint(1) NOT NULL default '0',
+  `folders_owner` mediumint(8) NOT NULL default '0',
+  `folders_usermod` mediumint(8) NOT NULL default '0',
+  `folders_parent_id` int(10) NOT NULL default '0',
+  PRIMARY KEY  (`folders_id`)
+) TYPE=MyISAM AUTO_INCREMENT=42 COMMENT='Folders Table' AUTO_INCREMENT=42 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_docmanager_rights`
+-- 
+
+CREATE TABLE `isupport_docmanager_rights` (
+  `rights_id` int(10) NOT NULL auto_increment,
+  `rights_code` varchar(10) NOT NULL default '',
+  `rights_name` varchar(255) NOT NULL default '',
+  `rights_applied_to_folders` tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (`rights_id`)
+) TYPE=MyISAM AUTO_INCREMENT=8 COMMENT='Rights Table' AUTO_INCREMENT=8 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_group_permission`
+-- 
+
+CREATE TABLE `isupport_group_permission` (
+  `gperm_id` int(10) unsigned NOT NULL auto_increment,
+  `gperm_groupid` smallint(5) unsigned NOT NULL default '0',
+  `gperm_itemid` mediumint(8) unsigned NOT NULL default '0',
+  `gperm_modid` mediumint(5) unsigned NOT NULL default '0',
+  `gperm_name` varchar(50) NOT NULL default '',
+  PRIMARY KEY  (`gperm_id`),
+  KEY `groupid` (`gperm_groupid`),
+  KEY `itemid` (`gperm_itemid`),
+  KEY `gperm_modid` (`gperm_modid`,`gperm_name`(10))
+) TYPE=MyISAM AUTO_INCREMENT=43800 AUTO_INCREMENT=43800 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_groups`
+-- 
+
+CREATE TABLE `isupport_groups` (
+  `groupid` smallint(5) unsigned NOT NULL auto_increment,
+  `name` varchar(50) NOT NULL default '',
+  `description` text NOT NULL,
+  `group_type` varchar(10) NOT NULL default '',
+  PRIMARY KEY  (`groupid`),
+  KEY `group_type` (`group_type`)
+) TYPE=MyISAM AUTO_INCREMENT=50 AUTO_INCREMENT=50 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_groups_users_link`
+-- 
+
+CREATE TABLE `isupport_groups_users_link` (
+  `linkid` mediumint(8) unsigned NOT NULL auto_increment,
+  `groupid` smallint(5) unsigned NOT NULL default '0',
+  `uid` mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`linkid`),
+  KEY `groupid_uid` (`groupid`,`uid`)
+) TYPE=MyISAM AUTO_INCREMENT=2792 AUTO_INCREMENT=2792 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_image`
+-- 
+
+CREATE TABLE `isupport_image` (
+  `image_id` mediumint(8) unsigned NOT NULL auto_increment,
+  `image_name` varchar(30) NOT NULL default '',
+  `image_nicename` varchar(255) NOT NULL default '',
+  `image_mimetype` varchar(30) NOT NULL default '',
+  `image_created` int(10) unsigned NOT NULL default '0',
+  `image_display` tinyint(1) unsigned NOT NULL default '0',
+  `image_weight` smallint(5) unsigned NOT NULL default '0',
+  `imgcat_id` smallint(5) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`image_id`),
+  KEY `imgcat_id` (`imgcat_id`),
+  KEY `image_display` (`image_display`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_imagebody`
+-- 
+
+CREATE TABLE `isupport_imagebody` (
+  `image_id` mediumint(8) unsigned NOT NULL default '0',
+  `image_body` mediumblob,
+  KEY `image_id` (`image_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_imagecategory`
+-- 
+
+CREATE TABLE `isupport_imagecategory` (
+  `imgcat_id` smallint(5) unsigned NOT NULL auto_increment,
+  `imgcat_name` varchar(100) NOT NULL default '',
+  `imgcat_maxsize` int(8) unsigned NOT NULL default '0',
+  `imgcat_maxwidth` smallint(3) unsigned NOT NULL default '0',
+  `imgcat_maxheight` smallint(3) unsigned NOT NULL default '0',
+  `imgcat_display` tinyint(1) unsigned NOT NULL default '0',
+  `imgcat_weight` smallint(3) unsigned NOT NULL default '0',
+  `imgcat_type` char(1) NOT NULL default '',
+  `imgcat_storetype` varchar(5) NOT NULL default '',
+  PRIMARY KEY  (`imgcat_id`),
+  KEY `imgcat_display` (`imgcat_display`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_imgset`
+-- 
+
+CREATE TABLE `isupport_imgset` (
+  `imgset_id` smallint(5) unsigned NOT NULL auto_increment,
+  `imgset_name` varchar(50) NOT NULL default '',
+  `imgset_refid` mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`imgset_id`),
+  KEY `imgset_refid` (`imgset_refid`)
+) TYPE=MyISAM AUTO_INCREMENT=2 AUTO_INCREMENT=2 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_imgset_tplset_link`
+-- 
+
+CREATE TABLE `isupport_imgset_tplset_link` (
+  `imgset_id` smallint(5) unsigned NOT NULL default '0',
+  `tplset_name` varchar(50) NOT NULL default '',
+  KEY `tplset_name` (`tplset_name`(10))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_imgsetimg`
+-- 
+
+CREATE TABLE `isupport_imgsetimg` (
+  `imgsetimg_id` mediumint(8) unsigned NOT NULL auto_increment,
+  `imgsetimg_file` varchar(50) NOT NULL default '',
+  `imgsetimg_body` blob NOT NULL,
+  `imgsetimg_imgset` smallint(5) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`imgsetimg_id`),
+  KEY `imgsetimg_imgset` (`imgsetimg_imgset`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_liaise_formelements`
+-- 
+
+CREATE TABLE `isupport_liaise_formelements` (
+  `ele_id` smallint(5) unsigned NOT NULL auto_increment,
+  `form_id` smallint(5) NOT NULL default '0',
+  `ele_type` varchar(10) NOT NULL default '',
+  `ele_caption` varchar(255) NOT NULL default '',
+  `ele_order` smallint(2) NOT NULL default '0',
+  `ele_req` tinyint(1) NOT NULL default '1',
+  `ele_value` text NOT NULL,
+  `ele_display` tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  (`ele_id`),
+  KEY `ele_display` (`ele_display`),
+  KEY `ele_order` (`ele_order`)
+) TYPE=MyISAM AUTO_INCREMENT=73 AUTO_INCREMENT=73 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_liaise_forms`
+-- 
+
+CREATE TABLE `isupport_liaise_forms` (
+  `form_id` smallint(5) NOT NULL auto_increment,
+  `form_send_method` char(1) NOT NULL default 'e',
+  `form_send_to_group` smallint(3) NOT NULL default '0',
+  `form_order` smallint(3) NOT NULL default '0',
+  `form_delimiter` char(1) NOT NULL default 's',
+  `form_title` varchar(255) NOT NULL default '',
+  `form_submit_text` varchar(50) NOT NULL default '',
+  `form_desc` text NOT NULL,
+  `form_intro` text NOT NULL,
+  `form_whereto` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`form_id`),
+  KEY `form_order` (`form_order`)
+) TYPE=MyISAM AUTO_INCREMENT=10 AUTO_INCREMENT=10 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_archive`
+-- 
+
+CREATE TABLE `isupport_mediawiki_archive` (
+  `ar_namespace` int(11) NOT NULL default '0',
+  `ar_title` varchar(255) binary NOT NULL default '',
+  `ar_text` mediumblob NOT NULL,
+  `ar_comment` tinyblob NOT NULL,
+  `ar_user` int(5) unsigned NOT NULL default '0',
+  `ar_user_text` varchar(255) binary NOT NULL default '',
+  `ar_timestamp` varchar(14) binary NOT NULL default '',
+  `ar_minor_edit` tinyint(1) NOT NULL default '0',
+  `ar_flags` tinyblob NOT NULL,
+  `ar_rev_id` int(8) unsigned default NULL,
+  `ar_text_id` int(8) unsigned default NULL,
+  KEY `name_title_timestamp` (`ar_namespace`,`ar_title`,`ar_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_categorylinks`
+-- 
+
+CREATE TABLE `isupport_mediawiki_categorylinks` (
+  `cl_from` int(8) unsigned NOT NULL default '0',
+  `cl_to` varchar(255) binary NOT NULL default '',
+  `cl_sortkey` varchar(86) binary NOT NULL default '',
+  `cl_timestamp` timestamp NOT NULL,
+  UNIQUE KEY `cl_from` (`cl_from`,`cl_to`),
+  KEY `cl_sortkey` (`cl_to`,`cl_sortkey`),
+  KEY `cl_timestamp` (`cl_to`,`cl_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_externallinks`
+-- 
+
+CREATE TABLE `isupport_mediawiki_externallinks` (
+  `el_from` int(8) unsigned NOT NULL default '0',
+  `el_to` blob NOT NULL,
+  `el_index` blob NOT NULL,
+  KEY `el_from` (`el_from`,`el_to`(40)),
+  KEY `el_to` (`el_to`(60),`el_from`),
+  KEY `el_index` (`el_index`(60))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_hitcounter`
+-- 
+
+CREATE TABLE `isupport_mediawiki_hitcounter` (
+  `hc_id` int(10) unsigned NOT NULL default '0'
+) TYPE=HEAP MAX_ROWS=25000;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_image`
+-- 
+
+CREATE TABLE `isupport_mediawiki_image` (
+  `img_name` varchar(255) binary NOT NULL default '',
+  `img_size` int(8) unsigned NOT NULL default '0',
+  `img_width` int(5) NOT NULL default '0',
+  `img_height` int(5) NOT NULL default '0',
+  `img_metadata` mediumblob NOT NULL,
+  `img_bits` int(3) NOT NULL default '0',
+  `img_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE') default NULL,
+  `img_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart') NOT NULL default 'unknown',
+  `img_minor_mime` varchar(32) NOT NULL default 'unknown',
+  `img_description` tinyblob NOT NULL,
+  `img_user` int(5) unsigned NOT NULL default '0',
+  `img_user_text` varchar(255) binary NOT NULL default '',
+  `img_timestamp` varchar(14) binary NOT NULL default '',
+  PRIMARY KEY  (`img_name`),
+  KEY `img_size` (`img_size`),
+  KEY `img_timestamp` (`img_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_imagelinks`
+-- 
+
+CREATE TABLE `isupport_mediawiki_imagelinks` (
+  `il_from` int(8) unsigned NOT NULL default '0',
+  `il_to` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `il_from` (`il_from`,`il_to`),
+  KEY `il_to` (`il_to`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_interwiki`
+-- 
+
+CREATE TABLE `isupport_mediawiki_interwiki` (
+  `iw_prefix` char(32) NOT NULL default '',
+  `iw_url` char(127) NOT NULL default '',
+  `iw_local` tinyint(1) NOT NULL default '0',
+  `iw_trans` tinyint(1) NOT NULL default '0',
+  UNIQUE KEY `iw_prefix` (`iw_prefix`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_ipblocks`
+-- 
+
+CREATE TABLE `isupport_mediawiki_ipblocks` (
+  `ipb_id` int(8) NOT NULL auto_increment,
+  `ipb_address` varchar(40) binary NOT NULL default '',
+  `ipb_user` int(8) unsigned NOT NULL default '0',
+  `ipb_by` int(8) unsigned NOT NULL default '0',
+  `ipb_reason` tinyblob NOT NULL,
+  `ipb_timestamp` varchar(14) binary NOT NULL default '',
+  `ipb_auto` tinyint(1) NOT NULL default '0',
+  `ipb_expiry` varchar(14) binary NOT NULL default '',
+  `ipb_range_start` varchar(32) NOT NULL default '',
+  `ipb_range_end` varchar(32) NOT NULL default '',
+  PRIMARY KEY  (`ipb_id`),
+  KEY `ipb_address` (`ipb_address`),
+  KEY `ipb_user` (`ipb_user`),
+  KEY `ipb_range` (`ipb_range_start`(8),`ipb_range_end`(8))
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_job`
+-- 
+
+CREATE TABLE `isupport_mediawiki_job` (
+  `job_id` int(9) unsigned NOT NULL auto_increment,
+  `job_cmd` varchar(255) NOT NULL default '',
+  `job_namespace` int(11) NOT NULL default '0',
+  `job_title` varchar(255) binary NOT NULL default '',
+  `job_params` blob NOT NULL,
+  PRIMARY KEY  (`job_id`),
+  KEY `job_cmd` (`job_cmd`,`job_namespace`,`job_title`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_logging`
+-- 
+
+CREATE TABLE `isupport_mediawiki_logging` (
+  `log_type` varchar(10) NOT NULL default '',
+  `log_action` varchar(10) NOT NULL default '',
+  `log_timestamp` varchar(14) NOT NULL default '19700101000000',
+  `log_user` int(10) unsigned NOT NULL default '0',
+  `log_namespace` int(11) NOT NULL default '0',
+  `log_title` varchar(255) binary NOT NULL default '',
+  `log_comment` varchar(255) NOT NULL default '',
+  `log_params` blob NOT NULL,
+  KEY `type_time` (`log_type`,`log_timestamp`),
+  KEY `user_time` (`log_user`,`log_timestamp`),
+  KEY `page_time` (`log_namespace`,`log_title`,`log_timestamp`),
+  KEY `times` (`log_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_math`
+-- 
+
+CREATE TABLE `isupport_mediawiki_math` (
+  `math_inputhash` varchar(16) NOT NULL default '',
+  `math_outputhash` varchar(16) NOT NULL default '',
+  `math_html_conservativeness` tinyint(1) NOT NULL default '0',
+  `math_html` text,
+  `math_mathml` text,
+  UNIQUE KEY `math_inputhash` (`math_inputhash`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_objectcache`
+-- 
+
+CREATE TABLE `isupport_mediawiki_objectcache` (
+  `keyname` varchar(255) binary NOT NULL default '',
+  `value` mediumblob,
+  `exptime` datetime default NULL,
+  UNIQUE KEY `keyname` (`keyname`),
+  KEY `exptime` (`exptime`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_oldimage`
+-- 
+
+CREATE TABLE `isupport_mediawiki_oldimage` (
+  `oi_name` varchar(255) binary NOT NULL default '',
+  `oi_archive_name` varchar(255) binary NOT NULL default '',
+  `oi_size` int(8) unsigned NOT NULL default '0',
+  `oi_width` int(5) NOT NULL default '0',
+  `oi_height` int(5) NOT NULL default '0',
+  `oi_bits` int(3) NOT NULL default '0',
+  `oi_description` tinyblob NOT NULL,
+  `oi_user` int(5) unsigned NOT NULL default '0',
+  `oi_user_text` varchar(255) binary NOT NULL default '',
+  `oi_timestamp` varchar(14) binary NOT NULL default '',
+  KEY `oi_name` (`oi_name`(10))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_page`
+-- 
+
+CREATE TABLE `isupport_mediawiki_page` (
+  `page_id` int(8) unsigned NOT NULL auto_increment,
+  `page_namespace` int(11) NOT NULL default '0',
+  `page_title` varchar(255) binary NOT NULL default '',
+  `page_restrictions` tinyblob NOT NULL,
+  `page_counter` bigint(20) unsigned NOT NULL default '0',
+  `page_is_redirect` tinyint(1) unsigned NOT NULL default '0',
+  `page_is_new` tinyint(1) unsigned NOT NULL default '0',
+  `page_random` double unsigned NOT NULL default '0',
+  `page_touched` varchar(14) binary NOT NULL default '',
+  `page_latest` int(8) unsigned NOT NULL default '0',
+  `page_len` int(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`page_id`),
+  UNIQUE KEY `name_title` (`page_namespace`,`page_title`),
+  KEY `page_random` (`page_random`),
+  KEY `page_len` (`page_len`),
+  KEY `page_id` (`page_id`,`page_namespace`,`page_title`,`page_touched`)
+) TYPE=MyISAM AUTO_INCREMENT=4734 AUTO_INCREMENT=4734 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_pagelinks`
+-- 
+
+CREATE TABLE `isupport_mediawiki_pagelinks` (
+  `pl_from` int(8) unsigned NOT NULL default '0',
+  `pl_namespace` int(11) NOT NULL default '0',
+  `pl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `pl_from` (`pl_from`,`pl_namespace`,`pl_title`),
+  KEY `pl_namespace` (`pl_namespace`,`pl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_querycache`
+-- 
+
+CREATE TABLE `isupport_mediawiki_querycache` (
+  `qc_type` char(32) NOT NULL default '',
+  `qc_value` int(5) unsigned NOT NULL default '0',
+  `qc_namespace` int(11) NOT NULL default '0',
+  `qc_title` char(255) binary NOT NULL default '',
+  KEY `qc_type` (`qc_type`,`qc_value`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_recentchanges`
+-- 
+
+CREATE TABLE `isupport_mediawiki_recentchanges` (
+  `rc_id` int(8) NOT NULL auto_increment,
+  `rc_timestamp` varchar(14) binary NOT NULL default '',
+  `rc_cur_time` varchar(14) binary NOT NULL default '',
+  `rc_user` int(10) unsigned NOT NULL default '0',
+  `rc_user_text` varchar(255) binary NOT NULL default '',
+  `rc_namespace` int(11) NOT NULL default '0',
+  `rc_title` varchar(255) binary NOT NULL default '',
+  `rc_comment` varchar(255) binary NOT NULL default '',
+  `rc_minor` tinyint(3) unsigned NOT NULL default '0',
+  `rc_bot` tinyint(3) unsigned NOT NULL default '0',
+  `rc_new` tinyint(3) unsigned NOT NULL default '0',
+  `rc_cur_id` int(10) unsigned NOT NULL default '0',
+  `rc_this_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_last_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_type` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_ns` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_title` varchar(255) binary NOT NULL default '',
+  `rc_patrolled` tinyint(3) unsigned NOT NULL default '0',
+  `rc_ip` varchar(15) NOT NULL default '',
+  PRIMARY KEY  (`rc_id`),
+  KEY `rc_timestamp` (`rc_timestamp`),
+  KEY `rc_namespace_title` (`rc_namespace`,`rc_title`),
+  KEY `rc_cur_id` (`rc_cur_id`),
+  KEY `new_name_timestamp` (`rc_new`,`rc_namespace`,`rc_timestamp`),
+  KEY `rc_ip` (`rc_ip`)
+) TYPE=MyISAM AUTO_INCREMENT=3736 AUTO_INCREMENT=3736 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_revision`
+-- 
+
+CREATE TABLE `isupport_mediawiki_revision` (
+  `rev_id` int(8) unsigned NOT NULL auto_increment,
+  `rev_page` int(8) unsigned NOT NULL default '0',
+  `rev_text_id` int(8) unsigned NOT NULL default '0',
+  `rev_comment` tinyblob NOT NULL,
+  `rev_user` int(5) unsigned NOT NULL default '0',
+  `rev_user_text` varchar(255) binary NOT NULL default '',
+  `rev_timestamp` varchar(14) binary NOT NULL default '',
+  `rev_minor_edit` tinyint(1) unsigned NOT NULL default '0',
+  `rev_deleted` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`rev_page`,`rev_id`),
+  UNIQUE KEY `rev_id` (`rev_id`),
+  KEY `rev_timestamp` (`rev_timestamp`),
+  KEY `page_timestamp` (`rev_page`,`rev_timestamp`),
+  KEY `user_timestamp` (`rev_user`,`rev_timestamp`),
+  KEY `usertext_timestamp` (`rev_user_text`,`rev_timestamp`)
+) TYPE=MyISAM AUTO_INCREMENT=5798 AUTO_INCREMENT=5798 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_searchindex`
+-- 
+
+CREATE TABLE `isupport_mediawiki_searchindex` (
+  `si_page` int(8) unsigned NOT NULL default '0',
+  `si_title` varchar(255) NOT NULL default '',
+  `si_text` mediumtext NOT NULL,
+  UNIQUE KEY `si_page` (`si_page`),
+  FULLTEXT KEY `si_title` (`si_title`),
+  FULLTEXT KEY `si_text` (`si_text`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_site_stats`
+-- 
+
+CREATE TABLE `isupport_mediawiki_site_stats` (
+  `ss_row_id` int(8) unsigned NOT NULL default '0',
+  `ss_total_views` bigint(20) unsigned default '0',
+  `ss_total_edits` bigint(20) unsigned default '0',
+  `ss_good_articles` bigint(20) unsigned default '0',
+  `ss_total_pages` bigint(20) default '-1',
+  `ss_users` bigint(20) default '-1',
+  `ss_admins` int(10) default '-1',
+  `ss_images` int(10) default '0',
+  UNIQUE KEY `ss_row_id` (`ss_row_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_templatelinks`
+-- 
+
+CREATE TABLE `isupport_mediawiki_templatelinks` (
+  `tl_from` int(8) unsigned NOT NULL default '0',
+  `tl_namespace` int(11) NOT NULL default '0',
+  `tl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `tl_from` (`tl_from`,`tl_namespace`,`tl_title`),
+  KEY `tl_namespace` (`tl_namespace`,`tl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_text`
+-- 
+
+CREATE TABLE `isupport_mediawiki_text` (
+  `old_id` int(8) unsigned NOT NULL auto_increment,
+  `old_text` mediumblob NOT NULL,
+  `old_flags` tinyblob NOT NULL,
+  PRIMARY KEY  (`old_id`)
+) TYPE=MyISAM AUTO_INCREMENT=5744 AUTO_INCREMENT=5744 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_trackbacks`
+-- 
+
+CREATE TABLE `isupport_mediawiki_trackbacks` (
+  `tb_id` int(11) NOT NULL auto_increment,
+  `tb_page` int(11) default NULL,
+  `tb_title` varchar(255) NOT NULL default '',
+  `tb_url` varchar(255) NOT NULL default '',
+  `tb_ex` text,
+  `tb_name` varchar(255) default NULL,
+  PRIMARY KEY  (`tb_id`),
+  KEY `tb_page` (`tb_page`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_transcache`
+-- 
+
+CREATE TABLE `isupport_mediawiki_transcache` (
+  `tc_url` varchar(255) NOT NULL default '',
+  `tc_contents` text,
+  `tc_time` int(11) NOT NULL default '0',
+  UNIQUE KEY `tc_url_idx` (`tc_url`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_user`
+-- 
+
+CREATE TABLE `isupport_mediawiki_user` (
+  `user_id` int(5) unsigned NOT NULL auto_increment,
+  `user_name` varchar(255) binary NOT NULL default '',
+  `user_real_name` varchar(255) binary NOT NULL default '',
+  `user_password` tinyblob NOT NULL,
+  `user_newpassword` tinyblob NOT NULL,
+  `user_email` tinytext NOT NULL,
+  `user_options` blob NOT NULL,
+  `user_touched` varchar(14) binary NOT NULL default '',
+  `user_token` varchar(32) binary NOT NULL default '',
+  `user_email_authenticated` varchar(14) binary default NULL,
+  `user_email_token` varchar(32) binary default NULL,
+  `user_email_token_expires` varchar(14) binary default NULL,
+  `user_registration` varchar(14) binary default NULL,
+  PRIMARY KEY  (`user_id`),
+  UNIQUE KEY `user_name` (`user_name`),
+  KEY `user_email_token` (`user_email_token`)
+) TYPE=MyISAM AUTO_INCREMENT=114 AUTO_INCREMENT=114 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_user_groups`
+-- 
+
+CREATE TABLE `isupport_mediawiki_user_groups` (
+  `ug_user` int(5) unsigned NOT NULL default '0',
+  `ug_group` char(16) NOT NULL default '',
+  PRIMARY KEY  (`ug_user`,`ug_group`),
+  KEY `ug_group` (`ug_group`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_user_newtalk`
+-- 
+
+CREATE TABLE `isupport_mediawiki_user_newtalk` (
+  `user_id` int(5) NOT NULL default '0',
+  `user_ip` varchar(40) NOT NULL default '',
+  KEY `user_id` (`user_id`),
+  KEY `user_ip` (`user_ip`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_validate`
+-- 
+
+CREATE TABLE `isupport_mediawiki_validate` (
+  `val_user` int(11) NOT NULL default '0',
+  `val_page` int(11) unsigned NOT NULL default '0',
+  `val_revision` int(11) unsigned NOT NULL default '0',
+  `val_type` int(11) unsigned NOT NULL default '0',
+  `val_value` int(11) default '0',
+  `val_comment` varchar(255) NOT NULL default '',
+  `val_ip` varchar(20) NOT NULL default '',
+  KEY `val_user` (`val_user`,`val_revision`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_mediawiki_watchlist`
+-- 
+
+CREATE TABLE `isupport_mediawiki_watchlist` (
+  `wl_user` int(5) unsigned NOT NULL default '0',
+  `wl_namespace` int(11) NOT NULL default '0',
+  `wl_title` varchar(255) binary NOT NULL default '',
+  `wl_notificationtimestamp` varchar(14) binary default NULL,
+  UNIQUE KEY `wl_user` (`wl_user`,`wl_namespace`,`wl_title`),
+  KEY `namespace_title` (`wl_namespace`,`wl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_modules`
+-- 
+
+CREATE TABLE `isupport_modules` (
+  `mid` smallint(5) unsigned NOT NULL auto_increment,
+  `name` varchar(150) NOT NULL default '',
+  `version` smallint(5) unsigned NOT NULL default '100',
+  `last_update` int(10) unsigned NOT NULL default '0',
+  `weight` smallint(3) unsigned NOT NULL default '0',
+  `isactive` tinyint(1) unsigned NOT NULL default '0',
+  `dirname` varchar(25) NOT NULL default '',
+  `hasmain` tinyint(1) unsigned NOT NULL default '0',
+  `hasadmin` tinyint(1) unsigned NOT NULL default '0',
+  `hassearch` tinyint(1) unsigned NOT NULL default '0',
+  `hasconfig` tinyint(1) unsigned NOT NULL default '0',
+  `hascomments` tinyint(1) unsigned NOT NULL default '0',
+  `hasnotification` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`mid`),
+  KEY `hasmain` (`hasmain`),
+  KEY `hasadmin` (`hasadmin`),
+  KEY `hassearch` (`hassearch`),
+  KEY `hasnotification` (`hasnotification`),
+  KEY `dirname` (`dirname`),
+  KEY `name` (`name`(15))
+) TYPE=MyISAM AUTO_INCREMENT=79 AUTO_INCREMENT=79 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_narf_index`
+-- 
+
+CREATE TABLE `isupport_narf_index` (
+  `Word` varchar(255) NOT NULL default '',
+  `soundex` varchar(4) NOT NULL default '',
+  `metaphone` varchar(255) NOT NULL default '',
+  `count` mediumint(8) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`Word`),
+  KEY `soundex_2` (`soundex`,`metaphone`),
+  KEY `count` (`count`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_narf_pagerank`
+-- 
+
+CREATE TABLE `isupport_narf_pagerank` (
+  `word` varchar(255) NOT NULL default '',
+  `url` varchar(255) NOT NULL default '',
+  `count` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`word`,`url`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_narf_typos`
+-- 
+
+CREATE TABLE `isupport_narf_typos` (
+  `Word` varchar(255) NOT NULL default '',
+  `Replacement` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`Word`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_newblocks`
+-- 
+
+CREATE TABLE `isupport_newblocks` (
+  `bid` mediumint(8) unsigned NOT NULL auto_increment,
+  `mid` smallint(5) unsigned NOT NULL default '0',
+  `func_num` tinyint(3) unsigned NOT NULL default '0',
+  `options` varchar(255) NOT NULL default '',
+  `name` varchar(150) NOT NULL default '',
+  `title` varchar(255) NOT NULL default '',
+  `content` text NOT NULL,
+  `side` tinyint(1) unsigned NOT NULL default '0',
+  `weight` smallint(5) unsigned NOT NULL default '0',
+  `visible` tinyint(1) unsigned NOT NULL default '0',
+  `block_type` char(1) NOT NULL default '',
+  `c_type` char(1) NOT NULL default '',
+  `isactive` tinyint(1) unsigned NOT NULL default '0',
+  `dirname` varchar(50) NOT NULL default '',
+  `func_file` varchar(50) NOT NULL default '',
+  `show_func` varchar(50) NOT NULL default '',
+  `edit_func` varchar(50) NOT NULL default '',
+  `template` varchar(50) NOT NULL default '',
+  `bcachetime` int(10) unsigned NOT NULL default '0',
+  `last_modified` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`bid`),
+  KEY `mid` (`mid`),
+  KEY `visible` (`visible`),
+  KEY `isactive_visible_mid` (`isactive`,`visible`,`mid`),
+  KEY `mid_funcnum` (`mid`,`func_num`)
+) TYPE=MyISAM AUTO_INCREMENT=137 AUTO_INCREMENT=137 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_online`
+-- 
+
+CREATE TABLE `isupport_online` (
+  `online_uid` mediumint(8) unsigned NOT NULL default '0',
+  `online_uname` varchar(25) NOT NULL default '',
+  `online_updated` int(10) unsigned NOT NULL default '0',
+  `online_module` smallint(5) unsigned NOT NULL default '0',
+  `online_ip` varchar(15) NOT NULL default '',
+  KEY `online_module` (`online_module`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_pical2_cat`
+-- 
+
+CREATE TABLE `isupport_pical2_cat` (
+  `cid` smallint(5) unsigned zerofill NOT NULL auto_increment,
+  `pid` smallint(5) unsigned zerofill NOT NULL default '00000',
+  `weight` smallint(5) NOT NULL default '0',
+  `exportable` tinyint(4) NOT NULL default '1',
+  `autocreated` tinyint(4) NOT NULL default '0',
+  `ismenuitem` tinyint(4) NOT NULL default '0',
+  `enabled` tinyint(4) NOT NULL default '1',
+  `cat_title` varchar(255) NOT NULL default '',
+  `cat_desc` text NOT NULL,
+  `dtstamp` timestamp NOT NULL,
+  `cat_extkey0` int(10) unsigned zerofill NOT NULL default '0000000000',
+  `cat_depth` tinyint(3) unsigned NOT NULL default '0',
+  `cat_style` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`cid`),
+  KEY `pid` (`pid`),
+  KEY `weight` (`weight`),
+  KEY `cat_depth` (`cat_depth`)
+) TYPE=MyISAM AUTO_INCREMENT=3 AUTO_INCREMENT=3 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_pical2_event`
+-- 
+
+CREATE TABLE `isupport_pical2_event` (
+  `id` int(10) unsigned zerofill NOT NULL auto_increment,
+  `uid` mediumint(8) unsigned zerofill NOT NULL default '00000000',
+  `groupid` smallint(5) unsigned zerofill NOT NULL default '00000',
+  `summary` varchar(255) NOT NULL default '',
+  `location` varchar(255) NOT NULL default '',
+  `organizer` varchar(255) NOT NULL default '',
+  `sequence` varchar(255) NOT NULL default '',
+  `contact` varchar(255) NOT NULL default '',
+  `tzid` varchar(255) NOT NULL default 'GMT',
+  `description` text NOT NULL,
+  `dtstamp` timestamp NOT NULL,
+  `categories` varchar(255) NOT NULL default '',
+  `transp` tinyint(4) NOT NULL default '1',
+  `priority` tinyint(4) NOT NULL default '0',
+  `admission` tinyint(4) NOT NULL default '0',
+  `class` varchar(255) NOT NULL default 'PUBLIC',
+  `rrule` varchar(255) NOT NULL default '',
+  `rrule_pid` int(8) unsigned zerofill NOT NULL default '00000000',
+  `unique_id` varchar(255) NOT NULL default '',
+  `allday` tinyint(4) NOT NULL default '0',
+  `start` int(10) unsigned NOT NULL default '0',
+  `end` int(10) unsigned NOT NULL default '0',
+  `start_date` date default NULL,
+  `end_date` date default NULL,
+  `cid` smallint(5) unsigned zerofill NOT NULL default '00000',
+  `comments` mediumint(8) unsigned NOT NULL default '0',
+  `event_tz` float(2,1) NOT NULL default '0.0',
+  `server_tz` float(2,1) NOT NULL default '0.0',
+  `poster_tz` float(2,1) NOT NULL default '0.0',
+  `extkey0` int(10) unsigned zerofill NOT NULL default '0000000000',
+  `extkey1` int(10) unsigned zerofill NOT NULL default '0000000000',
+  PRIMARY KEY  (`id`),
+  KEY `admission` (`admission`),
+  KEY `allday` (`allday`),
+  KEY `start` (`start`),
+  KEY `end` (`end`),
+  KEY `start_date` (`start_date`),
+  KEY `end_date` (`end_date`),
+  KEY `dtstamp` (`dtstamp`),
+  KEY `unique_id` (`unique_id`),
+  KEY `cid` (`cid`),
+  KEY `event_tz` (`event_tz`),
+  KEY `server_tz` (`server_tz`),
+  KEY `poster_tz` (`poster_tz`),
+  KEY `uid` (`uid`),
+  KEY `groupid` (`groupid`),
+  KEY `class` (`class`),
+  KEY `rrule_pid` (`rrule_pid`),
+  KEY `categories` (`categories`)
+) TYPE=MyISAM AUTO_INCREMENT=475 AUTO_INCREMENT=475 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_pical2_plugins`
+-- 
+
+CREATE TABLE `isupport_pical2_plugins` (
+  `pi_id` smallint(5) unsigned zerofill NOT NULL auto_increment,
+  `pi_title` varchar(255) NOT NULL default '',
+  `pi_type` varchar(8) NOT NULL default '',
+  `pi_dirname` varchar(50) NOT NULL default '',
+  `pi_file` varchar(50) NOT NULL default '',
+  `pi_dotgif` varchar(255) NOT NULL default '',
+  `pi_options` varchar(255) NOT NULL default '',
+  `pi_enabled` tinyint(4) NOT NULL default '0',
+  `pi_weight` smallint(5) unsigned NOT NULL default '0',
+  `last_modified` timestamp NOT NULL,
+  PRIMARY KEY  (`pi_id`),
+  KEY `pi_weight` (`pi_weight`),
+  KEY `pi_type` (`pi_type`),
+  KEY `pi_dirname` (`pi_dirname`),
+  KEY `pi_file` (`pi_file`),
+  KEY `pi_options` (`pi_options`),
+  KEY `pi_enabled` (`pi_enabled`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_pical_cat`
+-- 
+
+CREATE TABLE `isupport_pical_cat` (
+  `cid` smallint(5) unsigned zerofill NOT NULL auto_increment,
+  `pid` smallint(5) unsigned zerofill NOT NULL default '00000',
+  `weight` smallint(5) NOT NULL default '0',
+  `exportable` tinyint(4) NOT NULL default '1',
+  `autocreated` tinyint(4) NOT NULL default '0',
+  `ismenuitem` tinyint(4) NOT NULL default '0',
+  `enabled` tinyint(4) NOT NULL default '1',
+  `cat_title` varchar(255) NOT NULL default '',
+  `cat_desc` text NOT NULL,
+  `dtstamp` timestamp NOT NULL,
+  `cat_extkey0` int(10) unsigned zerofill NOT NULL default '0000000000',
+  `cat_depth` tinyint(3) unsigned NOT NULL default '0',
+  `cat_style` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`cid`),
+  KEY `pid` (`pid`),
+  KEY `weight` (`weight`),
+  KEY `cat_depth` (`cat_depth`)
+) TYPE=MyISAM AUTO_INCREMENT=7 AUTO_INCREMENT=7 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_pical_event`
+-- 
+
+CREATE TABLE `isupport_pical_event` (
+  `id` int(10) unsigned zerofill NOT NULL auto_increment,
+  `uid` mediumint(8) unsigned zerofill NOT NULL default '00000000',
+  `groupid` smallint(5) unsigned zerofill NOT NULL default '00000',
+  `summary` varchar(255) NOT NULL default '',
+  `location` varchar(255) NOT NULL default '',
+  `organizer` varchar(255) NOT NULL default '',
+  `sequence` varchar(255) NOT NULL default '',
+  `contact` varchar(255) NOT NULL default '',
+  `tzid` varchar(255) NOT NULL default 'GMT',
+  `description` text NOT NULL,
+  `dtstamp` timestamp NOT NULL,
+  `categories` varchar(255) NOT NULL default '',
+  `transp` tinyint(4) NOT NULL default '1',
+  `priority` tinyint(4) NOT NULL default '0',
+  `admission` tinyint(4) NOT NULL default '0',
+  `class` varchar(255) NOT NULL default 'PUBLIC',
+  `rrule` varchar(255) NOT NULL default '',
+  `rrule_pid` int(8) unsigned zerofill NOT NULL default '00000000',
+  `unique_id` varchar(255) NOT NULL default '',
+  `allday` tinyint(4) NOT NULL default '0',
+  `start` int(10) unsigned NOT NULL default '0',
+  `end` int(10) unsigned NOT NULL default '0',
+  `start_date` date default NULL,
+  `end_date` date default NULL,
+  `cid` smallint(5) unsigned zerofill NOT NULL default '00000',
+  `comments` mediumint(8) unsigned NOT NULL default '0',
+  `event_tz` float(2,1) NOT NULL default '0.0',
+  `server_tz` float(2,1) NOT NULL default '0.0',
+  `poster_tz` float(2,1) NOT NULL default '0.0',
+  `extkey0` int(10) unsigned zerofill NOT NULL default '0000000000',
+  `extkey1` int(10) unsigned zerofill NOT NULL default '0000000000',
+  PRIMARY KEY  (`id`),
+  KEY `admission` (`admission`),
+  KEY `allday` (`allday`),
+  KEY `start` (`start`),
+  KEY `end` (`end`),
+  KEY `start_date` (`start_date`),
+  KEY `end_date` (`end_date`),
+  KEY `dtstamp` (`dtstamp`),
+  KEY `unique_id` (`unique_id`),
+  KEY `cid` (`cid`),
+  KEY `event_tz` (`event_tz`),
+  KEY `server_tz` (`server_tz`),
+  KEY `poster_tz` (`poster_tz`),
+  KEY `uid` (`uid`),
+  KEY `groupid` (`groupid`),
+  KEY `class` (`class`),
+  KEY `rrule_pid` (`rrule_pid`),
+  KEY `categories` (`categories`)
+) TYPE=MyISAM AUTO_INCREMENT=4037 AUTO_INCREMENT=4037 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_pical_plugins`
+-- 
+
+CREATE TABLE `isupport_pical_plugins` (
+  `pi_id` smallint(5) unsigned zerofill NOT NULL auto_increment,
+  `pi_title` varchar(255) NOT NULL default '',
+  `pi_type` varchar(8) NOT NULL default '',
+  `pi_dirname` varchar(50) NOT NULL default '',
+  `pi_file` varchar(50) NOT NULL default '',
+  `pi_dotgif` varchar(255) NOT NULL default '',
+  `pi_options` varchar(255) NOT NULL default '',
+  `pi_enabled` tinyint(4) NOT NULL default '0',
+  `pi_weight` smallint(5) unsigned NOT NULL default '0',
+  `last_modified` timestamp NOT NULL,
+  PRIMARY KEY  (`pi_id`),
+  KEY `pi_weight` (`pi_weight`),
+  KEY `pi_type` (`pi_type`),
+  KEY `pi_dirname` (`pi_dirname`),
+  KEY `pi_file` (`pi_file`),
+  KEY `pi_options` (`pi_options`),
+  KEY `pi_enabled` (`pi_enabled`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_priv_msgs`
+-- 
+
+CREATE TABLE `isupport_priv_msgs` (
+  `msg_id` mediumint(8) unsigned NOT NULL auto_increment,
+  `msg_image` varchar(100) default NULL,
+  `subject` varchar(255) NOT NULL default '',
+  `from_userid` mediumint(8) unsigned NOT NULL default '0',
+  `to_userid` mediumint(8) unsigned NOT NULL default '0',
+  `msg_time` int(10) unsigned NOT NULL default '0',
+  `msg_text` text NOT NULL,
+  `read_msg` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`msg_id`),
+  KEY `to_userid` (`to_userid`),
+  KEY `touseridreadmsg` (`to_userid`,`read_msg`),
+  KEY `msgidfromuserid` (`msg_id`,`from_userid`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_protector_access`
+-- 
+
+CREATE TABLE `isupport_protector_access` (
+  `ip` varchar(255) NOT NULL default '0.0.0.0',
+  `request_uri` varchar(255) NOT NULL default '',
+  `malicious_actions` varchar(255) NOT NULL default '',
+  `expire` int(11) NOT NULL default '0',
+  KEY `ip` (`ip`),
+  KEY `request_uri` (`request_uri`),
+  KEY `malicious_actions` (`malicious_actions`),
+  KEY `expire` (`expire`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_protector_log`
+-- 
+
+CREATE TABLE `isupport_protector_log` (
+  `lid` mediumint(8) unsigned NOT NULL auto_increment,
+  `uid` mediumint(8) unsigned NOT NULL default '0',
+  `ip` varchar(255) NOT NULL default '0.0.0.0',
+  `type` varchar(255) NOT NULL default '',
+  `agent` varchar(255) NOT NULL default '',
+  `description` text NOT NULL,
+  `extra` text NOT NULL,
+  `timestamp` timestamp NOT NULL,
+  PRIMARY KEY  (`lid`),
+  KEY `uid` (`uid`),
+  KEY `ip` (`ip`),
+  KEY `type` (`type`),
+  KEY `timestamp` (`timestamp`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_archive`
+-- 
+
+CREATE TABLE `isupport_qcwiki_archive` (
+  `ar_namespace` int(11) NOT NULL default '0',
+  `ar_title` varchar(255) binary NOT NULL default '',
+  `ar_text` mediumblob NOT NULL,
+  `ar_comment` tinyblob NOT NULL,
+  `ar_user` int(5) unsigned NOT NULL default '0',
+  `ar_user_text` varchar(255) binary NOT NULL default '',
+  `ar_timestamp` varchar(14) binary NOT NULL default '',
+  `ar_minor_edit` tinyint(1) NOT NULL default '0',
+  `ar_flags` tinyblob NOT NULL,
+  `ar_rev_id` int(8) unsigned default NULL,
+  `ar_text_id` int(8) unsigned default NULL,
+  KEY `name_title_timestamp` (`ar_namespace`,`ar_title`,`ar_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_categorylinks`
+-- 
+
+CREATE TABLE `isupport_qcwiki_categorylinks` (
+  `cl_from` int(8) unsigned NOT NULL default '0',
+  `cl_to` varchar(255) binary NOT NULL default '',
+  `cl_sortkey` varchar(86) binary NOT NULL default '',
+  `cl_timestamp` timestamp NOT NULL,
+  UNIQUE KEY `cl_from` (`cl_from`,`cl_to`),
+  KEY `cl_sortkey` (`cl_to`,`cl_sortkey`),
+  KEY `cl_timestamp` (`cl_to`,`cl_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_externallinks`
+-- 
+
+CREATE TABLE `isupport_qcwiki_externallinks` (
+  `el_from` int(8) unsigned NOT NULL default '0',
+  `el_to` blob NOT NULL,
+  `el_index` blob NOT NULL,
+  KEY `el_from` (`el_from`,`el_to`(40)),
+  KEY `el_to` (`el_to`(60),`el_from`),
+  KEY `el_index` (`el_index`(60))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_hitcounter`
+-- 
+
+CREATE TABLE `isupport_qcwiki_hitcounter` (
+  `hc_id` int(10) unsigned NOT NULL default '0'
+) TYPE=HEAP MAX_ROWS=25000;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_image`
+-- 
+
+CREATE TABLE `isupport_qcwiki_image` (
+  `img_name` varchar(255) binary NOT NULL default '',
+  `img_size` int(8) unsigned NOT NULL default '0',
+  `img_width` int(5) NOT NULL default '0',
+  `img_height` int(5) NOT NULL default '0',
+  `img_metadata` mediumblob NOT NULL,
+  `img_bits` int(3) NOT NULL default '0',
+  `img_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE') default NULL,
+  `img_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart') NOT NULL default 'unknown',
+  `img_minor_mime` varchar(32) NOT NULL default 'unknown',
+  `img_description` tinyblob NOT NULL,
+  `img_user` int(5) unsigned NOT NULL default '0',
+  `img_user_text` varchar(255) binary NOT NULL default '',
+  `img_timestamp` varchar(14) binary NOT NULL default '',
+  PRIMARY KEY  (`img_name`),
+  KEY `img_size` (`img_size`),
+  KEY `img_timestamp` (`img_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_imagelinks`
+-- 
+
+CREATE TABLE `isupport_qcwiki_imagelinks` (
+  `il_from` int(8) unsigned NOT NULL default '0',
+  `il_to` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `il_from` (`il_from`,`il_to`),
+  KEY `il_to` (`il_to`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_interwiki`
+-- 
+
+CREATE TABLE `isupport_qcwiki_interwiki` (
+  `iw_prefix` char(32) NOT NULL default '',
+  `iw_url` char(127) NOT NULL default '',
+  `iw_local` tinyint(1) NOT NULL default '0',
+  `iw_trans` tinyint(1) NOT NULL default '0',
+  UNIQUE KEY `iw_prefix` (`iw_prefix`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_ipblocks`
+-- 
+
+CREATE TABLE `isupport_qcwiki_ipblocks` (
+  `ipb_id` int(8) NOT NULL auto_increment,
+  `ipb_address` varchar(40) binary NOT NULL default '',
+  `ipb_user` int(8) unsigned NOT NULL default '0',
+  `ipb_by` int(8) unsigned NOT NULL default '0',
+  `ipb_reason` tinyblob NOT NULL,
+  `ipb_timestamp` varchar(14) binary NOT NULL default '',
+  `ipb_auto` tinyint(1) NOT NULL default '0',
+  `ipb_expiry` varchar(14) binary NOT NULL default '',
+  `ipb_range_start` varchar(32) NOT NULL default '',
+  `ipb_range_end` varchar(32) NOT NULL default '',
+  PRIMARY KEY  (`ipb_id`),
+  KEY `ipb_address` (`ipb_address`),
+  KEY `ipb_user` (`ipb_user`),
+  KEY `ipb_range` (`ipb_range_start`(8),`ipb_range_end`(8))
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_job`
+-- 
+
+CREATE TABLE `isupport_qcwiki_job` (
+  `job_id` int(9) unsigned NOT NULL auto_increment,
+  `job_cmd` varchar(255) NOT NULL default '',
+  `job_namespace` int(11) NOT NULL default '0',
+  `job_title` varchar(255) binary NOT NULL default '',
+  `job_params` blob NOT NULL,
+  PRIMARY KEY  (`job_id`),
+  KEY `job_cmd` (`job_cmd`,`job_namespace`,`job_title`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_logging`
+-- 
+
+CREATE TABLE `isupport_qcwiki_logging` (
+  `log_type` varchar(10) NOT NULL default '',
+  `log_action` varchar(10) NOT NULL default '',
+  `log_timestamp` varchar(14) NOT NULL default '19700101000000',
+  `log_user` int(10) unsigned NOT NULL default '0',
+  `log_namespace` int(11) NOT NULL default '0',
+  `log_title` varchar(255) binary NOT NULL default '',
+  `log_comment` varchar(255) NOT NULL default '',
+  `log_params` blob NOT NULL,
+  KEY `type_time` (`log_type`,`log_timestamp`),
+  KEY `user_time` (`log_user`,`log_timestamp`),
+  KEY `page_time` (`log_namespace`,`log_title`,`log_timestamp`),
+  KEY `times` (`log_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_math`
+-- 
+
+CREATE TABLE `isupport_qcwiki_math` (
+  `math_inputhash` varchar(16) NOT NULL default '',
+  `math_outputhash` varchar(16) NOT NULL default '',
+  `math_html_conservativeness` tinyint(1) NOT NULL default '0',
+  `math_html` text,
+  `math_mathml` text,
+  UNIQUE KEY `math_inputhash` (`math_inputhash`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_objectcache`
+-- 
+
+CREATE TABLE `isupport_qcwiki_objectcache` (
+  `keyname` varchar(255) binary NOT NULL default '',
+  `value` mediumblob,
+  `exptime` datetime default NULL,
+  UNIQUE KEY `keyname` (`keyname`),
+  KEY `exptime` (`exptime`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_oldimage`
+-- 
+
+CREATE TABLE `isupport_qcwiki_oldimage` (
+  `oi_name` varchar(255) binary NOT NULL default '',
+  `oi_archive_name` varchar(255) binary NOT NULL default '',
+  `oi_size` int(8) unsigned NOT NULL default '0',
+  `oi_width` int(5) NOT NULL default '0',
+  `oi_height` int(5) NOT NULL default '0',
+  `oi_bits` int(3) NOT NULL default '0',
+  `oi_description` tinyblob NOT NULL,
+  `oi_user` int(5) unsigned NOT NULL default '0',
+  `oi_user_text` varchar(255) binary NOT NULL default '',
+  `oi_timestamp` varchar(14) binary NOT NULL default '',
+  KEY `oi_name` (`oi_name`(10))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_page`
+-- 
+
+CREATE TABLE `isupport_qcwiki_page` (
+  `page_id` int(8) unsigned NOT NULL auto_increment,
+  `page_namespace` int(11) NOT NULL default '0',
+  `page_title` varchar(255) binary NOT NULL default '',
+  `page_restrictions` tinyblob NOT NULL,
+  `page_counter` bigint(20) unsigned NOT NULL default '0',
+  `page_is_redirect` tinyint(1) unsigned NOT NULL default '0',
+  `page_is_new` tinyint(1) unsigned NOT NULL default '0',
+  `page_random` double unsigned NOT NULL default '0',
+  `page_touched` varchar(14) binary NOT NULL default '',
+  `page_latest` int(8) unsigned NOT NULL default '0',
+  `page_len` int(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`page_id`),
+  UNIQUE KEY `name_title` (`page_namespace`,`page_title`),
+  KEY `page_random` (`page_random`),
+  KEY `page_len` (`page_len`)
+) TYPE=MyISAM AUTO_INCREMENT=172 AUTO_INCREMENT=172 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_pagelinks`
+-- 
+
+CREATE TABLE `isupport_qcwiki_pagelinks` (
+  `pl_from` int(8) unsigned NOT NULL default '0',
+  `pl_namespace` int(11) NOT NULL default '0',
+  `pl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `pl_from` (`pl_from`,`pl_namespace`,`pl_title`),
+  KEY `pl_namespace` (`pl_namespace`,`pl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_querycache`
+-- 
+
+CREATE TABLE `isupport_qcwiki_querycache` (
+  `qc_type` char(32) NOT NULL default '',
+  `qc_value` int(5) unsigned NOT NULL default '0',
+  `qc_namespace` int(11) NOT NULL default '0',
+  `qc_title` char(255) binary NOT NULL default '',
+  KEY `qc_type` (`qc_type`,`qc_value`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_recentchanges`
+-- 
+
+CREATE TABLE `isupport_qcwiki_recentchanges` (
+  `rc_id` int(8) NOT NULL auto_increment,
+  `rc_timestamp` varchar(14) binary NOT NULL default '',
+  `rc_cur_time` varchar(14) binary NOT NULL default '',
+  `rc_user` int(10) unsigned NOT NULL default '0',
+  `rc_user_text` varchar(255) binary NOT NULL default '',
+  `rc_namespace` int(11) NOT NULL default '0',
+  `rc_title` varchar(255) binary NOT NULL default '',
+  `rc_comment` varchar(255) binary NOT NULL default '',
+  `rc_minor` tinyint(3) unsigned NOT NULL default '0',
+  `rc_bot` tinyint(3) unsigned NOT NULL default '0',
+  `rc_new` tinyint(3) unsigned NOT NULL default '0',
+  `rc_cur_id` int(10) unsigned NOT NULL default '0',
+  `rc_this_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_last_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_type` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_ns` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_title` varchar(255) binary NOT NULL default '',
+  `rc_patrolled` tinyint(3) unsigned NOT NULL default '0',
+  `rc_ip` varchar(15) NOT NULL default '',
+  PRIMARY KEY  (`rc_id`),
+  KEY `rc_timestamp` (`rc_timestamp`),
+  KEY `rc_namespace_title` (`rc_namespace`,`rc_title`),
+  KEY `rc_cur_id` (`rc_cur_id`),
+  KEY `new_name_timestamp` (`rc_new`,`rc_namespace`,`rc_timestamp`),
+  KEY `rc_ip` (`rc_ip`)
+) TYPE=MyISAM AUTO_INCREMENT=263 AUTO_INCREMENT=263 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_revision`
+-- 
+
+CREATE TABLE `isupport_qcwiki_revision` (
+  `rev_id` int(8) unsigned NOT NULL auto_increment,
+  `rev_page` int(8) unsigned NOT NULL default '0',
+  `rev_text_id` int(8) unsigned NOT NULL default '0',
+  `rev_comment` tinyblob NOT NULL,
+  `rev_user` int(5) unsigned NOT NULL default '0',
+  `rev_user_text` varchar(255) binary NOT NULL default '',
+  `rev_timestamp` varchar(14) binary NOT NULL default '',
+  `rev_minor_edit` tinyint(1) unsigned NOT NULL default '0',
+  `rev_deleted` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`rev_page`,`rev_id`),
+  UNIQUE KEY `rev_id` (`rev_id`),
+  KEY `rev_timestamp` (`rev_timestamp`),
+  KEY `page_timestamp` (`rev_page`,`rev_timestamp`),
+  KEY `user_timestamp` (`rev_user`,`rev_timestamp`),
+  KEY `usertext_timestamp` (`rev_user_text`,`rev_timestamp`)
+) TYPE=MyISAM AUTO_INCREMENT=261 AUTO_INCREMENT=261 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_searchindex`
+-- 
+
+CREATE TABLE `isupport_qcwiki_searchindex` (
+  `si_page` int(8) unsigned NOT NULL default '0',
+  `si_title` varchar(255) NOT NULL default '',
+  `si_text` mediumtext NOT NULL,
+  UNIQUE KEY `si_page` (`si_page`),
+  FULLTEXT KEY `si_title` (`si_title`),
+  FULLTEXT KEY `si_text` (`si_text`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_site_stats`
+-- 
+
+CREATE TABLE `isupport_qcwiki_site_stats` (
+  `ss_row_id` int(8) unsigned NOT NULL default '0',
+  `ss_total_views` bigint(20) unsigned default '0',
+  `ss_total_edits` bigint(20) unsigned default '0',
+  `ss_good_articles` bigint(20) unsigned default '0',
+  `ss_total_pages` bigint(20) default '-1',
+  `ss_users` bigint(20) default '-1',
+  `ss_admins` int(10) default '-1',
+  `ss_images` int(10) default '0',
+  UNIQUE KEY `ss_row_id` (`ss_row_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_templatelinks`
+-- 
+
+CREATE TABLE `isupport_qcwiki_templatelinks` (
+  `tl_from` int(8) unsigned NOT NULL default '0',
+  `tl_namespace` int(11) NOT NULL default '0',
+  `tl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `tl_from` (`tl_from`,`tl_namespace`,`tl_title`),
+  KEY `tl_namespace` (`tl_namespace`,`tl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_text`
+-- 
+
+CREATE TABLE `isupport_qcwiki_text` (
+  `old_id` int(8) unsigned NOT NULL auto_increment,
+  `old_text` mediumblob NOT NULL,
+  `old_flags` tinyblob NOT NULL,
+  PRIMARY KEY  (`old_id`)
+) TYPE=MyISAM AUTO_INCREMENT=259 AUTO_INCREMENT=259 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_trackbacks`
+-- 
+
+CREATE TABLE `isupport_qcwiki_trackbacks` (
+  `tb_id` int(11) NOT NULL auto_increment,
+  `tb_page` int(11) default NULL,
+  `tb_title` varchar(255) NOT NULL default '',
+  `tb_url` varchar(255) NOT NULL default '',
+  `tb_ex` text,
+  `tb_name` varchar(255) default NULL,
+  PRIMARY KEY  (`tb_id`),
+  KEY `tb_page` (`tb_page`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_transcache`
+-- 
+
+CREATE TABLE `isupport_qcwiki_transcache` (
+  `tc_url` varchar(255) NOT NULL default '',
+  `tc_contents` text,
+  `tc_time` int(11) NOT NULL default '0',
+  UNIQUE KEY `tc_url_idx` (`tc_url`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_user`
+-- 
+
+CREATE TABLE `isupport_qcwiki_user` (
+  `user_id` int(5) unsigned NOT NULL auto_increment,
+  `user_name` varchar(255) binary NOT NULL default '',
+  `user_real_name` varchar(255) binary NOT NULL default '',
+  `user_password` tinyblob NOT NULL,
+  `user_newpassword` tinyblob NOT NULL,
+  `user_email` tinytext NOT NULL,
+  `user_options` blob NOT NULL,
+  `user_touched` varchar(14) binary NOT NULL default '',
+  `user_token` varchar(32) binary NOT NULL default '',
+  `user_email_authenticated` varchar(14) binary default NULL,
+  `user_email_token` varchar(32) binary default NULL,
+  `user_email_token_expires` varchar(14) binary default NULL,
+  `user_registration` varchar(14) binary default NULL,
+  PRIMARY KEY  (`user_id`),
+  UNIQUE KEY `user_name` (`user_name`),
+  KEY `user_email_token` (`user_email_token`)
+) TYPE=MyISAM AUTO_INCREMENT=2 AUTO_INCREMENT=2 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_user_groups`
+-- 
+
+CREATE TABLE `isupport_qcwiki_user_groups` (
+  `ug_user` int(5) unsigned NOT NULL default '0',
+  `ug_group` char(16) NOT NULL default '',
+  PRIMARY KEY  (`ug_user`,`ug_group`),
+  KEY `ug_group` (`ug_group`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_user_newtalk`
+-- 
+
+CREATE TABLE `isupport_qcwiki_user_newtalk` (
+  `user_id` int(5) NOT NULL default '0',
+  `user_ip` varchar(40) NOT NULL default '',
+  KEY `user_id` (`user_id`),
+  KEY `user_ip` (`user_ip`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_validate`
+-- 
+
+CREATE TABLE `isupport_qcwiki_validate` (
+  `val_user` int(11) NOT NULL default '0',
+  `val_page` int(11) unsigned NOT NULL default '0',
+  `val_revision` int(11) unsigned NOT NULL default '0',
+  `val_type` int(11) unsigned NOT NULL default '0',
+  `val_value` int(11) default '0',
+  `val_comment` varchar(255) NOT NULL default '',
+  `val_ip` varchar(20) NOT NULL default '',
+  KEY `val_user` (`val_user`,`val_revision`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_qcwiki_watchlist`
+-- 
+
+CREATE TABLE `isupport_qcwiki_watchlist` (
+  `wl_user` int(5) unsigned NOT NULL default '0',
+  `wl_namespace` int(11) NOT NULL default '0',
+  `wl_title` varchar(255) binary NOT NULL default '',
+  `wl_notificationtimestamp` varchar(14) binary default NULL,
+  UNIQUE KEY `wl_user` (`wl_user`,`wl_namespace`,`wl_title`),
+  KEY `namespace_title` (`wl_namespace`,`wl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_ranks`
+-- 
+
+CREATE TABLE `isupport_ranks` (
+  `rank_id` smallint(5) unsigned NOT NULL auto_increment,
+  `rank_title` varchar(50) NOT NULL default '',
+  `rank_min` mediumint(8) unsigned NOT NULL default '0',
+  `rank_max` mediumint(8) unsigned NOT NULL default '0',
+  `rank_special` tinyint(1) unsigned NOT NULL default '0',
+  `rank_image` varchar(255) default NULL,
+  PRIMARY KEY  (`rank_id`),
+  KEY `rank_min` (`rank_min`),
+  KEY `rank_max` (`rank_max`),
+  KEY `rankminrankmaxranspecial` (`rank_min`,`rank_max`,`rank_special`),
+  KEY `rankspecial` (`rank_special`)
+) TYPE=MyISAM AUTO_INCREMENT=10 AUTO_INCREMENT=10 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_archive`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_archive` (
+  `ar_namespace` int(11) NOT NULL default '0',
+  `ar_title` varchar(255) binary NOT NULL default '',
+  `ar_text` mediumblob NOT NULL,
+  `ar_comment` tinyblob NOT NULL,
+  `ar_user` int(5) unsigned NOT NULL default '0',
+  `ar_user_text` varchar(255) binary NOT NULL default '',
+  `ar_timestamp` varchar(14) binary NOT NULL default '',
+  `ar_minor_edit` tinyint(1) NOT NULL default '0',
+  `ar_flags` tinyblob NOT NULL,
+  `ar_rev_id` int(8) unsigned default NULL,
+  `ar_text_id` int(8) unsigned default NULL,
+  KEY `name_title_timestamp` (`ar_namespace`,`ar_title`,`ar_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_categorylinks`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_categorylinks` (
+  `cl_from` int(8) unsigned NOT NULL default '0',
+  `cl_to` varchar(255) binary NOT NULL default '',
+  `cl_sortkey` varchar(86) binary NOT NULL default '',
+  `cl_timestamp` timestamp NOT NULL,
+  UNIQUE KEY `cl_from` (`cl_from`,`cl_to`),
+  KEY `cl_sortkey` (`cl_to`,`cl_sortkey`),
+  KEY `cl_timestamp` (`cl_to`,`cl_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_externallinks`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_externallinks` (
+  `el_from` int(8) unsigned NOT NULL default '0',
+  `el_to` blob NOT NULL,
+  `el_index` blob NOT NULL,
+  KEY `el_from` (`el_from`,`el_to`(40)),
+  KEY `el_to` (`el_to`(60),`el_from`),
+  KEY `el_index` (`el_index`(60))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_hitcounter`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_hitcounter` (
+  `hc_id` int(10) unsigned NOT NULL default '0'
+) TYPE=HEAP MAX_ROWS=25000;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_image`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_image` (
+  `img_name` varchar(255) binary NOT NULL default '',
+  `img_size` int(8) unsigned NOT NULL default '0',
+  `img_width` int(5) NOT NULL default '0',
+  `img_height` int(5) NOT NULL default '0',
+  `img_metadata` mediumblob NOT NULL,
+  `img_bits` int(3) NOT NULL default '0',
+  `img_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE') default NULL,
+  `img_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart') NOT NULL default 'unknown',
+  `img_minor_mime` varchar(32) NOT NULL default 'unknown',
+  `img_description` tinyblob NOT NULL,
+  `img_user` int(5) unsigned NOT NULL default '0',
+  `img_user_text` varchar(255) binary NOT NULL default '',
+  `img_timestamp` varchar(14) binary NOT NULL default '',
+  PRIMARY KEY  (`img_name`),
+  KEY `img_size` (`img_size`),
+  KEY `img_timestamp` (`img_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_imagelinks`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_imagelinks` (
+  `il_from` int(8) unsigned NOT NULL default '0',
+  `il_to` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `il_from` (`il_from`,`il_to`),
+  KEY `il_to` (`il_to`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_interwiki`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_interwiki` (
+  `iw_prefix` char(32) NOT NULL default '',
+  `iw_url` char(127) NOT NULL default '',
+  `iw_local` tinyint(1) NOT NULL default '0',
+  `iw_trans` tinyint(1) NOT NULL default '0',
+  UNIQUE KEY `iw_prefix` (`iw_prefix`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_ipblocks`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_ipblocks` (
+  `ipb_id` int(8) NOT NULL auto_increment,
+  `ipb_address` varchar(40) binary NOT NULL default '',
+  `ipb_user` int(8) unsigned NOT NULL default '0',
+  `ipb_by` int(8) unsigned NOT NULL default '0',
+  `ipb_reason` tinyblob NOT NULL,
+  `ipb_timestamp` varchar(14) binary NOT NULL default '',
+  `ipb_auto` tinyint(1) NOT NULL default '0',
+  `ipb_expiry` varchar(14) binary NOT NULL default '',
+  `ipb_range_start` varchar(32) NOT NULL default '',
+  `ipb_range_end` varchar(32) NOT NULL default '',
+  PRIMARY KEY  (`ipb_id`),
+  KEY `ipb_address` (`ipb_address`),
+  KEY `ipb_user` (`ipb_user`),
+  KEY `ipb_range` (`ipb_range_start`(8),`ipb_range_end`(8))
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_job`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_job` (
+  `job_id` int(9) unsigned NOT NULL auto_increment,
+  `job_cmd` varchar(255) NOT NULL default '',
+  `job_namespace` int(11) NOT NULL default '0',
+  `job_title` varchar(255) binary NOT NULL default '',
+  `job_params` blob NOT NULL,
+  PRIMARY KEY  (`job_id`),
+  KEY `job_cmd` (`job_cmd`,`job_namespace`,`job_title`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_logging`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_logging` (
+  `log_type` varchar(10) NOT NULL default '',
+  `log_action` varchar(10) NOT NULL default '',
+  `log_timestamp` varchar(14) NOT NULL default '19700101000000',
+  `log_user` int(10) unsigned NOT NULL default '0',
+  `log_namespace` int(11) NOT NULL default '0',
+  `log_title` varchar(255) binary NOT NULL default '',
+  `log_comment` varchar(255) NOT NULL default '',
+  `log_params` blob NOT NULL,
+  KEY `type_time` (`log_type`,`log_timestamp`),
+  KEY `user_time` (`log_user`,`log_timestamp`),
+  KEY `page_time` (`log_namespace`,`log_title`,`log_timestamp`),
+  KEY `times` (`log_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_math`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_math` (
+  `math_inputhash` varchar(16) NOT NULL default '',
+  `math_outputhash` varchar(16) NOT NULL default '',
+  `math_html_conservativeness` tinyint(1) NOT NULL default '0',
+  `math_html` text,
+  `math_mathml` text,
+  UNIQUE KEY `math_inputhash` (`math_inputhash`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_objectcache`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_objectcache` (
+  `keyname` varchar(255) binary NOT NULL default '',
+  `value` mediumblob,
+  `exptime` datetime default NULL,
+  UNIQUE KEY `keyname` (`keyname`),
+  KEY `exptime` (`exptime`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_oldimage`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_oldimage` (
+  `oi_name` varchar(255) binary NOT NULL default '',
+  `oi_archive_name` varchar(255) binary NOT NULL default '',
+  `oi_size` int(8) unsigned NOT NULL default '0',
+  `oi_width` int(5) NOT NULL default '0',
+  `oi_height` int(5) NOT NULL default '0',
+  `oi_bits` int(3) NOT NULL default '0',
+  `oi_description` tinyblob NOT NULL,
+  `oi_user` int(5) unsigned NOT NULL default '0',
+  `oi_user_text` varchar(255) binary NOT NULL default '',
+  `oi_timestamp` varchar(14) binary NOT NULL default '',
+  KEY `oi_name` (`oi_name`(10))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_page`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_page` (
+  `page_id` int(8) unsigned NOT NULL auto_increment,
+  `page_namespace` int(11) NOT NULL default '0',
+  `page_title` varchar(255) binary NOT NULL default '',
+  `page_restrictions` tinyblob NOT NULL,
+  `page_counter` bigint(20) unsigned NOT NULL default '0',
+  `page_is_redirect` tinyint(1) unsigned NOT NULL default '0',
+  `page_is_new` tinyint(1) unsigned NOT NULL default '0',
+  `page_random` double unsigned NOT NULL default '0',
+  `page_touched` varchar(14) binary NOT NULL default '',
+  `page_latest` int(8) unsigned NOT NULL default '0',
+  `page_len` int(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`page_id`),
+  UNIQUE KEY `name_title` (`page_namespace`,`page_title`),
+  KEY `page_random` (`page_random`),
+  KEY `page_len` (`page_len`)
+) TYPE=MyISAM AUTO_INCREMENT=51 AUTO_INCREMENT=51 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_pagelinks`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_pagelinks` (
+  `pl_from` int(8) unsigned NOT NULL default '0',
+  `pl_namespace` int(11) NOT NULL default '0',
+  `pl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `pl_from` (`pl_from`,`pl_namespace`,`pl_title`),
+  KEY `pl_namespace` (`pl_namespace`,`pl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_querycache`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_querycache` (
+  `qc_type` char(32) NOT NULL default '',
+  `qc_value` int(5) unsigned NOT NULL default '0',
+  `qc_namespace` int(11) NOT NULL default '0',
+  `qc_title` char(255) binary NOT NULL default '',
+  KEY `qc_type` (`qc_type`,`qc_value`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_recentchanges`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_recentchanges` (
+  `rc_id` int(8) NOT NULL auto_increment,
+  `rc_timestamp` varchar(14) binary NOT NULL default '',
+  `rc_cur_time` varchar(14) binary NOT NULL default '',
+  `rc_user` int(10) unsigned NOT NULL default '0',
+  `rc_user_text` varchar(255) binary NOT NULL default '',
+  `rc_namespace` int(11) NOT NULL default '0',
+  `rc_title` varchar(255) binary NOT NULL default '',
+  `rc_comment` varchar(255) binary NOT NULL default '',
+  `rc_minor` tinyint(3) unsigned NOT NULL default '0',
+  `rc_bot` tinyint(3) unsigned NOT NULL default '0',
+  `rc_new` tinyint(3) unsigned NOT NULL default '0',
+  `rc_cur_id` int(10) unsigned NOT NULL default '0',
+  `rc_this_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_last_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_type` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_ns` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_title` varchar(255) binary NOT NULL default '',
+  `rc_patrolled` tinyint(3) unsigned NOT NULL default '0',
+  `rc_ip` varchar(15) NOT NULL default '',
+  PRIMARY KEY  (`rc_id`),
+  KEY `rc_timestamp` (`rc_timestamp`),
+  KEY `rc_namespace_title` (`rc_namespace`,`rc_title`),
+  KEY `rc_cur_id` (`rc_cur_id`),
+  KEY `new_name_timestamp` (`rc_new`,`rc_namespace`,`rc_timestamp`),
+  KEY `rc_ip` (`rc_ip`)
+) TYPE=MyISAM AUTO_INCREMENT=158 AUTO_INCREMENT=158 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_revision`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_revision` (
+  `rev_id` int(8) unsigned NOT NULL auto_increment,
+  `rev_page` int(8) unsigned NOT NULL default '0',
+  `rev_text_id` int(8) unsigned NOT NULL default '0',
+  `rev_comment` tinyblob NOT NULL,
+  `rev_user` int(5) unsigned NOT NULL default '0',
+  `rev_user_text` varchar(255) binary NOT NULL default '',
+  `rev_timestamp` varchar(14) binary NOT NULL default '',
+  `rev_minor_edit` tinyint(1) unsigned NOT NULL default '0',
+  `rev_deleted` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`rev_page`,`rev_id`),
+  UNIQUE KEY `rev_id` (`rev_id`),
+  KEY `rev_timestamp` (`rev_timestamp`),
+  KEY `page_timestamp` (`rev_page`,`rev_timestamp`),
+  KEY `user_timestamp` (`rev_user`,`rev_timestamp`),
+  KEY `usertext_timestamp` (`rev_user_text`,`rev_timestamp`)
+) TYPE=MyISAM AUTO_INCREMENT=150 AUTO_INCREMENT=150 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_searchindex`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_searchindex` (
+  `si_page` int(8) unsigned NOT NULL default '0',
+  `si_title` varchar(255) NOT NULL default '',
+  `si_text` mediumtext NOT NULL,
+  UNIQUE KEY `si_page` (`si_page`),
+  FULLTEXT KEY `si_title` (`si_title`),
+  FULLTEXT KEY `si_text` (`si_text`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_site_stats`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_site_stats` (
+  `ss_row_id` int(8) unsigned NOT NULL default '0',
+  `ss_total_views` bigint(20) unsigned default '0',
+  `ss_total_edits` bigint(20) unsigned default '0',
+  `ss_good_articles` bigint(20) unsigned default '0',
+  `ss_total_pages` bigint(20) default '-1',
+  `ss_users` bigint(20) default '-1',
+  `ss_admins` int(10) default '-1',
+  `ss_images` int(10) default '0',
+  UNIQUE KEY `ss_row_id` (`ss_row_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_templatelinks`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_templatelinks` (
+  `tl_from` int(8) unsigned NOT NULL default '0',
+  `tl_namespace` int(11) NOT NULL default '0',
+  `tl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `tl_from` (`tl_from`,`tl_namespace`,`tl_title`),
+  KEY `tl_namespace` (`tl_namespace`,`tl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_text`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_text` (
+  `old_id` int(8) unsigned NOT NULL auto_increment,
+  `old_text` mediumblob NOT NULL,
+  `old_flags` tinyblob NOT NULL,
+  PRIMARY KEY  (`old_id`)
+) TYPE=MyISAM AUTO_INCREMENT=149 AUTO_INCREMENT=149 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_trackbacks`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_trackbacks` (
+  `tb_id` int(11) NOT NULL auto_increment,
+  `tb_page` int(11) default NULL,
+  `tb_title` varchar(255) NOT NULL default '',
+  `tb_url` varchar(255) NOT NULL default '',
+  `tb_ex` text,
+  `tb_name` varchar(255) default NULL,
+  PRIMARY KEY  (`tb_id`),
+  KEY `tb_page` (`tb_page`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_transcache`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_transcache` (
+  `tc_url` varchar(255) NOT NULL default '',
+  `tc_contents` text,
+  `tc_time` int(11) NOT NULL default '0',
+  UNIQUE KEY `tc_url_idx` (`tc_url`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_user`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_user` (
+  `user_id` int(5) unsigned NOT NULL auto_increment,
+  `user_name` varchar(255) binary NOT NULL default '',
+  `user_real_name` varchar(255) binary NOT NULL default '',
+  `user_password` tinyblob NOT NULL,
+  `user_newpassword` tinyblob NOT NULL,
+  `user_email` tinytext NOT NULL,
+  `user_options` blob NOT NULL,
+  `user_touched` varchar(14) binary NOT NULL default '',
+  `user_token` varchar(32) binary NOT NULL default '',
+  `user_email_authenticated` varchar(14) binary default NULL,
+  `user_email_token` varchar(32) binary default NULL,
+  `user_email_token_expires` varchar(14) binary default NULL,
+  `user_registration` varchar(14) binary default NULL,
+  PRIMARY KEY  (`user_id`),
+  UNIQUE KEY `user_name` (`user_name`),
+  KEY `user_email_token` (`user_email_token`)
+) TYPE=MyISAM AUTO_INCREMENT=114 AUTO_INCREMENT=114 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_user_groups`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_user_groups` (
+  `ug_user` int(5) unsigned NOT NULL default '0',
+  `ug_group` char(16) NOT NULL default '',
+  PRIMARY KEY  (`ug_user`,`ug_group`),
+  KEY `ug_group` (`ug_group`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_user_newtalk`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_user_newtalk` (
+  `user_id` int(5) NOT NULL default '0',
+  `user_ip` varchar(40) NOT NULL default '',
+  KEY `user_id` (`user_id`),
+  KEY `user_ip` (`user_ip`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_validate`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_validate` (
+  `val_user` int(11) NOT NULL default '0',
+  `val_page` int(11) unsigned NOT NULL default '0',
+  `val_revision` int(11) unsigned NOT NULL default '0',
+  `val_type` int(11) unsigned NOT NULL default '0',
+  `val_value` int(11) default '0',
+  `val_comment` varchar(255) NOT NULL default '',
+  `val_ip` varchar(20) NOT NULL default '',
+  KEY `val_user` (`val_user`,`val_revision`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_seniorwiki_watchlist`
+-- 
+
+CREATE TABLE `isupport_seniorwiki_watchlist` (
+  `wl_user` int(5) unsigned NOT NULL default '0',
+  `wl_namespace` int(11) NOT NULL default '0',
+  `wl_title` varchar(255) binary NOT NULL default '',
+  `wl_notificationtimestamp` varchar(14) binary default NULL,
+  UNIQUE KEY `wl_user` (`wl_user`,`wl_namespace`,`wl_title`),
+  KEY `namespace_title` (`wl_namespace`,`wl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_session`
+-- 
+
+CREATE TABLE `isupport_session` (
+  `sess_id` varchar(32) NOT NULL default '',
+  `sess_updated` int(10) unsigned NOT NULL default '0',
+  `sess_ip` varchar(15) NOT NULL default '',
+  `sess_data` text NOT NULL,
+  PRIMARY KEY  (`sess_id`),
+  KEY `updated` (`sess_updated`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_signup_event`
+-- 
+
+CREATE TABLE `isupport_signup_event` (
+  `eve_id` int(11) unsigned NOT NULL auto_increment,
+  `eve_sdesc` varchar(100) NOT NULL default '',
+  `eve_ldesc` text,
+  `eve_sdate` datetime NOT NULL default '0000-00-00 00:00:00',
+  `eve_edate` datetime NOT NULL default '0000-00-00 00:00:00',
+  `eve_mdate` datetime NOT NULL default '0000-00-00 00:00:00',
+  `eve_rec` int(11) unsigned NOT NULL default '0',
+  `eve_slot` tinyint(1) unsigned NOT NULL default '0',
+  `eve_hidden` tinyint(1) unsigned NOT NULL default '0',
+  `eve_volunteer` tinyint(1) unsigned NOT NULL default '0',
+  `eve_guests` tinyint(1) unsigned NOT NULL default '0',
+  `eve_pickup` tinyint(1) unsigned default '0',
+  `eve_shift` tinyint(1) unsigned default '0',
+  PRIMARY KEY  (`eve_id`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_signup_guest`
+-- 
+
+CREATE TABLE `isupport_signup_guest` (
+  `gue_id` int(11) unsigned NOT NULL auto_increment,
+  `gue_fname` varchar(20) NOT NULL default '',
+  `gue_lname` varchar(20) NOT NULL default '',
+  `gue_uid` int(11) unsigned NOT NULL default '0',
+  `gue_eid` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`gue_id`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_signup_jnt_event`
+-- 
+
+CREATE TABLE `isupport_signup_jnt_event` (
+  `eve_jnt_id` int(11) unsigned NOT NULL auto_increment,
+  `eve_jnt_eid` int(11) unsigned NOT NULL default '0',
+  `eve_jnt_uid` int(11) unsigned NOT NULL default '0',
+  `eve_jnt_volunteer` tinyint(1) unsigned NOT NULL default '0',
+  `eve_jnt_pickup` varchar(50) default NULL,
+  `eve_jnt_shift` varchar(15) default NULL,
+  PRIMARY KEY  (`eve_jnt_id`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_smartsection_categories`
+-- 
+
+CREATE TABLE `isupport_smartsection_categories` (
+  `categoryid` int(11) NOT NULL auto_increment,
+  `parentid` int(11) NOT NULL default '0',
+  `name` varchar(100) NOT NULL default '',
+  `description` text NOT NULL,
+  `image` varchar(255) NOT NULL default '',
+  `total` int(11) NOT NULL default '0',
+  `weight` int(11) NOT NULL default '1',
+  `created` int(11) NOT NULL default '1033141070',
+  `template` varchar(255) NOT NULL default '',
+  `header` text NOT NULL,
+  `meta_keywords` text NOT NULL,
+  `meta_description` text NOT NULL,
+  `short_url` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`categoryid`)
+) TYPE=MyISAM AUTO_INCREMENT=46 COMMENT='SmartSection by The SmartFactory <www.smartfactory.ca>' AUTO_INCREMENT=46 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_smartsection_files`
+-- 
+
+CREATE TABLE `isupport_smartsection_files` (
+  `fileid` int(11) NOT NULL auto_increment,
+  `itemid` int(11) NOT NULL default '0',
+  `name` varchar(255) NOT NULL default '',
+  `description` text NOT NULL,
+  `filename` varchar(255) NOT NULL default '',
+  `mimetype` varchar(64) NOT NULL default '',
+  `uid` int(6) default '0',
+  `datesub` int(11) NOT NULL default '0',
+  `status` int(1) NOT NULL default '-1',
+  `notifypub` tinyint(1) NOT NULL default '1',
+  `counter` int(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`fileid`)
+) TYPE=MyISAM COMMENT='SmartSection by The SmartFactory <www.smartfactory.ca>' AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_smartsection_items`
+-- 
+
+CREATE TABLE `isupport_smartsection_items` (
+  `itemid` int(11) NOT NULL auto_increment,
+  `categoryid` int(11) NOT NULL default '0',
+  `title` varchar(255) NOT NULL default '',
+  `summary` text NOT NULL,
+  `display_summary` tinyint(1) NOT NULL default '1',
+  `body` longtext NOT NULL,
+  `uid` int(6) default '0',
+  `datesub` int(11) NOT NULL default '0',
+  `status` int(1) NOT NULL default '-1',
+  `image` varchar(255) NOT NULL default '',
+  `counter` int(8) unsigned NOT NULL default '0',
+  `weight` int(11) NOT NULL default '1',
+  `dohtml` tinyint(1) NOT NULL default '1',
+  `dosmiley` tinyint(1) NOT NULL default '1',
+  `doxcode` tinyint(1) NOT NULL default '1',
+  `doimage` tinyint(1) NOT NULL default '1',
+  `dobr` tinyint(1) NOT NULL default '1',
+  `cancomment` tinyint(1) NOT NULL default '1',
+  `comments` int(11) NOT NULL default '0',
+  `notifypub` tinyint(1) NOT NULL default '0',
+  `meta_keywords` text NOT NULL,
+  `meta_description` text NOT NULL,
+  `short_url` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`itemid`),
+  KEY `counter` (`counter`),
+  KEY `title` (`title`,`counter`)
+) TYPE=MyISAM AUTO_INCREMENT=187 COMMENT='SmartSection by The SmartFactory <www.smartfactory.ca>' AUTO_INCREMENT=187 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_smartsection_meta`
+-- 
+
+CREATE TABLE `isupport_smartsection_meta` (
+  `metakey` varchar(50) NOT NULL default '',
+  `metavalue` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`metakey`)
+) TYPE=MyISAM COMMENT='SmartDoc by The SmartFactory <www.smartfactory.ca>';
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_smartsection_mimetypes`
+-- 
+
+CREATE TABLE `isupport_smartsection_mimetypes` (
+  `mime_id` int(11) NOT NULL auto_increment,
+  `mime_ext` varchar(60) NOT NULL default '',
+  `mime_types` text NOT NULL,
+  `mime_name` varchar(255) NOT NULL default '',
+  `mime_admin` int(1) NOT NULL default '1',
+  `mime_user` int(1) NOT NULL default '0',
+  KEY `mime_id` (`mime_id`)
+) TYPE=MyISAM AUTO_INCREMENT=124 AUTO_INCREMENT=124 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_smiles`
+-- 
+
+CREATE TABLE `isupport_smiles` (
+  `id` smallint(5) unsigned NOT NULL auto_increment,
+  `code` varchar(50) NOT NULL default '',
+  `smile_url` varchar(100) NOT NULL default '',
+  `emotion` varchar(75) NOT NULL default '',
+  `display` tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+) TYPE=MyISAM AUTO_INCREMENT=18 AUTO_INCREMENT=18 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_archive`
+-- 
+
+CREATE TABLE `isupport_techwiki_archive` (
+  `ar_namespace` int(11) NOT NULL default '0',
+  `ar_title` varchar(255) binary NOT NULL default '',
+  `ar_text` mediumblob NOT NULL,
+  `ar_comment` tinyblob NOT NULL,
+  `ar_user` int(5) unsigned NOT NULL default '0',
+  `ar_user_text` varchar(255) binary NOT NULL default '',
+  `ar_timestamp` varchar(14) binary NOT NULL default '',
+  `ar_minor_edit` tinyint(1) NOT NULL default '0',
+  `ar_flags` tinyblob NOT NULL,
+  `ar_rev_id` int(8) unsigned default NULL,
+  `ar_text_id` int(8) unsigned default NULL,
+  KEY `name_title_timestamp` (`ar_namespace`,`ar_title`,`ar_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_categorylinks`
+-- 
+
+CREATE TABLE `isupport_techwiki_categorylinks` (
+  `cl_from` int(8) unsigned NOT NULL default '0',
+  `cl_to` varchar(255) binary NOT NULL default '',
+  `cl_sortkey` varchar(86) binary NOT NULL default '',
+  `cl_timestamp` timestamp NOT NULL,
+  UNIQUE KEY `cl_from` (`cl_from`,`cl_to`),
+  KEY `cl_sortkey` (`cl_to`,`cl_sortkey`),
+  KEY `cl_timestamp` (`cl_to`,`cl_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_externallinks`
+-- 
+
+CREATE TABLE `isupport_techwiki_externallinks` (
+  `el_from` int(8) unsigned NOT NULL default '0',
+  `el_to` blob NOT NULL,
+  `el_index` blob NOT NULL,
+  KEY `el_from` (`el_from`,`el_to`(40)),
+  KEY `el_to` (`el_to`(60),`el_from`),
+  KEY `el_index` (`el_index`(60))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_hitcounter`
+-- 
+
+CREATE TABLE `isupport_techwiki_hitcounter` (
+  `hc_id` int(10) unsigned NOT NULL default '0'
+) TYPE=HEAP MAX_ROWS=25000;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_image`
+-- 
+
+CREATE TABLE `isupport_techwiki_image` (
+  `img_name` varchar(255) binary NOT NULL default '',
+  `img_size` int(8) unsigned NOT NULL default '0',
+  `img_width` int(5) NOT NULL default '0',
+  `img_height` int(5) NOT NULL default '0',
+  `img_metadata` mediumblob NOT NULL,
+  `img_bits` int(3) NOT NULL default '0',
+  `img_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE') default NULL,
+  `img_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart') NOT NULL default 'unknown',
+  `img_minor_mime` varchar(32) NOT NULL default 'unknown',
+  `img_description` tinyblob NOT NULL,
+  `img_user` int(5) unsigned NOT NULL default '0',
+  `img_user_text` varchar(255) binary NOT NULL default '',
+  `img_timestamp` varchar(14) binary NOT NULL default '',
+  PRIMARY KEY  (`img_name`),
+  KEY `img_size` (`img_size`),
+  KEY `img_timestamp` (`img_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_imagelinks`
+-- 
+
+CREATE TABLE `isupport_techwiki_imagelinks` (
+  `il_from` int(8) unsigned NOT NULL default '0',
+  `il_to` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `il_from` (`il_from`,`il_to`),
+  KEY `il_to` (`il_to`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_interwiki`
+-- 
+
+CREATE TABLE `isupport_techwiki_interwiki` (
+  `iw_prefix` char(32) NOT NULL default '',
+  `iw_url` char(127) NOT NULL default '',
+  `iw_local` tinyint(1) NOT NULL default '0',
+  `iw_trans` tinyint(1) NOT NULL default '0',
+  UNIQUE KEY `iw_prefix` (`iw_prefix`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_ipblocks`
+-- 
+
+CREATE TABLE `isupport_techwiki_ipblocks` (
+  `ipb_id` int(8) NOT NULL auto_increment,
+  `ipb_address` varchar(40) binary NOT NULL default '',
+  `ipb_user` int(8) unsigned NOT NULL default '0',
+  `ipb_by` int(8) unsigned NOT NULL default '0',
+  `ipb_reason` tinyblob NOT NULL,
+  `ipb_timestamp` varchar(14) binary NOT NULL default '',
+  `ipb_auto` tinyint(1) NOT NULL default '0',
+  `ipb_expiry` varchar(14) binary NOT NULL default '',
+  `ipb_range_start` varchar(32) NOT NULL default '',
+  `ipb_range_end` varchar(32) NOT NULL default '',
+  PRIMARY KEY  (`ipb_id`),
+  KEY `ipb_address` (`ipb_address`),
+  KEY `ipb_user` (`ipb_user`),
+  KEY `ipb_range` (`ipb_range_start`(8),`ipb_range_end`(8))
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_job`
+-- 
+
+CREATE TABLE `isupport_techwiki_job` (
+  `job_id` int(9) unsigned NOT NULL auto_increment,
+  `job_cmd` varchar(255) NOT NULL default '',
+  `job_namespace` int(11) NOT NULL default '0',
+  `job_title` varchar(255) binary NOT NULL default '',
+  `job_params` blob NOT NULL,
+  PRIMARY KEY  (`job_id`),
+  KEY `job_cmd` (`job_cmd`,`job_namespace`,`job_title`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_logging`
+-- 
+
+CREATE TABLE `isupport_techwiki_logging` (
+  `log_type` varchar(10) NOT NULL default '',
+  `log_action` varchar(10) NOT NULL default '',
+  `log_timestamp` varchar(14) NOT NULL default '19700101000000',
+  `log_user` int(10) unsigned NOT NULL default '0',
+  `log_namespace` int(11) NOT NULL default '0',
+  `log_title` varchar(255) binary NOT NULL default '',
+  `log_comment` varchar(255) NOT NULL default '',
+  `log_params` blob NOT NULL,
+  KEY `type_time` (`log_type`,`log_timestamp`),
+  KEY `user_time` (`log_user`,`log_timestamp`),
+  KEY `page_time` (`log_namespace`,`log_title`,`log_timestamp`),
+  KEY `times` (`log_timestamp`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_math`
+-- 
+
+CREATE TABLE `isupport_techwiki_math` (
+  `math_inputhash` varchar(16) NOT NULL default '',
+  `math_outputhash` varchar(16) NOT NULL default '',
+  `math_html_conservativeness` tinyint(1) NOT NULL default '0',
+  `math_html` text,
+  `math_mathml` text,
+  UNIQUE KEY `math_inputhash` (`math_inputhash`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_objectcache`
+-- 
+
+CREATE TABLE `isupport_techwiki_objectcache` (
+  `keyname` varchar(255) binary NOT NULL default '',
+  `value` mediumblob,
+  `exptime` datetime default NULL,
+  UNIQUE KEY `keyname` (`keyname`),
+  KEY `exptime` (`exptime`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_oldimage`
+-- 
+
+CREATE TABLE `isupport_techwiki_oldimage` (
+  `oi_name` varchar(255) binary NOT NULL default '',
+  `oi_archive_name` varchar(255) binary NOT NULL default '',
+  `oi_size` int(8) unsigned NOT NULL default '0',
+  `oi_width` int(5) NOT NULL default '0',
+  `oi_height` int(5) NOT NULL default '0',
+  `oi_bits` int(3) NOT NULL default '0',
+  `oi_description` tinyblob NOT NULL,
+  `oi_user` int(5) unsigned NOT NULL default '0',
+  `oi_user_text` varchar(255) binary NOT NULL default '',
+  `oi_timestamp` varchar(14) binary NOT NULL default '',
+  KEY `oi_name` (`oi_name`(10))
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_page`
+-- 
+
+CREATE TABLE `isupport_techwiki_page` (
+  `page_id` int(8) unsigned NOT NULL auto_increment,
+  `page_namespace` int(11) NOT NULL default '0',
+  `page_title` varchar(255) binary NOT NULL default '',
+  `page_restrictions` tinyblob NOT NULL,
+  `page_counter` bigint(20) unsigned NOT NULL default '0',
+  `page_is_redirect` tinyint(1) unsigned NOT NULL default '0',
+  `page_is_new` tinyint(1) unsigned NOT NULL default '0',
+  `page_random` double unsigned NOT NULL default '0',
+  `page_touched` varchar(14) binary NOT NULL default '',
+  `page_latest` int(8) unsigned NOT NULL default '0',
+  `page_len` int(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`page_id`),
+  UNIQUE KEY `name_title` (`page_namespace`,`page_title`),
+  KEY `page_random` (`page_random`),
+  KEY `page_len` (`page_len`)
+) TYPE=MyISAM AUTO_INCREMENT=36 AUTO_INCREMENT=36 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_pagelinks`
+-- 
+
+CREATE TABLE `isupport_techwiki_pagelinks` (
+  `pl_from` int(8) unsigned NOT NULL default '0',
+  `pl_namespace` int(11) NOT NULL default '0',
+  `pl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `pl_from` (`pl_from`,`pl_namespace`,`pl_title`),
+  KEY `pl_namespace` (`pl_namespace`,`pl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_querycache`
+-- 
+
+CREATE TABLE `isupport_techwiki_querycache` (
+  `qc_type` char(32) NOT NULL default '',
+  `qc_value` int(5) unsigned NOT NULL default '0',
+  `qc_namespace` int(11) NOT NULL default '0',
+  `qc_title` char(255) binary NOT NULL default '',
+  KEY `qc_type` (`qc_type`,`qc_value`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_recentchanges`
+-- 
+
+CREATE TABLE `isupport_techwiki_recentchanges` (
+  `rc_id` int(8) NOT NULL auto_increment,
+  `rc_timestamp` varchar(14) binary NOT NULL default '',
+  `rc_cur_time` varchar(14) binary NOT NULL default '',
+  `rc_user` int(10) unsigned NOT NULL default '0',
+  `rc_user_text` varchar(255) binary NOT NULL default '',
+  `rc_namespace` int(11) NOT NULL default '0',
+  `rc_title` varchar(255) binary NOT NULL default '',
+  `rc_comment` varchar(255) binary NOT NULL default '',
+  `rc_minor` tinyint(3) unsigned NOT NULL default '0',
+  `rc_bot` tinyint(3) unsigned NOT NULL default '0',
+  `rc_new` tinyint(3) unsigned NOT NULL default '0',
+  `rc_cur_id` int(10) unsigned NOT NULL default '0',
+  `rc_this_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_last_oldid` int(10) unsigned NOT NULL default '0',
+  `rc_type` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_ns` tinyint(3) unsigned NOT NULL default '0',
+  `rc_moved_to_title` varchar(255) binary NOT NULL default '',
+  `rc_patrolled` tinyint(3) unsigned NOT NULL default '0',
+  `rc_ip` varchar(15) NOT NULL default '',
+  PRIMARY KEY  (`rc_id`),
+  KEY `rc_timestamp` (`rc_timestamp`),
+  KEY `rc_namespace_title` (`rc_namespace`,`rc_title`),
+  KEY `rc_cur_id` (`rc_cur_id`),
+  KEY `new_name_timestamp` (`rc_new`,`rc_namespace`,`rc_timestamp`),
+  KEY `rc_ip` (`rc_ip`)
+) TYPE=MyISAM AUTO_INCREMENT=76 AUTO_INCREMENT=76 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_revision`
+-- 
+
+CREATE TABLE `isupport_techwiki_revision` (
+  `rev_id` int(8) unsigned NOT NULL auto_increment,
+  `rev_page` int(8) unsigned NOT NULL default '0',
+  `rev_text_id` int(8) unsigned NOT NULL default '0',
+  `rev_comment` tinyblob NOT NULL,
+  `rev_user` int(5) unsigned NOT NULL default '0',
+  `rev_user_text` varchar(255) binary NOT NULL default '',
+  `rev_timestamp` varchar(14) binary NOT NULL default '',
+  `rev_minor_edit` tinyint(1) unsigned NOT NULL default '0',
+  `rev_deleted` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`rev_page`,`rev_id`),
+  UNIQUE KEY `rev_id` (`rev_id`),
+  KEY `rev_timestamp` (`rev_timestamp`),
+  KEY `page_timestamp` (`rev_page`,`rev_timestamp`),
+  KEY `user_timestamp` (`rev_user`,`rev_timestamp`),
+  KEY `usertext_timestamp` (`rev_user_text`,`rev_timestamp`)
+) TYPE=MyISAM AUTO_INCREMENT=74 AUTO_INCREMENT=74 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_searchindex`
+-- 
+
+CREATE TABLE `isupport_techwiki_searchindex` (
+  `si_page` int(8) unsigned NOT NULL default '0',
+  `si_title` varchar(255) NOT NULL default '',
+  `si_text` mediumtext NOT NULL,
+  UNIQUE KEY `si_page` (`si_page`),
+  FULLTEXT KEY `si_title` (`si_title`),
+  FULLTEXT KEY `si_text` (`si_text`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_site_stats`
+-- 
+
+CREATE TABLE `isupport_techwiki_site_stats` (
+  `ss_row_id` int(8) unsigned NOT NULL default '0',
+  `ss_total_views` bigint(20) unsigned default '0',
+  `ss_total_edits` bigint(20) unsigned default '0',
+  `ss_good_articles` bigint(20) unsigned default '0',
+  `ss_total_pages` bigint(20) default '-1',
+  `ss_users` bigint(20) default '-1',
+  `ss_admins` int(10) default '-1',
+  `ss_images` int(10) default '0',
+  UNIQUE KEY `ss_row_id` (`ss_row_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_templatelinks`
+-- 
+
+CREATE TABLE `isupport_techwiki_templatelinks` (
+  `tl_from` int(8) unsigned NOT NULL default '0',
+  `tl_namespace` int(11) NOT NULL default '0',
+  `tl_title` varchar(255) binary NOT NULL default '',
+  UNIQUE KEY `tl_from` (`tl_from`,`tl_namespace`,`tl_title`),
+  KEY `tl_namespace` (`tl_namespace`,`tl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_text`
+-- 
+
+CREATE TABLE `isupport_techwiki_text` (
+  `old_id` int(8) unsigned NOT NULL auto_increment,
+  `old_text` mediumblob NOT NULL,
+  `old_flags` tinyblob NOT NULL,
+  PRIMARY KEY  (`old_id`)
+) TYPE=MyISAM AUTO_INCREMENT=72 AUTO_INCREMENT=72 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_trackbacks`
+-- 
+
+CREATE TABLE `isupport_techwiki_trackbacks` (
+  `tb_id` int(11) NOT NULL auto_increment,
+  `tb_page` int(11) default NULL,
+  `tb_title` varchar(255) NOT NULL default '',
+  `tb_url` varchar(255) NOT NULL default '',
+  `tb_ex` text,
+  `tb_name` varchar(255) default NULL,
+  PRIMARY KEY  (`tb_id`),
+  KEY `tb_page` (`tb_page`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_transcache`
+-- 
+
+CREATE TABLE `isupport_techwiki_transcache` (
+  `tc_url` varchar(255) NOT NULL default '',
+  `tc_contents` text,
+  `tc_time` int(11) NOT NULL default '0',
+  UNIQUE KEY `tc_url_idx` (`tc_url`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_user`
+-- 
+
+CREATE TABLE `isupport_techwiki_user` (
+  `user_id` int(5) unsigned NOT NULL auto_increment,
+  `user_name` varchar(255) binary NOT NULL default '',
+  `user_real_name` varchar(255) binary NOT NULL default '',
+  `user_password` tinyblob NOT NULL,
+  `user_newpassword` tinyblob NOT NULL,
+  `user_email` tinytext NOT NULL,
+  `user_options` blob NOT NULL,
+  `user_touched` varchar(14) binary NOT NULL default '',
+  `user_token` varchar(32) binary NOT NULL default '',
+  `user_email_authenticated` varchar(14) binary default NULL,
+  `user_email_token` varchar(32) binary default NULL,
+  `user_email_token_expires` varchar(14) binary default NULL,
+  `user_registration` varchar(14) binary default NULL,
+  PRIMARY KEY  (`user_id`),
+  UNIQUE KEY `user_name` (`user_name`),
+  KEY `user_email_token` (`user_email_token`)
+) TYPE=MyISAM AUTO_INCREMENT=7 AUTO_INCREMENT=7 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_user_groups`
+-- 
+
+CREATE TABLE `isupport_techwiki_user_groups` (
+  `ug_user` int(5) unsigned NOT NULL default '0',
+  `ug_group` char(16) NOT NULL default '',
+  PRIMARY KEY  (`ug_user`,`ug_group`),
+  KEY `ug_group` (`ug_group`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_user_newtalk`
+-- 
+
+CREATE TABLE `isupport_techwiki_user_newtalk` (
+  `user_id` int(5) NOT NULL default '0',
+  `user_ip` varchar(40) NOT NULL default '',
+  KEY `user_id` (`user_id`),
+  KEY `user_ip` (`user_ip`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_validate`
+-- 
+
+CREATE TABLE `isupport_techwiki_validate` (
+  `val_user` int(11) NOT NULL default '0',
+  `val_page` int(11) unsigned NOT NULL default '0',
+  `val_revision` int(11) unsigned NOT NULL default '0',
+  `val_type` int(11) unsigned NOT NULL default '0',
+  `val_value` int(11) default '0',
+  `val_comment` varchar(255) NOT NULL default '',
+  `val_ip` varchar(20) NOT NULL default '',
+  KEY `val_user` (`val_user`,`val_revision`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_techwiki_watchlist`
+-- 
+
+CREATE TABLE `isupport_techwiki_watchlist` (
+  `wl_user` int(5) unsigned NOT NULL default '0',
+  `wl_namespace` int(11) NOT NULL default '0',
+  `wl_title` varchar(255) binary NOT NULL default '',
+  `wl_notificationtimestamp` varchar(14) binary default NULL,
+  UNIQUE KEY `wl_user` (`wl_user`,`wl_namespace`,`wl_title`),
+  KEY `namespace_title` (`wl_namespace`,`wl_title`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_tplfile`
+-- 
+
+CREATE TABLE `isupport_tplfile` (
+  `tpl_id` mediumint(7) unsigned NOT NULL auto_increment,
+  `tpl_refid` smallint(5) unsigned NOT NULL default '0',
+  `tpl_module` varchar(25) NOT NULL default '',
+  `tpl_tplset` varchar(50) NOT NULL default '',
+  `tpl_file` varchar(50) NOT NULL default '',
+  `tpl_desc` varchar(255) NOT NULL default '',
+  `tpl_lastmodified` int(10) unsigned NOT NULL default '0',
+  `tpl_lastimported` int(10) unsigned NOT NULL default '0',
+  `tpl_type` varchar(20) NOT NULL default '',
+  PRIMARY KEY  (`tpl_id`),
+  KEY `tpl_refid` (`tpl_refid`,`tpl_type`),
+  KEY `tpl_tplset` (`tpl_tplset`,`tpl_file`(10))
+) TYPE=MyISAM AUTO_INCREMENT=573 AUTO_INCREMENT=573 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_tplset`
+-- 
+
+CREATE TABLE `isupport_tplset` (
+  `tplset_id` int(7) unsigned NOT NULL auto_increment,
+  `tplset_name` varchar(50) NOT NULL default '',
+  `tplset_desc` varchar(255) NOT NULL default '',
+  `tplset_credits` text NOT NULL,
+  `tplset_created` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`tplset_id`)
+) TYPE=MyISAM AUTO_INCREMENT=3 AUTO_INCREMENT=3 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_tplsource`
+-- 
+
+CREATE TABLE `isupport_tplsource` (
+  `tpl_id` mediumint(7) unsigned NOT NULL default '0',
+  `tpl_source` mediumtext NOT NULL,
+  KEY `tpl_id` (`tpl_id`)
+) TYPE=MyISAM;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_users`
+-- 
+
+CREATE TABLE `isupport_users` (
+  `uid` mediumint(8) unsigned NOT NULL auto_increment,
+  `name` varchar(60) NOT NULL default '',
+  `uname` varchar(25) NOT NULL default '',
+  `email` varchar(60) NOT NULL default '',
+  `url` varchar(100) NOT NULL default '',
+  `user_avatar` varchar(30) NOT NULL default 'blank.gif',
+  `user_regdate` int(10) unsigned NOT NULL default '0',
+  `user_icq` varchar(15) NOT NULL default '',
+  `user_from` varchar(100) NOT NULL default '',
+  `user_sig` tinytext NOT NULL,
+  `user_viewemail` tinyint(1) unsigned NOT NULL default '0',
+  `actkey` varchar(8) NOT NULL default '',
+  `user_aim` varchar(18) NOT NULL default '',
+  `user_yim` varchar(25) NOT NULL default '',
+  `user_msnm` varchar(100) NOT NULL default '',
+  `pass` varchar(32) NOT NULL default '',
+  `posts` mediumint(8) unsigned NOT NULL default '0',
+  `attachsig` tinyint(1) unsigned NOT NULL default '0',
+  `rank` smallint(5) unsigned NOT NULL default '0',
+  `level` tinyint(3) unsigned NOT NULL default '1',
+  `theme` varchar(100) NOT NULL default '',
+  `timezone_offset` float(3,1) NOT NULL default '0.0',
+  `last_login` int(10) unsigned NOT NULL default '0',
+  `umode` varchar(10) NOT NULL default '',
+  `uorder` tinyint(1) unsigned NOT NULL default '0',
+  `notify_method` tinyint(1) NOT NULL default '1',
+  `notify_mode` tinyint(1) NOT NULL default '0',
+  `user_occ` varchar(100) NOT NULL default '',
+  `bio` tinytext NOT NULL,
+  `user_intrest` varchar(150) NOT NULL default '',
+  `user_mailok` tinyint(1) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`uid`),
+  KEY `uname` (`uname`),
+  KEY `email` (`email`),
+  KEY `uiduname` (`uid`,`uname`),
+  KEY `unamepass` (`uname`,`pass`)
+) TYPE=MyISAM AUTO_INCREMENT=768 AUTO_INCREMENT=768 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_wf_resource_types`
+-- 
+
+CREATE TABLE `isupport_wf_resource_types` (
+  `rtid` int(11) NOT NULL auto_increment,
+  `name` text NOT NULL,
+  `description` text,
+  `url` text,
+  `resource_list_select` text,
+  `module_id` int(11) default NULL,
+  PRIMARY KEY  (`rtid`)
+) TYPE=MyISAM COMMENT='WF : resource types' AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_xoopscomments`
+-- 
+
+CREATE TABLE `isupport_xoopscomments` (
+  `com_id` mediumint(8) unsigned NOT NULL auto_increment,
+  `com_pid` mediumint(8) unsigned NOT NULL default '0',
+  `com_rootid` mediumint(8) unsigned NOT NULL default '0',
+  `com_modid` smallint(5) unsigned NOT NULL default '0',
+  `com_itemid` mediumint(8) unsigned NOT NULL default '0',
+  `com_icon` varchar(25) NOT NULL default '',
+  `com_created` int(10) unsigned NOT NULL default '0',
+  `com_modified` int(10) unsigned NOT NULL default '0',
+  `com_uid` mediumint(8) unsigned NOT NULL default '0',
+  `com_ip` varchar(15) NOT NULL default '',
+  `com_title` varchar(255) NOT NULL default '',
+  `com_text` text NOT NULL,
+  `com_sig` tinyint(1) unsigned NOT NULL default '0',
+  `com_status` tinyint(1) unsigned NOT NULL default '0',
+  `com_exparams` varchar(255) NOT NULL default '',
+  `dohtml` tinyint(1) unsigned NOT NULL default '0',
+  `dosmiley` tinyint(1) unsigned NOT NULL default '0',
+  `doxcode` tinyint(1) unsigned NOT NULL default '0',
+  `doimage` tinyint(1) unsigned NOT NULL default '0',
+  `dobr` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`com_id`),
+  KEY `com_pid` (`com_pid`),
+  KEY `com_itemid` (`com_itemid`),
+  KEY `com_uid` (`com_uid`),
+  KEY `com_title` (`com_title`(40))
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `isupport_xoopsnotifications`
+-- 
+
+CREATE TABLE `isupport_xoopsnotifications` (
+  `not_id` mediumint(8) unsigned NOT NULL auto_increment,
+  `not_modid` smallint(5) unsigned NOT NULL default '0',
+  `not_itemid` mediumint(8) unsigned NOT NULL default '0',
+  `not_category` varchar(30) NOT NULL default '',
+  `not_event` varchar(30) NOT NULL default '',
+  `not_uid` mediumint(8) unsigned NOT NULL default '0',
+  `not_mode` tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (`not_id`),
+  KEY `not_modid` (`not_modid`),
+  KEY `not_itemid` (`not_itemid`),
+  KEY `not_class` (`not_category`),
+  KEY `not_uid` (`not_uid`),
+  KEY `not_event` (`not_event`)
+) TYPE=MyISAM AUTO_INCREMENT=57 AUTO_INCREMENT=57 ;

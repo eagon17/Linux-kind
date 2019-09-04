@@ -1,0 +1,110 @@
+
+******************************* Network IP Setup ****************************************
+
+my current network information:
+ifconfig
+
+
+also try:
+route
+
+
+
+to change network information:
+	1. if you have setup tool installed:
+setup
+
+	2. to change directly from file, Network information is kept in:
+
+/etc/sysconfig/network-scripts/ifcfg-eth0
+
+	for DHCP:
+
+DEVICE=eth0
+BOOTPROTO=dhcp
+ONBOOT=yes
+
+
+	for static:
+
+DEVICE=eth0
+BOOTPROTO=none
+ONBOOT=yes
+IPADDR=<number>
+NETMASK=<number>
+GATEWAY=<number>
+TYPE=Ethernet
+NETWORK=<number>
+BROADCAST=<number>
+
+	for example:
+
+DEVICE=eth0
+ONBOOT=yes
+BOOTPROTO=static
+IPADDR=10.129.195.16
+NETMASK=255.255.255.192
+GATEWAY=10.129.195.1
+
+
+
+	in Debian
+
+/etc/network/interfaces 
+ iface eth0 inet static
+             address 192.168.0.111
+             netmask 255.255.255.0
+             gateway 192.168.0.1
+
+
+******************************** changing hostname *******************************
+[root@host3 root]# hostname
+host3.superuser.co.kr
+[root@host3 root]# 
+
+[root@host3 root]# hostname host4
+[root@host3 root]# 
+[root@host3 root]# hostname
+host4
+[root@host3 root]# 
+
+but the above will change back the hostname after the reboot
+
+
+for permanent change, edit:
+
+/etc/sysconfig/network
+HOSTNAME=
+
+
+******************************* DNS Setup ****************************************
+
+edit the file:
+
+/etc/resolv.conf
+nameserver 10.129.195.10
+
+
+
+******************************* Network restart ****************************************
+
+/etc/init.d/network restart
+
+
+
+
+******************************* Internal information ****************************************
+
+internal:
+Mask: 	255.255.255.192
+DNS: 	10.129.195.10
+GW: 	10.129.195.1
+
+
+
+external:
+Mask: 	255.255.255.240
+DNS: 	164.124.101.2
+	168.126.63.1
+GW: 	211.192.198.193
+

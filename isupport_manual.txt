@@ -1,0 +1,61 @@
+************* Setting up isupport server ***********
+
+A. Things needed:
+
+	1. HP7100 w/ 2GB RAM
+	2. WindowsXP Korean installed
+	3. apache_2.0.59-win32-x86-no_ssl.msi
+	4. xampp-win32-1.4.13-installer.exe
+	5. php-5.2.1-Win32.zip (this file contains dir & files)
+	6. mysql-4.1.22-win32.zip (this file contains setup file)
+	7. isupport related files (given from euroup)
+
+
+
+
+
+B. Setting up a Apache-PHP server:
+
+	1. run apache_2.0.59-win32-x86-no_ssl.msi
+	2. install under <C:\ApacheGroup\Apache2> with standard setup.
+	3. run xampp-win32-1.4.13-installer.exe
+	4. install under <C:\ApacheGroup\Apache2\xampp>
+	5. unzip php-5.2.1-Win32.zip under <C:\ApacheGroup\php>
+	6. open C:\ApacheGroup\Apache2\conf\httpd.conf and add the followings:
+		--change the Home directory
+		LoadModule php5_module "C:/ApacheGroup/php/php5apache2.dll"
+		PHPIniDir "C:/ApacheGroup/php"
+		AddType application/x-httpd-php .php .html .htm .php3 .php4 .php5 .inc .phtml
+	7. change php.ini-dis in C:/ApacheGroup/php to php.ini and change the followings:
+		extension_dir = C:\ApacheGroup\php\ext\
+		extension=php_mysql.dll (simply remove the remark)
+	8. copy libmySQL.dll in C:\ApacheGroup\php into C:\Windows\system32
+	9. restart the Apache
+	10.test by making test.php with <? phpinfo(); ?> and see it from the browser.
+
+
+
+
+
+
+C. Setting up a MySQL server:
+
+	1. unzip mysql-4.1.22-win32.zip and run setup file
+	2. install in C:\MySQL and go with all standard.
+
+
+
+
+
+
+D. Creating database and Importing tables:
+
+	1. run MsSQL
+	2. create database and user by doing the followings:
+		create database [DB_name];
+		GRANT ALL PRIVILEGES ON `[DB_name]`.* TO '[user_name]'@'%';
+	3. import the given database tables by doing the following:
+		mysql -u[user_name] -p [DB_name] < [DBStructure.txt]
+
+
+E. Follow the given instruction from EU.

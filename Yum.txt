@@ -1,0 +1,56 @@
+******************** using yum for the first time *********************
+
+for CentOS:
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-5
+
+for Fedora Core 3
+rpm --import /usr/share/doc/fedora-release-3/RPM-GPG-KEY*
+
+
+
+
+******************** Using yum behind the proxy server ****************
+
+edit the file and add the line:
+
+/etc/yum.conf
+
+[main]
+proxy=http://10.129.195.6:8080/
+
+
+
+
+
+
+
+if you get an error, try the following:
+
+yum clean all
+yum clean metadata
+yum update
+yum -y remove yum-fastestmirror
+
+
+to see the available list:
+yum list [name]
+
+to update kernel:
+yum update kernel
+
+to install [service]:
+yum install [service]
+
+
+****************** I hope you don't come this far.. ****************
+
+If you use FC3 but have no /usr/share/doc/fedora-release-3/ files
+install RPM for that
+
+rpm -Uhv fedora-release-3-8
+
+And then, make rpm import
+
+
+
+/etc/yum.repos.d/CentOS-Base.repo

@@ -1,0 +1,15 @@
+
+yum install ntsysv
+yum install ncurses-devel
+yum install gcc-c++
+yum install make
+yum install libxml2-devel
+yum install libpng-devel
+yum install libart_lgpl-devel
+yum install freetype-devel
+yum install vixie-cron crontabs
+yum install zlib
+yum install jpeg
+yum install gd
+yum install glibc
+

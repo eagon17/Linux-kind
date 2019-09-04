@@ -1,0 +1,1600 @@
+**** Basic commands ************************************************************
+
+
+ctrl-C (terminate the foreground task)
+
+ctrl-Z (suspend: after the command start, you can use one of the followings)
+bg + [Enter] (run the current command in the background)
+fg + [Enter] (bringthe running command to the foreground)
+
+
+******************************************************************************************
+rm wallet
+
+immediately deletes the file named wallet in the current directory without prompting. 
+If you want to be prompted before the deletion, use the -i flag. 
+
+Note: There is one little safety feature in rm--it won't delete a directory (unless you use the -r flag).
+
+One other rm flag is -f, which translates roughly to "Don't ask me any questions--just delete the files." 
+While rm normally asks for confirmation before deleting a write-protected file, the -f (force) flag overrides this prompt.
+
+Be careful with the rm command, since the multiuser nature of Linux does not allow for undelete as in DOS. 
+As soon as you let go of the space occupied by a file, the operating system is likely to use it for something else.
+
+Deleting Directories
+
+If you created a directory named spelunking six months ago, and now you're not so keen on crawling through slimy 
+caves, the rmdir command may be able to help:
+
+$ rmdir spelunking
+
+This command removes the specified directory, but only if it's empty. 
+If the directory contains files or subdirectories, you'll have to delete them using rm first.
+
+One alternative to painstakingly removing all the contents of a directory that you just want to 
+make disappear is to use the rm -r command. 
+The -r flag gives rm license to kill directories, their files, and even their subdirectories. 
+Be very sure you understand what's about to happen before using a command like this: 
+
+$ rm -r spelunking
+
+Let's just say that careless use of the -r flag might end your spelunking hobby prematurely.
+
+
+$ rm -rf spelunking
+
+don't ask me, delet all file, dir
+
+
+to change the directory name, use
+
+mv [source-dir] [dest-dir]
+
+
+*************************************************************************************
+
+coping files
+
+#cp source_filename target_filename
+
+
+coping directory
+
+#cp -r source_directory target_directory
+
+
+
+*************************************************************************************
+
+
+**** Boot start up file: ************************************************************
+
+/etc/rc.d/rc.local
+/etc/rc.d/init.d
+
+contains a series of commands that bash executes automatically
+when you log in, similar to autoexec.bat the DOS world.
+
+
+.profile
+
+
+
+
+**** 재부팅 *************************************************************************
+
+shutdown -h now
+
+halt
+
+shutdown  [ -r ]   시간    [ 경고 메시지 ]
+
+-r:   시스템 종료후 재 부팅
+
+ 
+
+시간 : now        지금종료
+
+         +m          m분 이후 종료
+
+         hh:mm     몇시 몇분후 종료
+
+예) shutdown  -r  20:00    Sorry! 
+
+     shutdown  -r  now 
+
+같은 명령어 
+
+reboot   (  ==  shutdown  -r  now )
+
+
+**** Add User ************************************************************************
+
+adduser
+passwd [user]
+
+
+ps -ef | grep hehehe : display all the procedures and show only lines with hehehe
+
+
+
+**** Default Shell ************************************************************************
+
+hermie:x:501:1::/home/hermie:/bin/bash
+hermie:x:501:1::/home/hermie:/bin/pdksh (Korn shell)
+hermie:x:501:1::/home/hermie:/bin/tcsh (C shell)
+
+
+**** alias usage ************************************************************************
+
+alias dir='ls -l'
+alias dogs='find . -name "*dog*" -print'
+
+
+**** using Redirect to Feed program *********************************************************
+
+$nocats < stuff
+
+The program nocats is being fed by < with contents in stuff
+
+
+$nocats < stuff > bother
+
+The result is being stroed into the file 'bother'
+
+$zippity > somefile
+
+The result is being overwritten into 'somefile'
+
+
+$doodah >> somefile
+
+The result is being appended into 'somefile'
+
+
+
+**** using Redirect ************************************************************************
+
+$grep Roosevelt people.txt > grep.out
+
+Grab all the line containing the word 'Roosevelt' in the file 'people.txt'
+and store it into the file 'grep.out'
+
+
+
+$sort +3 grep.out
+
+Sort the 'grep.out' lines on the 4th column(0,1,2,3) and display.
+
+
+**** using ps(process) ************************************************************************
+
+ps -f
+UID PID PPID STIME TTY TIME COMD
+hermie 24 1 00:35:28 tty1 0:01 bash
+hermie 137 24 00:36:39 tty1 0:00 ps -f
+
+The output here shows, for each active task, 
+the UID (User ID),
+PID (Process ID),
+PPID (Parent Process ID),
+STIME (Started TIME),
+TIME (how long the task has been active),
+CMD (the actual command line used to start the task)
+
+If you examine the PIDs and PPIDs, you can see that bash invoked the ps -f command,
+because the PPID of the latter matches the PID of the former.
+
+
+
+**** Running and Killing program in background ***************************************************
+
+$cc hugepgm.c > outlist &
+
+compile hugepgm.c and make it 'outlist' and run it in the background.
+
+
+
+$seek_and_destroy &
+
+to kill the above process, do the following
+
+check the PIC by using,
+
+$ps -f
+
+then,
+
+$kill [PID]
+
+to kill looping or stall program,
+
+$kill -9 [PID]
+
+
+
+**** Running and Killing program in background *************************************************
+
+PS1 defines the shell's command-line prompt.
+
+HOME defines the home directory for a user.
+
+PATH defines a list of directories to search through when looking for a command to execute.
+
+
+
+****IP table manipulation *************************************************
+
+iptables-config file is located at:
+
+$/etc/sysconfig/iptables-config
+
+
+
+
+Location of iptable script is in:
+
+$/etc/rc.d/init.d/iptables [start/stop/restart/save]
+
+
+
+Generally
+
+Try the followings:
+
+$ls -al iptables-config
+
+
+
+range 설정
+
+iptables -A INPUT -p tcp -m iprange --src-range 192.168.1.13-192.168.2.19
+iptables -A INPUT -p tcp -m iprange --dst-range 192.168.1.13-192.168.2.19
+
+iptables -A INPUT -p tcp -m iprange ! --src-range 192.168.1.13-192.168.2.19 (except these)
+
+
+iptables -A INPUT -p tcp -s [특정IP]/32 --dport [port#] -j ACCEPT
+
+iptables -A INPUT -p tcp --dport 0:1024 -j DROP
+
+
+confirm by:
+
+/sbin/iptables -L
+ 
+
+http://wiki.kldp.org/wiki.php/LinuxdocSgml/Packet_Filtering-TRANS
+
+
+
+
+
+
+slow iptables
+
+
+use -n so it wont looup the ip address you added in the nameserver.
+Or add all those ips to 
+
+/etc/hosts
+
+and 
+
+/etc/networks
+
+and make the first in resolver lookup.
+
+
+
+
+
+
+
+
+
+
+
+**** Virtual hosting procedure *************************************************
+
+create/modify the directory below
+
+$var/webapps/[directory]
+
+ex>
+
+$var/webapps/wwwbattlenet/index.html
+
+index.html
+<script>location.href='http://www.worldofwarcraft.co.kr/sorry_blizzard.html';</script>
+
+
+
+************** Checking the user existance ***************************************
+
+Looking in the <home> directory is not enough.
+
+$cat /etc/passwd | grep /home/
+
+h
+************** Checking the current user and present working directory ******************
+
+$who am i
+
+this will display who you are
+
+$su - root
+password:
+#
+(# indicates that you are a root user)
+
+
+
+************** clearing the log file ******************
+
+#cat /dev/null > log_file
+
+
+************** host name looking and changing *********
+
+
+
+[root@host3 root]# hostname
+host3.superuser.co.kr
+[root@host3 root]# 
+
+
+
+
+
+
+[root@host3 root]# hostname host4
+[root@host3 root]# 
+[root@host3 root]# hostname
+host4
+[root@host3 root]# 
+
+but the above will change back the hostname after the reboot
+
+
+
+/etc/sysconfig/network파일의 HOSTNAME부분을 변경하시기 바랍니다. for permenant change.
+
+ 
+
+****************************** SSH ***********************************************
+SSH 
+나는 텔넷은 사용하지 않고 ssh 을 열어두고있다. 텔넷보다는 보안상 좀더 안정적이라고할수있겠다. 
+ssh 의 경우 7.1 버전까지는 기본적으로 root 접속이 가능하다. 
+하지만 7.3버전에서는 접속이 안되니 ssh 에서 루트 접속이 가능하게하려면 ssh 설정파일인 
+
+/etc/ssh/sshd_config 
+
+파일을 열어서 PermitRootLogin 부분을 yes 로 해주시면 된다. 
+
+
+PermitRootLogin yes 
+
+
+
+*****************************************************************************
+
+
+
+
+
+******************************* Network Setup ****************************************
+
+보는 방법은
+
+#route
+
+root로 로그인하셔서
+
+쉘 프롬프트 상에서 setup이라고 치시면 
+
+Network Configuration 메뉴가 나옵니다
+
+거기서 IP, G/W, DNS등을 다시 잡아주시고...
+
+내부서버
+Mask: 	255.255.255.192
+DNS: 	10.129.195.10
+GW: 	10.129.195.1
+
+
+DNS 설정 파일 위치는... /etc/resolv.conf
+
+nameserver 10.129.195.10
+
+
+외부서버
+Mask: 	255.255.255.240
+DNS: 	164.124.101.2
+	168.126.63.1
+GW: 	211.192.198.193
+
+
+
+setup 프로그램을 마치신다음,
+
+다시 쉘 프롬프트 상에서
+
+cd /etc/init.d
+./network restart
+
+
+
+*****************************************************************************
+
+Command-line Configuration
+This method of configuration should work for most Linux distributions. The change is temporary because the commands do not change the network file that is read at startup. 
+
+To configure the IP address manually in a command line, two commands need to be used
+
+ComputerName:~# ifconfig eth0 *IP address* netmask *address*
+
+ComputerName:~# route add default gw *gateway address*
+
+The first command tells the computer to configure Ethernet adapter 0 to have *IP address* as the IP address and *address* for the netmask. The second command configures the gateway of the system. This configuration will last until the device is turned off and on or the computer is restarted.
+
+
+Manually
+Network information is kept in:
+
+/etc/sysconfig/network-scripts/ifcfg-eth0
+
+A file set up to obtain the network information from DHCP has the following look:
+
+DEVICE=eth0
+BOOTPROTO=dhcp
+ONBOOT=yes
+
+
+The ifcfg-eth0 file configured to obtain the network information statically is as follows:
+
+DEVICE=eth0
+BOOTPROTO=none
+ONBOOT=yes
+IPADDR=<number>
+NETMASK=<number>
+GATEWAY=<number>
+TYPE=Ethernet
+NETWORK=<number>
+BROADCAST=<number>
+
+예) 16번 서버
+DEVICE=eth0
+ONBOOT=yes
+BOOTPROTO=static
+IPADDR=10.129.195.16
+NETMASK=255.255.255.192
+GATEWAY=10.129.195.1
+
+
+
+
+in DEBIAN
+
+/etc/network/interfaces 
+ iface eth0 inet static
+             address 192.168.0.111
+             netmask 255.255.255.0
+             gateway 192.168.0.1
+
+
+
+/etc/init.d/networking restart
+
+********************** Partition check *******************************************************
+
+[현재구성]
+
+[root@mail2-2 ~]# df -h
+
+Filesystem            Size  Used Avail Use% Mounted on
+
+/dev/cciss/c0d0p3     9.5G  300M  8.7G   4% /
+
+/dev/cciss/c0d0p1      99M   16M   79M  17% /boot
+
+/dev/shm             1014M     0 1014M   0% /dev/shm
+
+/dev/cciss/c0d0p7      36G   81M   34G   1% /home
+
+/dev/cciss/c0d0p2      15G  7.6G  6.0G  56% /usr <= 이렇게 usr와 var를 /(루트)에 포함시켜 파티셔닝합니다.
+
+/dev/cciss/c0d0p5     4.8G  2.3G  2.3G  51% /var
+
+ 
+
+[차기구성]
+
+[root@mail2-2 ~]# df -h
+
+Filesystem            Size  Used Avail Use% Mounted on
+
+/dev/cciss/c0d0p3     39.5G  300M  8.7G   4% / <= 루트를 확 키움(이에 /var도 덩달아 커지는…)
+
+/dev/cciss/c0d0p1      99M   16M   79M  17% /boot
+
+/dev/shm             1014M     0 1014M   0% /dev/shm
+
+/dev/cciss/c0d0p7      36G   81M   34G   1% /home
+
+
+
+
+메모리
+
+free -m
+
+********************************* system setting commands **************************************
+
+
+$ntsysv
+
+the command above opens the list of available service and allows user to choose
+some of them.
+
+$setup
+
+the command above opens the setup list for the local machine.
+
+
+
+
+********************* 터미널에서 한글 깨짐현상 해결 ***************************************
+
+
+/etc/sysconfig/i18n 파일에...
+
+LANG="ko_KR.eucKR"
+SUPPORTED="ko_KR.UTF-8:ko_KR:ko"
+SYSFONT="latarcyrheb-sun16"
+
+또는
+
+LANG="ko_KR.eucKR"
+SUPPORTED="en_US:en:ko_KR.eucKR:ko_KR:ko"
+SYSFONT="lat0-sun16"
+SYSFONTACM="iso01"
+
+
+를 추가
+
+
+************************* 각종 버젼 확인 ****************************************************
+
+Linux kernel version view
+
+#uname -a
+
+
+
+
+아파치 / PHP 버전확인
+
+
+ps -ef | grep httpd 로 프로세스의 PID를 확인 후
+
+lsof -p [PID]
+
+프로세스가 어느 경로에 위치한 httpd를 사용하는지 확인 후
+
+아파치 설치된 bin/ 디렉토리에서 아래 명령어를 실행시켜보세요
+
+# httpd -v 
+
+또는
+
+# rpm -q httpd
+
+ 
+
+mysql 버전확인
+
+# mysql --version
+
+
+
+sendmail 버전 확인
+
+ -> # echo \$Z | /usr/sbin/sendmail -bt -d0
+
+ 
+
+sendmail 컴파일 옵션 확인
+
+(예를 들어 smtp 인증을 위해 sasl library가 포함되어 있는지 여부 확인 등)
+
+ -> # sendmail -d0.1 -bv | grep SASL
+
+
+
+
+리눅스 설치 module 정보확인
+리눅스박스에 설치된 모듈에 대한 구체적인 파일내역을 확인하려면 아래예와 같이 
+/lib/modules 디렉토리를 참조하기 바란다
+ 
+
+
+
+5. 설치패키지 전체확인
+참고로 rpm 명령어를 이용하여 설치된 패키지를 차근차근 살펴보려면 
+"rpm -qa | more"로 살펴보면 된다. 
+
+
+6. 특정 설치패키지 확인
+아래와 같이 "rpm -qa | grep [패키지명]"
+으로 특정 패키지의 설치여부를 확인할수 있다. 
+
+
+
+7. 초기 설치 패키지 정보확인
+/tmp/install.log 파일을 보면 리눅스설치초기시에 설치된 패키지이름들이 들어가 있다. 
+이 파일도 함께 참조하면 좋을 것 같아서 언급하여본다. 
+ 
+ 
+
+
+
+8. tomcat/apache/php 버전 확인
+
+telnet 대상호스트 80
+GET / HTTP/1.1
+Host: 대상호스트
+엔터두번
+
+치시면 헤더 정보가 죽 나옵니다.
+
+HTTP/1.1 400 Bad Request
+Date: Wed, 03 Jan 2007 12:31:58 GMT
+Server: Apache/2.2.3 (Debian) PHP/5.2.0-8 mod_jk/1.2.19
+Content-Length: 329
+Connection: close
+Content-Type: text/html; charset=iso-8859-1
+
+위의 헤더를 보시면 아파치 2.2.3인걸 알수가 있고 php 5.2.0 이 돌아가고 있죠
+그리고 JSP컨테이너 커넥터로 mod_jk 1.2.19를 쓰는걸 알수 있습니다.
+
+그럼 톰캣버전은 어떻게 보느냐
+그냥 주소창에
+
+http://대상호스트/존재하지않는jsp파일.jsp
+
+치시면
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+HTTP Status 404 - /skldjfl.jsp
+
+--------------------------------------------------------------------------------
+
+type Status report
+
+message /skldjfl.jsp
+
+description The requested resource (/skldjfl.jsp) is not available.
+
+
+--------------------------------------------------------------------------------
+
+Apache Tomcat/5.5.17
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+이런 에러화면이 나오면서 맨 하단에 톰캣 버전이 나옵니다.
+
+참고하시길.. ^^
+
+
+
+********************* rpm 설치 ***********************
+rpm -ivh [파일명]
+
+일반적으로 /usr 안에 설치됨
+
+
+
+
+
+
+
+
+mail server setup
+
+#/etc/mail
+
+#sendmail restart
+
+/etc/mail/access
+/etc/hosts
+/etc/hosts.allow
+/etc/mail/sendmail.cf
+/etc/mail/sendmail.mc
+
+copy the files above
+
+
+등록후에는 반드시 다음과 같이 /etc/mail/access.db에 등록되도록 작업을 해야함.
+
+
+
+#makemap hash /etc/mail/access < /etc/mail/access
+
+Look p450 of 뇌를 자극하는 Redhat Linux
+
+************************ setting the time zone ******************************
+
+
+ln -sf ../usr/share/zoneinfo/[my zone] /etc/localtime
+
+
+/etc/locatime : link to my timezone
+
+
+ls -l localtime : this will display the link of localtime
+
+time synchronizing
+
+
+============ Setting UTC or local time ===================
+
+When Linux boots, one of the initialisation scripts will run the 
+
+/sbin/hwclock 
+
+program to copy the current hardware clock time to the system clock. 
+
+hwclock 
+
+will assume the hardware clock is set to local time unless it is run with the --utc switch. 
+
+Rather than editing the startup script, under Red Hat Linux you should edit the 
+
+/etc/sysconfig/clock 
+
+file and change the ``UTC'' line to either 
+
+``UTC=true'' or ``UTC=false'' as appropriate.
+
+
+
+
+============ Setting the system clock =============
+
+date mmddhhmmyyyy.ss
+
+To set the system clock under Linux, use the date command. 
+
+As an example, to set the current time and date to July 31, 11:16pm, type 
+
+``date 07312316'' (note that the time is given in 24 hour notation). 
+
+If you wanted to change the year as well, you could type ``date 073123161998''. 
+
+To set the seconds as well, type ``date 07312316.30'' or ``date 073123161998.30''. 
+
+To see what Linux thinks the current local time is, run date with no arguments.
+
+
+
+=============== Setting the hardware clock ===========
+
+To set the hardware clock, my favourite way is to set the system clock first, 
+
+and then set the hardware clock to the current system clock by typing ``/sbin/hwclock --systohc'' 
+
+(or ``/sbin/hwclock --systohc --utc'' if you are keeping the hardware clock in UTC). 
+
+To see what the hardware clock is currently set to, run hwclock with no arguments. 
+
+If the hardware clock is in UTC and you want to see the local equivalent, type ``/sbin/hwclock --utc''
+
+
+
+
+************************ crontab usage ******************************
+
+crontab -l : display the currunt crontab (I did this in /etc)
+
+crontab -e : edit the crontab
+
+/etc/cron.d : monitored by cron for changes
+
+
+======= time synch ======
+00 00 * * * /usr/sbin/ntpdate 10.129.195.1 && /sbin/clock -w
+00 06 * * * /usr/sbin/ntpdate 10.129.195.1 && /sbin/clock -w
+00 12 * * * /usr/sbin/ntpdate 10.129.195.1 && /sbin/clock -w
+00 18 * * * /usr/sbin/ntpdate 10.129.195.1 && /sbin/clock -w
+
+or
+
+*/1 * * * * /usr/sbin/ntpdate 10.129.195.1 && /sbin/clock -w
+
+
+and make sure
+iptables -A INPUT -p udp -s 10.129.195.0/26 --dport 123 -j ACCEPT
+
+************************ Memory usage check ******************************
+
+sar
+top
+
+
+
+************************ network speed setup ******************************
+
+#ethtool eth0
+
+the command above will display the current setting
+
+
+
+#ethtool -s eth0 speed 100 duplex full autoneg off
+
+the command above will set the speed to 100 full duplex, turn auto negotiation off
+
+
+
+
+************************ switch ******************************
+
+sh: show
+
+
+sh run vlan [Vlan_number]
+
+
+
+
+
+************************ getting process ID ******************************
+#!/bin/sh
+#-------------------------------------------------
+# This script will do the following.
+#
+#
+# 1. kill java
+# 2. stop catalina
+# 3. start catalina
+#-------------------------------------------------
+
+kill -9 $(pidof java)
+/usr/local/tomcat/bin/catalina.sh start
+
+
+
+****************************************************************************
+
+
+
+
+************************ mail server queue check ******************************
+
+in
+
+/var/spool/mqueue
+
+
+check the listed files
+
+
+
+
+
+kernel version check
+
+uname -a
+
+cat /etc/issue
+
+cat /etc/issue.net
+
+cat /etc/redhat-release
+
+cat /proc/version
+
+
+*******************      apache version check         ***************
+
+#rpm -q httpd
+
+or
+
+#apache/httpd -v
+
+or
+
+
+telnet 대상호스트 80
+GET / HTTP/1.1
+Host: 대상호스트
+엔터두번
+
+치시면 헤더 정보가 죽 나옵니다.
+
+HTTP/1.1 400 Bad Request
+Date: Wed, 03 Jan 2007 12:31:58 GMT
+Server: Apache/2.2.3 (Debian) PHP/5.2.0-8 mod_jk/1.2.19
+Content-Length: 329
+Connection: close
+Content-Type: text/html; charset=iso-8859-1
+
+
+http://대상호스트/존재하지않는jsp파일.jsp to check tomcat
+
+**************************************************************************
+일반적으로 아래와 같이 해당 디렉토리에 다음과 같은 이름으로 있습니다.
+
+ 
+
+< Apache - web >
+
+/usr/local/apache/logs/
+
+access_log
+
+error_log
+
+referer_log
+
+ 
+
+< MySQL - DB >
+
+/usr/local/mysql/var/
+
+localhost.err
+
+ 
+
+< Mail >
+
+/var/log/
+
+maillog
+
+
+*********************************************************************
+
+
+
+
+************* checking the disk usage***********************
+
+df
+df -h
+du -h
+
+mail server 일 경우 /var/spool/mail/root 를 체크해볼 것
+************************************************************
+
+************* General Disk partition ***********************
+/	1G
+/boot	100MB
+swap	2 or 4 x RAM size
+/usr	5G
+/var	3G
+/home	20G
+/data	rest
+************************************************************
+
+
+
+
+**********************linux uses certain proxy server ************
+
+
+~/.bash_profile (if there is no such file, create it.)
+or
+/etc/bashrc
+
+
+
+# proxy setting
+http_proxy="http://anon:anon@10.129.195.6:8080"
+#ftp_proxy="ftp://anon:anon@10.129.195.6:8080"
+no_proxy="10.129."
+
+
+
+
+******************** Using yum behind the proxy server ****************
+
+/etc/yum.conf
+
+[main]
+proxy=http://10.129.195.6:8080/
+
+
+>>>>>>>
+You have enabled checking of packages via GPG keys. This is a good thing.
+However, you do not have any GPG public keys installed. You need to download
+the keys for packages you wish to install and install them.
+You can do that by running the command:
+    rpm --import public.gpg.key
+For more information contact your distribution or package provider.
+>>>>>>>>>>>
+
+rpm --import /usr/share/doc/fedora-release-3/RPM-GPG-KEY*
+
+example, if you use Fedora Core 3
+
+run as root this
+rpm --import /usr/share/doc/fedora-release-3/RPM-GPG-KEY*
+
+for CentOS:
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-5
+
+
+to import GPG public keys.
+If you use another distribution find correspont keys.
+
+
+If you use FC3 but have no /usr/share/doc/fedora-release-3/ files
+install RPM for that
+
+rpm -Uhv fedora-release-3-8
+
+And then, make rpm import
+
+
+
+/etc/yum.repos.d/CentOS-Base.repo
+
+
+
+on problems, try:
+yum clean all
+yum clean metadata
+yum update
+yum -y remove yum-fastestmirror
+
+
+
+************************************************************************
+
+
+
+
+********************** Ping control ************
+
+// ping 요청에 무응답 할 때
+
+[root@myhome root]# echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+
+
+// ping 요청에 응답 할때
+
+[root@myhome root]# echo 0 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+ 
+
+
+
+********************** Making ROOT authority account ************
+
+1. Not exactly the Root
+
+/etc/group
+
+wheel:x:10:root,gchong,minhong,junghoon,chulwoong,seungki,kwangbum,ajin,joonho,[UserID]
+
+
+2. Full Root access:
+
+/etc/passwd
+
+[UserID]:0
+
+3. Full Root access:
+
+#visudo
+
+[UserID] ALL=(ALL) ALL
+
+******************************************************************************
+
+
+
+
+
+
+*********************************** Mounting USB HDD *******************************************
+
+
+Extenal USB hard disk is really useful (and inexpensive) for backing up your Linux server. 
+Follow these steps to get it to work.
+
+1, Buy a USB hard disk (I have bought one 250 GB Western Digital “My Book” 
+Premium 1C External Hard Drive USB2.0/Firewire from CompUSA).
+
+2, Plug in USB cable to your server, power it up.
+
+3, Log in to Linux box, type the following command to if your server can see the disk
+
+tail /var/log/messages
+
+output will have the following entry:
+
+Mar 26 17:45:55 innovitainc kernel: Attached scsi disk sdc at scsi1, channel 0, id 0, lun 0
+
+4, Create partition
+
+fdisk /dev/sdc1
+
+The number of cylinders for this disk is set to 30400.
+There is nothing wrong with that, but this is larger than 1024,
+and could in certain setups cause problems with:
+1) software that runs at boot time (e.g., old versions of LILO)
+2) booting and partitioning software from other OSs
+(e.g., DOS FDISK, OS/2 FDISK)
+
+Command (m for help): p
+
+Disk /dev/sdc1: 250.0 GB, 250056705024 bytes
+255 heads, 63 sectors/track, 30400 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+
+Device Boot Start End Blocks Id System
+/dev/sdc1p1 ? 119512 153402 272218546+ 20 Unknown
+Partition 1 does not end on cylinder boundary.
+/dev/sdc1p2 ? 82801 116350 269488144 6b Unknown
+Partition 2 does not end on cylinder boundary.
+/dev/sdc1p3 ? 33551 120595 699181456 53 OnTrack DM6 Aux3
+Partition 3 does not end on cylinder boundary.
+/dev/sdc1p4 * 86812 86813 10668+ 49 Unknown
+Partition 4 does not end on cylinder boundary.
+
+Partition table entries are not in disk order
+
+Command (m for help): m
+Command action
+a toggle a bootable flag
+b edit bsd disklabel
+c toggle the dos compatibility flag
+d delete a partition
+l list known partition types
+m print this menu
+n add a new partition
+o create a new empty DOS partition table
+p print the partition table
+q quit without saving changes
+s create a new empty Sun disklabel
+t change a partition’s system id
+u change display/entry units
+v verify the partition table
+w write table to disk and exit
+x extra functionality (experts only)
+
+Command (m for help): d
+Partition number (1-4): 1
+
+Command (m for help): d
+Partition number (1-4): 2
+
+Command (m for help): d
+Partition number (1-4): 3
+
+Command (m for help): d
+Selected partition 4
+
+Command (m for help): p
+
+Disk /dev/sdc1: 250.0 GB, 250056705024 bytes
+255 heads, 63 sectors/track, 30400 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+
+Device Boot Start End Blocks Id System
+
+Command (m for help): n
+Command action
+e extended
+p primary partition (1-4)
+p
+Partition number (1-4): 1
+First cylinder (1-30400, default 1):
+Using default value 1
+Last cylinder or +size or +sizeM or +sizeK (1-30400, default 30400):
+Using default value 30400
+
+Command (m for help): p
+
+Disk /dev/sdc1: 250.0 GB, 250056705024 bytes
+255 heads, 63 sectors/track, 30400 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+
+Device Boot Start End Blocks Id System
+/dev/sdc1p1 1 30400 244187968+ 83 Linux
+
+Command (m for help): w
+The partition table has been altered!
+
+Calling ioctl() to re-read partition table.
+
+WARNING: Re-reading the partition table failed with error 22: Invalid argument.
+The kernel still uses the old table.
+The new table will be used at the next reboot.
+Syncing disks.
+
+5. Format hard disk
+
+mkfs.ext3 /dev/sdc1
+
+mke2fs 1.35 (28-Feb-2004)
+Filesystem label=
+OS type: Linux
+Block size=4096 (log=2)
+Fragment size=4096 (log=2)
+30539776 inodes, 61049000 blocks
+3052450 blocks (5.00%) reserved for the super user
+First data block=0
+Maximum filesystem blocks=62914560
+1864 block groups
+32768 blocks per group, 32768 fragments per group
+16384 inodes per group
+Superblock backups stored on blocks:
+32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208,
+4096000, 7962624, 11239424, 20480000, 23887872
+
+Writing inode tables: done
+Creating journal (8192 blocks): done
+Writing superblocks and filesystem accounting information: USB
+done
+
+This filesystem will be automatically checked every 27 mounts or
+180 days, whichever comes first. Use tune2fs -c or -i to override.
+
+6. Edit /etc/fstab using command vi /etc/fstab, add the following line to the file:
+
+/dev/sdc1 /media/usbdisk1 ext3 pamconsole,exec,noauto,managed 0 0
+
+7. Make a directory:
+
+mkdir /media/usbdisk1
+
+8, Mount the disk
+
+mount /media/usbdisk1
+
+9, edit crontab, add these line to reboot server and the mount the USB hard disk.
+
+0 3 * * * /sbin/reboot
+10 3 * * * mount /media/usbdisk1
+
+10. Verify you have the disk ready for use.
+
+df -k
+
+Filesystem 1K-blocks Used Available Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00
+32801652 22583956 8551444 73% /
+/dev/sda1 101086 39634 56233 42% /boot
+/dev/sdb1 70557052 11410016 55562940 18% /disk2
+none 1557528 0 1557528 0% /dev/shm
+/dev/sdc1 240362656 94272 228058584 1% /media/usbdisk1
+
+
+
+********************* 현재 연결된 네트워크 상태 보기 ******************
+
+netstat -nap | grep smb
+************************************************************************
+
+
+
+
+
+
+********************* vsFTP Vs. sFTP ******************
+
+ssh 를 깔면 안에 sFTP 가 내장되어있으며
+/etc/ssh/sshd_config
+파일 안에 자동으로 구동되게 설정되어있다.
+이 라인을 remark 처리해주고,
+
+
+
+vsFTP를 구동시키면 ok.
+설정 파일은
+/etc/vsftpd/vsftpd.config
+
+************************************************************************
+
+
+
+
+
+
+************************* Group management ***********************************************
+view group:
+/etc/group
+
+add user to multiple group:
+
+usermod -G GROUP1,GROUP2,GROUP_N USER_ID
+
+see also: man usermod
+
+************************************************************************
+
+
+***************************** unziping *******************************************
+.tar.tar:
+tar zxvf test.tar.tar
+
+.tar.bz2
+tar -xvf test.tar.bz2
+
+************************************************************************
+
+
+
+******************** changing ownership of the folder ****************
+
+chmod -R root.root /var/blah
+
+************************************************************************
+
+
+
+ 
+
+
+
+******************** displaying CPU information ****************
+
+less /proc/cpuinfo
+
+************************************************************************
+
+
+
+******************** if visudo doesn't work ****************
+
+yum install sudo
+
+************************************************************************
+
+
+
+
+******************** in case of MySQL error ********************
+checking for termcap functions library... configure: error: No curses/termcap library
+
+#yum install ncurses-devel
+or
+#apt-get install libncurses5-dev
+
+************************************************************************
+
+
+
+
+=============================
+
+method 1:
+=========
+I was able to get around this by doing the following:
+
+1. Check the timestamp sudo reports (will look something like below).
+sudo: timestamp too far in the future: Jun 17 08:17:55 2006
+
+2. Use Adjust Date & Time to set the date/time to the sudo timestamp or later.
+
+3. Execute the 'sudo -k' command. (Clears the timestamp).
+
+4. Use Adjust Date & Time to set the date/time back to the correct values.
+
+Worked for me!
+
+peace!
+
+method 2:
+=========
+
+You should also be able to remove the user file in /var/run/sudo
+
+I did this:
+- su to root
+- remove directory (rm -rf /var/run/sudo/username
+
+
+
+
+
+How to mount an USB Pen Drive/Hard Disk
+Attach your USB pendrive to Linux computer.
+#dmesg
+{Check the last lines. It will show the device name used by pendrive for example
+/dev/sda1 or /dev/sdb1)
+#mkdir /pendrive
+#mount /dev/sdb1 /pendrive
+How to unmount & remove an USB Pen Drive/Hard
+Disk from Linux System?
+#unmount /pendrive
+# eject /dev/sdb1 {Pendrive will stop blinking. Now remove it}
+
+
+========= Execute at start up boot ====
+
+
+   25  cat /etc/rc.d/rc.local
+   26  find / -name smscli_mon
+   29  vi /etc/rc.d/rc.local
+
+
+===================================
+
+
+yum install ntsysv
+yum install ncurses-devel
+yum install gcc-c++
+yum install make
+yum install libxml2-devel
+yum install libpng-devel
+yum install libart_lgpl-devel
+yum install freetype-devel
+yum install vixie-cron crontabs
+yum install zlib
+yum install jpeg
+yum install gd
+yum install glibc
+
+/sbin/chkconfig crond on
+/sbin/service crond start
+
+cgilib-0.5.1.tar.gz (./configure - make - make install) (for rrdtool error)
+
+
+=========================================================================
+cd /usr/local
+wget http://rhapsody.gnux.co.kr/download/linux/APM/etc/zlib-1.2.1.tar.gz
+tar xvfz zlib-1.2.1.tar.gz
+cd zlib-1.2.1
+./configure
+make && make install
+cd ..
+rm -rf zlib-1*
+=========================================================================
+
+
+/usr/local/ 을 통으로 압축
+tar cvfpz local.tar.gz /usr/local
+
+/usr/local/ 을 다 지우고 압축을 다시 풀면 처음상태로 돌아감
+
+make -j 4 =>듀얼/쿼드 CPU 경우 빠른 컴파일
+
+
+
+******************** Setting up RAID raid ********************
+
+Old times: mkraid
+now a days: mdadm
+
+mdadm -C /dev/md0 --level=5 --raid-devices=4 /dev/sdb1 /dev/sdc1 /dev/sdd1 /dev/sde1 --spare-devices=1 /dev/sdf1
+
+
+mdadm --detail /dev/md0
+
+********* partition:
+
+fdisk /dev/md0
+n
+p
+1
+w
+
+********* formatting:
+
+mkfs -t ext3 /dev/md0
+or
+mkfs.ext3 /dev/md0
+
+or for raid 4 or 5, following will give you the better performance:
+
+mke2fs -b 4096 -R stride=8 /dev/md0
+
+
+to use: mkraid /dev/md0
+file name : /etc/raidtab
+
+raiddev /dev/md0
+raid-level 5
+nr-raid-disks 4
+nr-spare-disks 1
+persistent-superblock 1
+parity-algorithm left-symmetric
+chunk-size 32
+device /dev/sdb
+raid-disk 0
+device /dev/sdc
+raid-disk 1
+device /dev/sdd
+raid-disk 2
+device /dev/sde
+raid-disk 3
+device /dev/sdf
+spare-disk 4
+
+
+
+
+
+
+******************** Setting up VMware server ********************
+
+yum install ntsysv
+yum install ncurses-devel
+yum install gcc-c++
+yum install make
+yum install libxml2-devel
+yum install libpng-devel
+yum install libart_lgpl-devel
+yum install freetype-devel
+yum install vixie-cron crontabs
+yum install zlib
+yum install jpeg
+yum install gd
+yum install glibc
+yum install xinetd libx11-6 libx11-dev libxtst6 xlibs-dev xinetd wget ssh openssh-server
+yum install libX*
+yum install system-config-
+
+******************** How to update kernel ********************
+yum update kernel
+reboot
+yum remove kernel-2.6.11\*FC3\*
+yum upgrade
+reboot
+************************************************************
+yum update kernel
+uname -a
+yum install kernel-devel
+
+tar zxvf VMware-server-1.0.6-91891.tar.gz
+cd vmware-server-distrib/
+./vmware-install.pl
+
+may use all default values
+Port must be 902, if not, must use <IP>:90x to connect.
+
+
+
+vmware-config.pl to reconfigure the server
+/etc/vmware/vm-list
+
+
+
+This program cannot tell for sure, but you may need to upgrade libc5 to glibc 
+before you can run VMware Server.
+
+******************** In the repair mode ********************
+
+mount -n -o remount /
+
+
+******************** ssh trouble shooting ********************
+
+[root@kalimdor /etc/ssh]# ll
+합계 184
+-rw-------  1 root root 111892  9월 21  2004 moduli
+-rw-r--r--  1 root root   1192  9월 21  2004 ssh_config
+-rw-------  1 root root    668 10월  4  2005 ssh_host_dsa_key
+-rw-r--r--  1 root root    590 10월  4  2005 ssh_host_dsa_key.pub
+-rw-------  1 root root    515 10월  4  2005 ssh_host_key
+-rw-r--r--  1 root root    319 10월  4  2005 ssh_host_key.pub
+-rw-------  1 root root    883 10월  4  2005 ssh_host_rsa_key
+-rw-r--r--  1 root root    210 10월  4  2005 ssh_host_rsa_key.pub
+-rw-------  1 root root   3004 10월  4  2005 sshd_config
+[root@kalimdor ssh]# 
+
+600
+644
+
+/var/empty/ssh permission 111
+

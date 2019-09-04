@@ -1,0 +1,32 @@
+for Uncompress error do
+
+#ln -s /usr/bin/gunzip /usr/bin/uncompress
+
+
+
+wget http://www.steampowered.com/download/hldsupdatetool.bin
+
+chmod +x hldsupdatetool.bin
+
+./hldsupdatetool.bin
+
+./hldsupdatetool.bin
+
+./steam -command update -game "Counter-Strike Source" -dir .
+
+./srcds_run -console -game cstrike -port 27015 +ip 10.129.195.12 +map de_dust +maxplayers 14
+./srcds_run -console -game tf -port 27015 +ip 10.129.195.12 +map ctf_2fort +maxplayers 14
+
+
+********************
+
+Team Fortress:	"tf"
+CounterS:	"Counter-Strike Source"
+
+
+
+installation information is in
+
+
+root/.steam/ClientRegistry.blob
+root/srcds_l/InstallRecord.blob

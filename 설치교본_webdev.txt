@@ -1,0 +1,32 @@
+아파치 설치
+
+./configure --prefix=/usr/local/apache2 --enable-ssl --with-ssl=/usr/local/openssl --enable-dav --enable-dav-fs --enable-auth-digest --enable-info --enable-rewrite --enable-vhost-alias --enable-expires --enable-mime-magic
+
+
+
+
+
+openssl 설치(http://www.openssl.org/source/)
+# cd /tmp
+# tar zxvf openssl-0.9.7c.tar.gz
+# cd openssl-0.9.7c/
+# ./config --prefix=/usr/local/openssl
+# make
+# make install
+
+
+
+
+
+/usr/local/apache2/conf
+
+/usr/local/apache2/modules
+
+
+/usr/local
+
+
+JAVA_HOME=/usr/local/java
+CATALINA_HOME=/usr/local/tomcat
+PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin
+export JAVA_HOME CATALINA_HOME PATH

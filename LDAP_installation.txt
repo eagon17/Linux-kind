@@ -1,0 +1,41 @@
+>yum install openldap openldap-devel nss_ldap openldap-clients openldap-servers
+>slappasswd
+	{SSHA}
+>vi /etc/openldap/slapd.conf
+	database        bdb
+	suffix          "dc=example,dc=com"
+	rootdn          "cn=Manager,dc=example,dc=com"
+	rootpw          {SSHA}
+>service ldap start
+>chkconfig ldap on
+>grep root /etc/passwd > /etc/openldap/passwd.root
+>grep eagon17 /etc/passwd > /etc/openldap/passwd.ldapusers
+>/usr/share/openldap/migration/migrate_passwd.pl /etc/openldap/passwd.root /etc/openldap/root.ldif
+>/usr/share/openldap/migration/migrate_passwd.pl /etc/openldap/passwd.ldapusers /etc/openldap/ldapusers.ldif
+>vi /etc/openldap/root.ldif
+	dn: uid=root,ou=People,dc=example,dc=com
+	uid: root
+	cn: Manager
+
+>vi /etc/openldap/ldapusers.ldif
+	dn: uid=root,ou=People,dc=example,dc=com
+	uid: root
+	cn: Manager
+
+>vi /etc/openldap/example.com.ldif
+
+	dn: dc=example,dc=com
+	dc: example
+	description: Root LDAP entry for example.com
+	objectClass: dcObject
+	objectClass: organizationalUnit
+	ou: rootobject
+
+	dn: ou=People, dc=example,dc=com
+	ou: People
+	description: All people in organisation
+	objectClass: organizationalUnit
+
+>ldapadd -x -D "cn=Manager,dc=example,dc=com" -W -f /etc/openldap/example.com.ldif
+>ldapadd -x -D "cn=Manager,dc=example,dc=com" -W -f /etc/openldap/root.ldif
+>ldapadd -x -D "cn=Manager,dc=example,dc=com" -W -f /etc/openldap/ldapusers.ldif

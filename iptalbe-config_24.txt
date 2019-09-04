@@ -1,0 +1,107 @@
+
+# Load additional iptables modules (nat helpers)
+#   Default: -none-
+# Space separated list of nat helpers (e.g. 'ip_nat_ftp ip_nat_irc'), which
+# are loaded after the firewall rules are applied. Options for the helpers are
+# stored in /etc/modules.conf.
+#IPTABLES_MODULES=""
+
+# Unload modules on restart and stop
+#   Value: yes|no,  default: yes
+# This option has to be 'yes' to get to a sane state for a firewall
+# restart or stop. Only set to 'no' if there are problems unloading netfilter
+# modules.
+#IPTABLES_MODULES_UNLOAD="yes"
+
+# Save current firewall rules on stop.
+#   Value: yes|no,  default: no
+# Saves all firewall rules to /etc/sysconfig/iptables if firewall gets stopped
+# (e.g. on system shutdown).
+#IPTABLES_SAVE_ON_STOP="no"
+
+# Save current firewall rules on restart.
+#   Value: yes|no,  default: no
+# Saves all firewall rules to /etc/sysconfig/iptables if firewall gets
+# restarted.
+#IPTABLES_SAVE_ON_RESTART="no"
+
+# Save (and restore) rule and chain counter.
+#   Value: yes|no,  default: no
+# Save counters for rules and chains to /etc/sysconfig/iptables if
+# 'service iptables save' is called or on stop or restart if SAVE_ON_STOP or
+# SAVE_ON_RESTART is enabled.
+#IPTABLES_SAVE_COUNTER="no"
+
+# Numeric status output
+#   Value: yes|no,  default: yes
+# Print IP addresses and port numbers in numeric format in the status output.
+#IPTABLES_STATUS_NUMERIC="yes"
+
+/sbin/iptables -F
+/sbin/iptables -P INPUT DROP
+/sbin/iptables -P OUTPUT ACCEPT
+/sbin/iptables -P FORWARD DROP
+#test web service
+iptables -A INPUT -p tcp -s 0/0 --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp -s 0/0 --dport 8080 -j ACCEPT
+iptables -A INPUT -p tcp -s 0/0 --dport 443 -j ACCEPT
+iptables -A INPUT -i eth0 -p tcp ! --syn -j ACCEPT
+# DNS Open config
+iptables -A INPUT -i eth0 -p tcp --sport 53 -j ACCEPT
+iptables -A INPUT -i eth0 -p udp --sport 53 -j ACCEPT
+
+# Admin IPS
+iptables -A INPUT -p tcp -s 10.129.193.0/26 --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp -s 10.129.193.128/26 --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp -s 10.129.193.192/26 --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp -s 192.168.114.0/27 --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp -s 10.129.193.128/26 -j ACCEPT
+
+
+# DB Conn
+iptables -A INPUT -p tcp -s 172.31.19.61 --sport 1521 -j ACCEPT
+iptables -A INPUT -p tcp -s 172.31.119.9 --sport 1521 -j ACCEPT
+iptables -A INPUT -p tcp -s 172.19.6.48/28 --sport 1521 -j ACCEPT
+iptables -A INPUT -p tcp -s 172.20.6.48/28 --sport 1521 -j ACCEPT
+iptables -A INPUT -p tcp -s 10.129.195.43 --sport 1521 -j ACCEPT
+
+# SMB Conn for Youngjoon
+iptables -A INPUT -p tcp -s 10.129.193.192/26 --dport 139 -j ACCEPT
+iptables -A INPUT -p tcp -s 10.129.193.192/26 --dport 445 -j ACCEPT
+iptables -A INPUT -p tcp -s 10.129.193.0/26 --dport 139 -j ACCEPT
+iptables -A INPUT -p tcp -s 10.129.193.0/26 --dport 445 -j ACCEPT
+
+# web-file server
+iptables -A INPUT -p tcp -s 10.129.195.50 --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp -s 10.129.195.50 --sport 22 -j ACCEPT
+
+# NTP Open
+iptables -A INPUT -p udp -s 10.129.195.0/26 --dport 123 -j ACCEPT
+
+# for seungki.choi
+#iptables -A INPUT -p tcp -s 10.129.193.64/26 --dport 11211 -j ACCEPT
+#iptables -A INPUT -p tcp -s 10.129.193.64/26 --sport 11211 -j ACCEPT
+iptables -A INPUT -p tcp -s 0/0 --dport 11211 -j ACCEPT
+iptables -A INPUT -p tcp -s 0/0 --sport 11211 -j ACCEPT
+#iptables -A INPUT -p tcp -s 10.129.193.3 -j ACCEPT
+iptables -A INPUT -p tcp -s 10.129.195.16 -j ACCEPT
+
+# DNS Open
+iptables -A INPUT -p tcp -s 10.129.195.0/26 --dport 53 -j ACCEPT
+iptables -A INPUT -p udp -s 10.129.195.0/26 --dport 53 -j ACCEPT
+
+# Icmp config
+iptables -A INPUT -i eth0 -s 10.129.193.0/24 -p icmp -j ACCEPT
+
+# Loofback allow
+iptables -A INPUT -i lo -j ACCEPT
+# Icmp config
+iptables -A INPUT -i eth0 -s 10.129.195.0/26 -p icmp -j ACCEPT
+iptables -A INPUT -p icmp -s 172.17.52.251 -j ACCEPT
+iptables -A INPUT -p icmp -s 172.17.52.253 -j ACCEPT
+iptables -A INPUT -p icmp -s 172.17.52.252 -j ACCEPT
+iptables -A INPUT -p icmp -s 211.192.198.193 -j ACCEPT
+iptables -A INPUT -p icmp -s 211.192.198.221 -j ACCEPT
+iptables -A INPUT -p icmp -s 211.192.198.220 -j ACCEPT
+iptables -A INPUT -p icmp -s 10.129.195.1 -j ACCEPT
+iptables -A INPUT -p icmp -s 10.129.195.64/26 -j ACCEPT

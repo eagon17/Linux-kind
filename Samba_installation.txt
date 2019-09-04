@@ -1,0 +1,62 @@
+
+/etc/samba/smb.conf
+
+************** web example **************
+
+[global]
+   log file = /var/log/samba-log.%m
+   lock directory = /var/lock/samba
+   share modes = yes
+
+[homes]
+   comment = Home Directories
+   browseable = no
+   read only = no
+   create mode = 0750
+
+[tmp]
+   comment = Temporary file space
+   path = /share_for_windows
+   read only = no
+   public = yes
+******************************************
+
+
+
+
+
+************** 16¹ø ¼­¹ö example **************
+
+[global]
+        workgroup = mygroup1
+        server string = Samba Server
+        printcap name = /etc/printcap
+        load printers = yes
+        cups options = raw
+        log file = /var/log/samba/%m.log
+        max log size = 50
+        security = SHARE
+*passwd:*all*authentication*tokens*updated*successfully*
+        socket options = TCP_NODELAY SO_RCVBUF=8192 SO_SNDBUF=8192
+        dns proxy = no
+        idmap uid = 16777216-33554431
+        idmap gid = 16777216-33554431
+        template shell = /bin/false
+        password server = None
+        winbind use default domain = no
+[homes]
+        comment = Home Directories
+        browseable = no
+        writeable = yes
+
+[printers]
+        comment = All Printers
+        path = /var/spool/samba
+        browseable = no
+        printable = yes
+
+[imgs]
+        path = /var/www/imgs
+        writeable = yes
+        guest ok = yes
+******************************************

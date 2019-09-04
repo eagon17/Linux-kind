@@ -1,0 +1,130 @@
+블리자드 리눅스 서버 일반 설치 과정
+
+Install all program in
+
+/usr/local
+
+1. java
+
+2. openssl
+
+3. apache
+
+4. tomcat
+
+***********************************
+
+
+1. installing java
+
+chmod 755 java.bin
+./java.bin
+
+
+
+2. openssl
+
+tar zxvf openssl.tar
+cd openssl-0.0
+./config --prefix=/usr/local/openssl
+make
+make install
+
+
+
+3. installing apache (httpd)
+
+tar zxvf apache.tar
+cd apache.0.0.0
+./configure --prefix=/usr/local/apache --enable-ssl --with-ssl=/usr/local/openssl --enable-dav --enable-dav-fs --enable-auth-digest --enable-info --enable-rewrite --enable-vhost-alias --enable-expires --enable-mime-magic
+make
+make install
+
+confirm:
+/usr/local/apache/conf/httpd.conf file
+
+
+
+
+
+
+
+
+
+
+4. installing tomcat
+
+tar zxvf tomcat.tar
+cd tomcat
+
+
+
+
+
+
+
+other things to make sure
+
+
+/etc/rc.d/rc.local (start up file)
+
+/etc/profile (java path)
+
+
+JAVA_HOME=/usr/local/java
+CATALINA_HOME=/usr/local/tomcat
+PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin
+export JAVA_HOME CATALINA_HOME PATH
+
+
+
+
+source /etc/profile (enable path)
+
+
+
+
+
+
+
+******************** Web Log Server setup **********************************************************
+
+
+
+mkdir /var/webapps
+chown -R ajin /var/webapps/
+cp -R /var/webapps/confTomcat/conf/Catalina/10.129.195.50/ /usr/local/tomcat/conf/Catalina/
+mv /usr/local/tomcat/conf/Catalina/10.129.195.50/ /usr/local/tomcat/conf/Catalina/10.129.195.7
+mv /usr/local/tomcat/conf/server.xml /usr/local/tomcat/conf/server.xml.org
+cp -R /var/webapps/confTomcat/conf/server.xml /usr/local/tomcat/conf
+vi /usr/local/tomcat/conf/server.xml
+/usr/local/tomcat/bin/catalina.sh start
+perl awstats_configure.pl 
+perl /usr/local/awstats-6.6/awstats_configure.pl
+cd /usr/local/awstats-6.6
+ls -al tools/
+perl /usr/local/awstats-6.6/tools/awstats_configure.pl 
+ls -al doc
+ls -al docs/
+ls -al tools/
+ls -al wwwroot/
+/usr/local/awstats/tools/awstats_buildstaticpages.pl -config=www.worldofwarcraft.co.kr -dir=/var/webapps/logsvr/awstats/ -update -configdir=/var/webapps/logsvr/awstats/ -year=2007 -month=01
+/usr/local/awstats-6.6/tools/awstats_buildstaticpages.pl -config=www.worldofwarcraft.co.kr -dir=/var/webapps/logsvr/awstats/ -update -configdir=/var/webapps/logsvr/awstats/ -year=2007 -month=01
+/usr/local/awstats-6.6/tools/awstats_buildstaticpages.pl -config=www.worldofwarcraft.co.kr -dir=/var/webapps/logsvr/awstats/ -update -configdir=/var/webapps/logsvr/awstats/ -year=2007 -month=01
+mv /usr/local/awstats-6.6 /usr/local/awstats
+/usr/local/awstats/tools/awstats_buildstaticpages.pl -config=www.worldofwarcraft.co.kr -dir=/var/webapps/logsvr/awstats/ -update -configdir=/var/webapps/logsvr/awstats/ -year=2007 -month=01
+
+
+
+
+
+
+
+
+
+******************** Samba Server setup **********************************************************
+
+
+
+
+./configure --prefix=/usr/local/samba --with-ssl=/usr/local/openssl --with-smbwrapper --with-automount --with-ldap --with-nis --with-nisplus --with-nisplus-home 

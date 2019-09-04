@@ -1,0 +1,174 @@
+R165049.txt
+
+Dell SAS 5 & SAS 6 Controller
+Device Driver for
+
+	RHEL 5 (x86 & x86_64) 
+	SLES 10 (x86_64)
+
+Driver Version : 04.00.07.00
+
+
+TABLE OF CONTENTS
+=================
+
+1  Introduction
+2  Compatibility / Minimum Requirements
+3  Install Instructions
+   3.1  The package.
+   3.2  Installing the Linux driver during an OS installation.
+   3.3  Adding/Updating the SAS Driver to an Existing system.
+4  Fixes or Enhancements in this Release
+5  Important Information
+6  Known issues
+
+
+1 Introduction
+==============
+
+This is the driver for following controllers:
+ 
+    SAS 5 Controllers
+    SAS 6 Controllers
+
+
+2 Compatibility / Minimum Requirements
+======================================
+
+This Device Driver is compatible with RHEL 5.
+This Device Driver is compatible with SLES 10.
+
+Minimum SAS 5 FW package version: 00.10.51.00.06.12.04.00
+Minimum SAS 6 FW package version: 00.20.43.00.06.14.08.00
+
+
+3 Installation Instructions
+===========================
+
+
+3.1 The package.
+----------------
+
+The driver package consists of a compressed tar file.  
+
+To extract the compressed file in the tar file, 
+first, uncompress the file:
+	"> gunzip <driver_package.tgz>"
+then, un-tar the files: 
+	"> tar -xvf <driver_package.tar>"
+	
+NOTE: The first step is not needed on SLES10 & RHEL5 systems.
+      Files extension change when uncompressed (*.tgz->*.tar)
+	
+The package should contain the following files:
+ - dkms rpm (dkms<version>.rpm)
+ - driver rpm (mptlinux<version>.rpm)
+ - release notes (*.txt)
+ - source code (megaraid<version>src.tgz)
+ - driver update disk (DUD) image for the different OSes (*.img)
+
+Preparation of the DUD image.  Transfer the image to the floppy:
+	Use "> dd if=<image_file_name> of=/dev/fd0"
+
+On most systems, the floppy drive is designated by the /dev/fd0 special file.
+It is recommended that the dd command is executed before the floppy is mounted.
+
+
+3.2 Installing the Linux driver during an OS installation
+----------------------------------------------------------
+
+- Installing the driver on a Red Hat Enterprise Linux system -
+
+Perform the following steps to install the RHEL 5 driver
+using the DUD:
+
+1  Boot normally to the RHEL installation media.
+2  At the command prompt, type:
+		> Linux expert dd
+3  When the install prompts for a driver diskette, insert the 
+   driver update disk (DUD) prepared earlier and press <Enter>.
+4  Complete the installation as directed by the installation program.
+
+- Installing the driver on a SuSE Enterprise Server system - 
+
+Perform the following steps to install the SLES 10 driver 
+using the DUD:
+
+1  Boot normally to the SLES installation media.
+2  Select <F5> for the driver update disk on SLES 10 installations.
+3  Select Installation from the menu.
+4  Press <Enter> to load the Linux kernel.
+5  At the prompt insert the driver update disk and follow instructions.
+6  Complete the installation as directed by the installation program.
+
+
+3.3 Adding/Updating the SAS Driver to an Existing Linux system
+--------------------------------------------------------------
+
+1  Install the DKMS rpm package if needed. Use this command: 
+      "> rpm -ivh <dkms rpm package name>"
+   
+   NOTE: Use rpm -Uvh <package name> when updating an existing package.
+   
+2  Install the Driver package. Use this command: 
+      "> rpm -ivh <driver rpm package name>"
+
+3  Verify the driver has been loaded with this system command:
+      "> lsmod mptsas"
+   and this dkms command:
+      "> dkms status"
+   The version shown in the output should match in both cases with 
+   the version of the package.
+
+
+4 Fixes or Enhancements in this Release 
+=======================================
+
+1  Added support:
+    - For SAS 6/iR controllers.
+    - To report a deleted RAID volume to upper layers when a 
+      firmware event is received saying that the volume has been disabled.
+    - To display port link speed.
+    - Xen kernel
+    - Additional kernel modes (precompiled binaries)
+    - For installing RPM after a DUD install on RHEL5.
+2  Hot plug functionality:
+    - Enhancement to re-queue event on 5 second intervals for 
+      1 minute until the device is found in the topology. 
+    - Handling improvements to decrease the impact of keyboard 
+      availability when many drives are added and removed. 
+4  Improvements of RAID event handling for hidden RAID components and 
+   for RAID events scheduling.
+5  Fixed a problem with volumes becoming read-only when one disk from 
+   a RAID1 volume was pulled.
+6  Timing and reset handling improvements to avoid configuration 
+   problems at startup.
+7  Fixed memory management problems to avoid memory leaks at driver 
+   load time under some conditions.
+8  Changed memory allocation to input/output buffer to manage 2kb buffers 
+   without stack overflow problems.
+
+
+5 Important Information
+=======================
+
+5.1 Power state transition
+--------------------------
+Note that system power state transitions are not validated on Dell 
+platforms under the Linux Operating Systems. If attempted, the 
+system might hang and/or panic resulting in data loss.
+
+5.2 DKMS AUTOINSTALL
+--------------------
+DKMS AUTOINSTALL option should always be disabled in the DKMS 
+configuration file for driver installation.
+
+
+6 Known issues
+==============
+Installation problems on SATA I drives: SAS Controllers require a minimum 
+of SATA II drives.  SATA I drives are not supported.  Use only SAS or 
+SATA II drives supported by your Dell system.
+
+
+

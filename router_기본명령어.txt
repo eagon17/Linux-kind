@@ -1,0 +1,86 @@
+Device>			user prompt
+
+Device#			privileged prompt
+			in this mode, you may: show(result), debug(procedure, current status)
+			save, delete(initialize all only), ping test, telnet
+
+Device(Config)#		global prompt
+
+Device(Config-if)#	interface configuring prompt
+
+Device(Config-line)#	line configuring prompt
+
+
+
+
+
+
+#show hosts		show the connected devices
+
+#clear line [port#]	ban other connection, may try several times
+
+>enable			enter privgd. mode
+
+#reload			initialize the device (reboot)
+
+#exit			return to the mode you came from
+
+#auth?			shows all possible command starting with 'auth'
+
+tab-key			completes the command
+
+#configure terminal	enter global mode
+
+#show running-config	show current configuration
+
+Changing certain value/setting is only possible in the mode where change/setting was initially performed.
+
+#show ip route		show all of detailed port/interface information
+
+기본설정(추가):		만약 DCE 장비라면 연결 serial interface 안에서
+			clock rate 값을 주어야한다. (일반적으로 64000)
+
+DCE(주) - DTE(종)
+
+(config)#interface ethernet [#]				enter the interface to configure
+
+(config-if)#ip address [ip] [subnet mask]		assign ip address to the current interface.
+
+#show ip interface brief				interface 가 shutdown/no shutdown 인지 보여줌.
+
+status			protocol
+
+administrative down	down		local interface is shutdown
+down			down		remote interface is shutdown
+up			down		remote DCE(clock) isn't set properly
+up			up		if no connection even with this state, IP isn't set properly
+down			up		no possible combo
+
+there are 3 ways of accessing device.
+
+con (consol)
+aux (modem)
+tel (telnet)
+
+(config)#line console 0			enter console #0 to configure
+(config-line)#password [password]	set password
+(config-line)#login			ask password when user connects to current interface.
+
+(config)#line aux 0			enter aux #0 to configure
+(config-line)#password [password]	set password
+(config-line)#login			ask password when user connects to current interface.
+
+(config)#line telnet 0			enter console #0 to configure
+(config-line)#password [password]	set password. if no password, can't connect through telnet.
+(config-line)#login			ask password when user connects to current interface.
+
+#enable secret		enable로 넘어갈때 암호를 물어봄. show running-config 으로 암호가 보이지 않음
+#enable password	enable로 넘어갈때 암호를 물어봄. show running-config 으로 암호가 보임
+
+enable password 가 없으면 telnet 상에서 privilege mode 로 전환 불가능.
+
+#no ip domain-lookup	오타 시 바로 에러 메시지 전달.
+
+#logging syn		로그메시지와 command 를 분리.
+
+#exec-t [minute] [second]	AFK 시간 조절.		

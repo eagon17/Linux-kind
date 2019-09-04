@@ -1,0 +1,15 @@
+yum install httpd mod_ssl openssl
+yum install mysql-server mysql
+yum install net-snmp-devel
+yum install php
+yum install cacti
+yum install rrdtool
+
+
+Add the following to the file: /etc/yum.repos.d/CentOS-Base.repo
+
+[extras2] 
+name=Fedora Extras - $releasever - $basearch 
+baseurl=http://download.fedora.redhat.com/pub/fedora/linux/extras/6/$basearch/ 
+gpgcheck=0 
+gpgkey=http://download.fedora.redhat.com/pub/fedora/linux/extras/RPM-GPG-KEY-Fedora-Extras 

@@ -1,0 +1,165 @@
+for .bz2 files, use
+tar xjvf cornbread.tar.bz2
+yum install *bzip*
+yum install flex
+
+
+yum install ncurses-devel
+yum install gcc-c++
+yum install make
+yum install libxml2-devel
+yum install libpng-devel
+yum install libart_lgpl-devel
+yum install freetype-devel
+yum install setuptool
+sudo yum install vixie-cron crontabs
+sudo /sbin/chkconfig crond on
+sudo /sbin/service crond start
+cgilib-0.5.1.tar.gz (./configure - make - make install) (for rrdtool error)
+
+
+
+설치순서:
+	1. MySQL
+	2. Apache (httpd)
+	3. PHP
+	4. configure MySQL
+	5. RRDtool
+	6. Net-SNMP
+	7. Cacti
+
+1. MySQL
+	./configure --prefix=/usr/local/mysql
+	make
+	make install
+	groupadd mysql
+	useradd -g mysql mysql
+	scripts/mysql_install_db
+	chown -R root /usr/local/mysql
+	chown -R mysql /usr/local/mysql/var
+	chgrp -R mysql /usr/local/mysql
+	rm -f /etc/my.cnf
+	cp support-files/my-medium.cnf /etc/my.cnf
+	echo /usr/local/mysql/lib/mysql >> /etc/ld.so.conf
+	echo /usr/local/lib >> /etc/ld.so.conf
+	ldconfig -v
+	cp support-files/mysql.server /etc/init.d/mysql
+	/usr/local/mysql/bin/mysqld_safe --user=mysql &
+	echo
+	cd /etc/rc3.d/
+	ln -s ../init.d/mysql S85mysql
+	ln -s ../init.d/mysql K85mysql
+	cd /etc/rc5.d/
+	ln -s ../init.d/mysql S85mysql
+	ln -s ../init.d/mysql K85mysql
+	cd /etc/init.d/
+	chmod 755 mysql
+
+2. Apache (httpd)
+	./configure --prefix=/www -enable-so
+	make
+	make install
+	cd /www/bin
+	cp apachectl /etc/init.d/httpd
+	y
+	cd /etc/rc3.d/
+	ln -s ../init.d/httpd S85httpd
+	ln -s ../init.d/httpd K85httpd
+	cd /etc/rc5.d/
+	ln -s ../init.d/httpd S85httpd
+	ln -s ../init.d/httpd K85httpd
+	/www/bin/apachectl start
+if you get a
+	httpd: Could not reliably determine the server's fully qualified domain name, using 203.248.244.168 for ServerName
+error,
+	vi /www/conf/httpd.conf
+	ServerName 127.0.0.1:80
+
+3. PHP
+	./configure --prefix=/www/php --with-apxs2=/www/bin/apxs --with-config-file-path=/www/php --enable-sockets --with-mysql=/usr/local/mysql --with-zlib-dir=/usr/include -with-gd
+	make
+	make install
+	cp php.ini-dist /www/php/php.ini
+	cp /www/conf/httpd.conf /www/conf/httpd.conf.backup
+	echo ####################### >> /www/conf/httpd.conf
+	echo # Added via Lee Carter's Script >> /www/conf/httpd.conf
+	echo ####################### >> /www/conf/httpd.conf
+	echo AddType application/x-tar .tgz >> /www/conf/httpd.conf
+	echo AddType application/x-httpd-php .php >> /www/conf/httpd.conf
+	echo AddType image/x-icon .ico >> /www/conf/httpd.conf
+	echo DirectoryIndex index.php index.html index.html.var >> /www/conf/httpd.conf
+	service httpd stop
+	service httpd start
+
+4. configure MySQL
+	cd /cacti-install
+	groupadd cacti
+	useradd -g cacti cactiuser
+	/usr/local/mysql/bin/mysql
+		mysql> set password for root@localhost=password('rootpw');
+		mysql> create database cactidb;
+		mysql> grant all on cactidb.* to root;
+		mysql> grant all on cactidb.* to root@localhost;
+		mysql> grant all on cactidb.* to cactiuser;
+		mysql> grant all on cactidb.* to cactiuser@localhost;
+		mysql> set password for cactiuser@localhost=password('cactipw');
+		mysql> exit
+
+5. RRDtool
+	./configure --prefix=/usr/local/rrdtool
+	make
+	make install
+
+6. Net-SNMP
+	./configure
+	make
+	make install
+		
+		if NETSNMP_DONT_CHECK_VERSION problem occurs,
+		#export NETSNMP_DONT_CHECK_VERSION=1
+
+7. Cacti
+	cd /cacti-install
+	cp cacti* /www/htdocs/
+	cd /www/htdocs/
+	tar -zxvf cacti*
+	mv cacti-0.8.6b cacti/
+	cd cacti
+	/usr/local/mysql/bin/mysql --user=root --password=rootpw cactidb < cacti.sql
+	chown -R cactiuser rra/ log/
+
+	vi /www/htdocs/cacti/include/config.php
+		$database_defaut = “cactidb”;
+		$database_hostname = “localhost”;
+		$database_username = “cactiuser”;
+		$database_password = “cactipw”;
+
+	vi /etc/crontab
+		*/5 * * * * cactiuser /www/php/bin/php /www/htdocs/cacti/poller.php > /dev/null 2>&1
+	or, log in as cactiuser and put
+	crontab -e
+		*/5 * * * * /www/php/bin/php /www/htdocs/cacti/poller.php > /dev/null 2>&1
+
+
+Done.
+
+http://000.000.000.000/cacti
+
+Next - Nwe Install - Next
+
+Fix by changing the following:
+
+RRDTOOL = /usr/local/rrdtool/bin/rrdtool
+PHP = /www/php/bin/php
+
+Login: admin/admin
+
+
+recommended versions:
+
+httpd-2.0.52.tar.gz
+php-4.3.8.tar.gz
+mysql-4.0.21.tar.gz
+rrdtool-1.0.49.tar.gz
+net-snmp-5.1.2.tar.gz
+cacti-0.8.6b.tar.gz

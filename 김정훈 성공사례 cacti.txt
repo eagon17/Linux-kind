@@ -1,0 +1,12 @@
+현재 windows 에서 running 하고 있는 cacti에 대한 모든 version 정보입니다.
+
+Cacti version 0.8.7b
+RRDTOOL WIN ver. : 1.2.19
+Cygwin : 1.5.21
+Net-SNMP WIN ver : 5.4.0.1
+PHP Version 5.1.2
+MySQL Version 5.0.18
+Zend Optimizer Version 2.6.0
+phpMyAdmin Version 2.7.0-pl2 
+
+참고로 모든 버전은 windows용 버전입니다. ?

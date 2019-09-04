@@ -1,0 +1,53 @@
+Desktops
+
+	* X Window System
+	* GNOME Desktop
+	KDE(K Desktop Environment)
+
+
+Applications
+
+	* Editors
+	Engineering and Scientific
+	* Graphical Internet
+	* Text-based Internet
+	Office/Productivity
+	Sound and Video
+	Authoring and Publishing
+	Graphics
+	Games and Entertainment
+
+
+Servers
+
+	* Server Configuration Tools
+	* Web Server
+	Mail Server
+	Windows File Server
+	DNS Name Server
+	* FTP Server
+	SQL Database Server
+	News Server
+	Network Servers
+
+
+Development
+
+	* Development Tools
+	Kernel Development
+	X Software Development
+	GNOME Software Development
+	KDE Software Development
+
+
+System
+
+	* Administration Tools
+	* System Tools
+	Printing Support
+
+
+Miscellaneous
+
+	Everything
+	Minimal

@@ -1,0 +1,72 @@
+How To Install MediaWiki on Linux
+
+1. install MySQL
+2. install Apache (httpd)
+3. install PHP
+4. install WIKI (Just copy the directory)
+
+1. MySQL
+
+rpm -ivh MySQL-client-4.0.26-0.i386.rpm MySQL-server-4.0.26-0.i386.rpm MySQL-shared-4.0.26-0.i386.rpm
+
+mysql_install_db
+
+Make sure /etc/ld.so.conf contains: 
+/usr/lib
+
+Run ldconfig 
+/sbin/ldconfig
+
+2. Apache
+
+ mv httpd-2.0.55.tar.gz /usr/local/; cd /usr/local/
+ tar -xzvf httpd-2.0.55.tar.gz
+ cd httpd-2.0.55
+ ./configure --enable-so
+ make
+ make install
+
+Test functionality by:
+
+/usr/local/apache2/bin/apachectl start
+/usr/local/apache2/bin/apachectl stop
+
+in httpd.conf file, check
+DocumentRoot and put WIKI folder in it.
+
+3. PHP
+
+
+mv php-4.4.1.tar.gz /usr/local/; cd /usr/local/
+tar -xzvf php-4.4.1.tar.gz
+cd php-4.4.1/
+./configure --with-apxs2=/usr/local/apache2/bin/apxs --with-mysql
+make
+make install
+
+Make some modifications to the httpd.conf file... 
+ LoadModule php4_module        modules/libphp4.so
+ AddType application/x-httpd-php .php .phtml     
+ AddType application/x-httpd-php-source .phps
+
+4. WIKI
+
+tar -xzvf mediawiki-1.5.1.tar.gz
+cp mediawiki /var/www/wiki
+
+Modify httpd.conf again, and restart the httpd ... 
+ DirectoryIndex index.html index.html.var index.php
+ /usr/local/apache2/bin/apachectl restart
+
+
+
+
+
+
+DBname: wikidb
+DBusername: wikiuser
+
+jiwoong
+abc123!@#
+
+mysql: root/nopassword

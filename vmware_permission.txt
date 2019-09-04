@@ -1,0 +1,10 @@
+chmod 755 folder
+chmod 600 *.vmdk
+chmod 444 *.WRITELOCK
+chmod 600 *.vmem
+chmod 600 nvram
+chmod 600 *.vmsd
+chmod 755 *.vmx
+chmod 644 *.log
+
+vmware-vdiskmanager -x [Desired Size]GB [File_name].vmdk

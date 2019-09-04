@@ -1,0 +1,75 @@
+리눅스/유닉스 명령어 모음
+리눅스와 유닉스에서 쓰이는 일반적인 명령어들을 나열하고 실제 활용 방법을 기록합니다. 
+
+BASH 일반
+
+파일과 디렉토리
+ls : 파일 목록 보기 
+cp : 파일의 복사 
+mv : 파일의 이동과 이름 바꾸기 
+rm : 파일의 삭제 
+ln : 파일과 디렉토리에 대한 링크 생성 
+mkdir : 디렉토리의 생성 
+rmdir : 디렉토리의 삭제 
+touch : 빈파일을 생성하거나 파일의 수정된 날짜를 현재 시각으로 변경 
+chown : 파일의 소유자 바꾸기 
+chgrp : 파일의 그룹 바꾸기 
+chmod : 파일의 허가권 설정 
+du : 현재 디렉토리가 차지하고 있는 용량보기 
+cat : 
+find : 파일 검색 
+locate : 
+which : 
+whereis : 
+
+압축과 아카이브
+tar : 아카이브(여러 파일을 한 파일로 묶음)를 생성하고 푼다. 
+gzip : 
+gunzip : 
+bzip2 : 
+bunzip2 : 
+compress : 
+uncompress : 
+
+디스크와 파일 시스템
+fstab : 파일 시스템 마운트 정보를 저장한 /etc/fstab 파일의 작성법 
+mount : 디스크와 파일 시스템의 마운트 
+umount : 마운트된 파일 시스템 언마운트(마운트 해제) 
+df : 마운트된 각 파티션의 용량과 사용량, 남은 용량 보기 
+
+프로세스 관리
+top : 현재 메모리 및 프로세스별 자원 사용률 표시 
+ps : 
+kill : 
+killall : 
+
+사용자와 그룹
+superadduser : 대화식으로 자동화된 사용자 계정 추가 명령 
+useradd : 사용자 계정 추가 
+adduser : see useradd 
+passwd : 계정의 비밀번호 바꾸기 
+groupadd : 그룹 추가 
+su : root 혹은 다른 사용자의 권한 획득 
+usermod : 
+groupmod : 
+
+시스템 관리
+shutdown : 시스템의 종료와 재부팅 
+free : 메모리와 스왑 이용량 출력 
+uname : 시스템 정보 표시(커널 종류/버전 등) 
+
+네트워크/인터넷
+telnet : 
+ftp : 
+ping : 
+ssh : 
+
+텍스트 처리
+sed : 텍스트 프로세싱 툴(스트림 에디터) 
+awk(gawk) : 패턴 스캔 & 프로세싱을 위한 랭귀지 툴 
+grep : 텍스트 파일 내용 검색 
+more : 
+less : 
+
+기타
+man : Manual 페이지 보기 

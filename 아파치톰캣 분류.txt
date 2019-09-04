@@ -1,0 +1,18 @@
+Java
+
+	jdk-1_5_0_11-linux-i586
+
+
+Apache
+
+	httpd-2.0.59.tar
+	httpd-2.2.3.tar
+	httpd-2.2.4.tar
+
+
+Tomcat
+
+	apache-tomcat-4.1.34.tar
+	apache-tomcat-5.5.20.tar
+	apache-tomcat-5.5.23.tar
+	apache-tomcat-6.0.7.tar

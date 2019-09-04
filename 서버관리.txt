@@ -1,0 +1,36 @@
+armory 장비	: 10.129.195.27
+check deamon	: /usr/local/apache2/bin/httpd -k start
+run		: /usr/local/apache2/bin/httpd -k start == pass phrase: 승기사랑
+관계자		: 김아진
+
+
+
+kalimdor 장비	: 10.129.195.35
+check page	: http://kalimdor:8080
+관계자		: 길기상, 백지숙
+업무지장	: SL부서, 회원탈퇴/가입 확인
+
+
+
+heroes 장비	: 10.129.195.36
+check deamon	: /www/java/bin/java -Xms768m -Xmx768m -Djava.endorsed.dirs=/www/tomcat/common/endorse
+check page	: http://heroes/HeroesTool/jsp/ht/login.do;jsessionid=93AFFB2BA30672D3AB0C5F4B1D89E9D9
+run		: startup.sh
+
+
+
+sms 장비	: 10.129.195.46
+check deamon	: ./smscli_mon and ./smscli
+background	: /home/kwangbum/sms/smscli_mon &
+
+
+
+sms DB 장비	: 10.129.195.47
+check deamon	: /bin/sh /usr/bin/mysqld_safe --defaults-file=/etc/my.cnf --pid-file=/var/run/mysqld/
+		  mysql     2090  2060  0 02:26 ?        00:00:00 /usr/libexec/mysqld --defaults-file=/etc/my.cnf --basedir=/usr --datadir=/var/lib/my
+run		: service mysqld start
+
+
+
+SVN 장비	: 10.129.195.48
+run		: /usr/local/apachectl start

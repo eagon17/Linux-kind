@@ -1,0 +1,1065 @@
+
+**1. 패킷 필터링이란
+
+***1-1. 패킷 필터란: 
+
+지나가는 패킷의 헤더를 살펴보고 패킷의 운명을 결정짓는 프로그램
+아래에 TCP 패킷의 구조를 예로 들어놓았다. 각각의 패킷의 헤더를 살펴보면 상당히 유용한 정보를 얻을 수 있는데 이러한 것을 이용하여 합법적이거나 정상적인 패킷은 ACCEPT 하고 그렇지 않은 패킷에 대해서는 DROP을 시키거나 지나가는 특별한 패킷에 대한 관찰(LOG)을 할 수 있다. 
+
+****예) TCP/IP 패킷의 구조
++--------------------------------------------+----
+| IP header | TCP Header | Application Data  | 
++--------------------------------------------+----
+
+***** TCP 패킷의 구조
+
+0                                 16                                   31
++----------------------------------------------------------------------+
+|       Source Port               |        Destination Port            |
++----------------------------------------------------------------------+
+|                        Sequence Number                               |
++----------------------------------------------------------------------+
+|                        Acknowledgement Number                        |
++----------------------------------------------------------------------+
+| offset  |   Reserved |  Flag    |        Window                      |
++----------------------------------------------------------------------+
+|           Checksum              |        Urgent Pointer              | 
++----------------------------------------------------------------------+
+|              Option                                    | Padding     | 
++----------------------------------------------------------------------+
+|                   Data region                                        | 
++----------------------------------------------------------------------+
+
+Source Port : 소스 포트 번호
+Destination Port : 목적지 포트 번호
+Sequence number : 패킷의 첫 번째 바이트의 일련번호
+Acknowledgment number : 수신될 다음번 바이트의 예상 일련번호
+Data Offset : 패킷내의 데이터 오프셋
+Control Bits : 
+    URG : 긴급 포인터
+    ACK : 승인
+    PSH : 푸쉬 기능
+    RST : 접속의 리셋
+    SYN : 동기화 일련번호
+    FIN : 송신자로부터 더 이상의 데이터 없음
+Window : 송신자의 윈도우 사이즈
+Checksum : 헤더와 데이터의 TCP 체크섬값
+Urgent Pointer : TCP 긴급 포인터
+Options : TCP 옵션들
+    *SEG_SEQ : 패킷의 일련번호
+    *SEG_ACK : 패킷의 확인번호
+    *SEG_FLAG : 제어 비트
+
+
+
+***** IP 패킷의 구조
+아래의 그림에서는 IP 패킷의 구조를 간략하게 보여주고 있으며 정확한 크기는 아니다.  
+0                                 16                                   31
++----------------------------------------------------------------------+
+| version | header length| TOS    |        Total length                |
++----------------------------------------------------------------------+
+| identification                  | flag |    flagment offset          |       
++----------------------------------------------------------------------+
+| Time To Live(TTL)|  protocol    |        Header Checksum             |
++----------------------------------------------------------------------+
+| 32bit Source address                                                 |
++----------------------------------------------------------------------+
+| 32bit Destination address                                            |
++----------------------------------------------------------------------+
+|              Option                                    | Padding     | 
++----------------------------------------------------------------------+
+|                   Data region                                        | 
++----------------------------------------------------------------------+
+
+version : 버전 
+Header length : IP header의 길이
+Type of Service(TOS) : 서비스의 종류 (FTP, DNS.....)
+total length : 패킷 전체의 길이 
+Identification : 16bit로 각각의 datagram을 구분
+Fregmentation offset : 분절에 대한 offset
+Time to live(TTL) : 패킷의 생존시간
+Protocol : 프로토콜 
+Header checksum : 오류검출
+Source IP address : 32bit로 데이터를 보내는 주소 
+Destination IP address : 32bit로 데이터를 받는 주소 
+
+< TCP/IP 5 Layers >
+
+Application
+     
+Transport(TCP, UDP)
+
+Network(IP)
+
+Data link
+
+Physical
+
+***1-2. netfilter 의 구조
+
+----> Routing --------> [Forword Chain] ----------------------->
+         |                                         ^
+|                                         |
+         v                                         |
+     [Input Chain] ---> local Process -------> [Output Chain]
+
+
+**2. netfilter를 사용하기 위한 커널옵션
+Menuconfig
+
+Networking options  --->  
+[*] Network packet filtering (replaces ipchains)  
+
+IP: Netfilter Configuration  --->   
+  <M> Connection tracking (required for masq/NAT)         
+  <M>   FTP protocol support                                  
+  <M> Userspace queueing via NETLINK (EXPERIMENTAL)           
+  <M> IP tables support (required for filtering/masq/NAT)     
+  <M>   limit match support                                   
+  <M>   MAC address match support                             
+  <M>   netfilter MARK match support                          
+  <M>   Multiple port match support                           
+  <M>   TOS match support                                     
+  <M>   tcpmss match support                                  
+  <M>   Connection state match support                        
+  <M>   Unclean match support (EXPERIMENTAL)                  
+  <M>   Owner match support (EXPERIMENTAL)                    
+  <M>   Packet filtering                                      
+  <M>     REJECT target support                               
+  <M>     MIRROR target support (EXPERIMENTAL)                
+  <M>   Full NAT                                              
+  <M>     MASQUERADE target support                           
+  <M>     REDIRECT target support                             
+  <M>   Packet mangling                                       
+  <M>   LOG target support                                    
+  <M>   TCPMSS target support        
+
+**3. iptables의 활용
+
+iptables은 netfilter 의 조작을 위한 utility 이다.
+
+옵션정리
+---------------------------------------------------------------------
+-N : 새로운 체인 만들기
+-X : 비어있는 체인을 제거하기
+-P : 미리 만들어진 체인의 정책을 바꾸기
+-L : 어떤 체인의 규칙들을 나열하기
+-F : 체인으로부터 규칙들을 지우기
+-Z : 체인내의 모든 규칙들의 패킷과 바이트의 카운드를 0 으로 만들기
+
+-A : 체인에 새로운 규칙을 추가하기
+-I : 체인의 어떤 지점에 규칙을 삽입하기
+-R : 체인의 어떤 지점의 규칙을 교환하기
+-D : 체인의 어떤 지점의 규칙을 제거하기
+-D : 체인에서 일치하는 첫번째 규칙을 제거하기
+
+-s : 출처 주소
+-d : 목적지 주소
+-p : 프로토콜(tcp, udp, icmp)
+-i : 패킷이 들어오는 인터페이스 ( input, foward )
+-o : 패킷이 나가는 인터페이스 ( foward, output )
+-f : 분절
+-j : 점프
+--syn : 밑에서 자세히 설명하겠음
+--dport : 목적지의 포트 정의
+--sport : 출발지의 포트 정의
+----------------------------------------------------------------------
+
+좀더 자세한 설명은 리눅스 2.4 패킷 필터링 하우투를 확인하기 바란다.
+여기서는 간략한 예만을 다룰것이다.
+
+***3.1 iptables의 사용예 
+
+Rule 을 chain에 적용하기
+# iptables -A INPUT -s 127.0.0.1 -p icmp -j DROP
+
+Rule 을 chain에서 제거하기
+# iptables -D INPUT 1
+# iptables -D INPUT -s 127.0.0.1 -p icmp -j DROP
+입력 체인으로부터 1번 규칙을 제거한다. 
+
+***3.3 필터링 지정 
+앞에서 프로토콜을 지정하기위하여 '-p'를 이용하였고, 출처를 지정하기 위하여 '-s'를 이용하였다. 그 외에도 패킷의 특징을 지정하는데 사용되 는 다른 옵션들이 있다. 아래는 이것들에 대한 완벽한 개요이다. 
+
+****source 와 destination 의 지정
+-s, -d 옵션지정에 사용되어지는 4가지 방법
+kerbung.org, localhost 
+127.0.0.1
+192.168.1.7/24
+192.168.1.7/255.255.255.0
+
+# iptables -A INPUT -s 192.168.1.7 -j DROP
+
+****'역'의 경우 지정
+
+많은 지시자들('-s'나 '-d' 같은)은 일치하지 않는 주소를 나타내기 위하여 '!'('not'을 의미한다)로 시작하는 설정을 할 수 있다. 예로, '-s ! localhost' 는 localhost로부터오는 패킷이 아닌경우를 나타낸다. 
+
+****프로토콜 지정
+
+프로토콜은 '-p' 지시자로 지정할 수 있다. 프로토콜을 숫자가 될수 있고 (IP의 프로토콜 번호를 알고 있다면) 'TCP', 'UDP', 'ICMP' 같은 이름이 될 수도 있다. 그리고 'tcp'는 'TCP'와 같은 역할을 한다. 
+
+프로토콜 이름 지정에도 '!'을 이용할 수 있다. '-p ! TCP' 
+
+****인터페이스 지정
+
+'-i'('--in-interface')와 '-o'('--out-interface')가 인터페이스를 지정 하는데 사용된다.
+
+특별한 경우로, 인터페이서 이름이 '+'로 끝날수 있는데 이것은 그 이름으로 시작하는 모든 인터페이서를 모두 지정한다(그것이 현재 존재하든 존재하지 않든). 예를들어, 모든 PPP 인터페이서와 일치하는 규칙을 지정하려면 -i ppp+와같이 하면 된다. 
+
+인터페이서 이름앞에 '!'도 이용할 수 있다. 
+
+****확장
+
+*****TCP 확장
+--tcp-flags
+'!' 옵션을 사용한다면 이것 뒤에 두개의 단어를 사용한다. 첫번째 것은 검사하고자 하는 지시자 리스트의 마스크이다. 두번째 단어는 지시자에게 어떤것이 설정 될 것인지를 말해준다. 예를들어, 
+
+# iptables -A INPUT -s 192.168.1.1 --protocol tcp --tcp-flags SYN,RST,ACK,SYN -j DENY
+192.168.1.1로 부터 tcp방식에 의한 접속 차단
+
+--syn
+이것은 '--tcp-flags SYN,RST,ACK,SYN'의 약어이다. 
+
+# iptables -A INPUT -p TCP -s 192.168.1.1 --syn -j DENY
+
+--source-port or --sport 
+Source 포트 
+
+--destination-port or --dport 
+도착지 포트
+
+*****UDP 확장
+이 확장은 '--protocol udp'가 지정되고 적용이 저정되지 않으면 자동으로 적재된다. 이것은 '--source-port', '--sport', '--destination-port', '-dport'를 지원하고 내용은 TCP 설명에서 자세히 나왔다. 
+
+*****새로운 타겟
+
+타겟의 다른 형태는 확장이다. 타겟 확장은 커널 모듈로 구성된다. 그리고 iptables 에 대한 선택적 확장은 새로운 명령행의 옵션을 제공한다. 기본적으로 넷필터 배포에 포함된 몇몇의 확장은 다음과 같다. 
+
+LOG
+일치하는 패킷의 커널 로그를 제공한다. 이것은 부가의 옵션을 제공한다. 
+
+--log-level 레벨 숫자나 이름 지정
+'debug' 'info', 'notice', 'warning', 'err', 'crit', 'alert', 'emerg' 이름은 각각 숫자 7 에서 0 에 대응된다. 
+--log-prefix 14자 까지의 문장을 지정
+
+REJECT
+이 모듈은 'DROP'과 같은 효과를 나타낸다. 다만, 'port unreachable' 이라는 에러 메세지를 ICMP 로 보낸다.
+
+RETURN
+RETURN은 한 체인의 끝으로 보내지는 것과 같은 효과가 있다. : 미리 만들어진 체 인의 경우 그 체인의 정책은 실행이다. 사용자 정의 체인의 경우 이 체인으로 점프 하는 규칙의 바로 다음인 이전 체인으로 이동한다. 
+
+QUEUE
+QUEUE은 특별한 타겟으로, 사용자공간의 작업을 위해 패킷을 대기하도록 한다. 패킷 을 위해서 대기하고있는 것이 없다면(즉, 이 패킷을 다룰 프로그램이 아직 씌어져 있지 않다면) 패킷은 DROP 될 것이다. 
+
+***3.4 타겟 지정 
+
+이제 패킷에서 어떤 검사를 할 수 있는지를 알았다. 이제 우리의 검사에 일치 하는 패킷을 어떻게 할 것인지를 말하는 것을 알아야 한다. 이것을 규칙 타겟 이라고 한다. 
+
+두개의 이미 만들어진 단순한 타겟이 있다. : DROP 과 ACCEPT. 이미 이것에 대해서는 이야기를 한 적이 있다. 적용이 되는 패킷과 그것의 타겟이 위의 두 개중 하나라면 더이상의 참고할 규칙은 없다. : 패킷의 운명은 결정 되는 것 이다. 
+
+이미 만들어진 두개의 타겟외에 두가지 형태의 타겟이 있다.: 확장과 사용자 지정의 체인들 이다. 
+
+****사용자 지정의 체인들
+
+ipchains로 부터 상속되는 iptables의 강력한 기능중의 하나는 능력되는 사용 자가 기존의 세개의 체인(입력, 출력, 포워드)외에 새로운 체인을 생성할 수 있다는 것이다. 모임의 결과 사용자 지정의 체인은 그것을 구분하기 위하여 소문 자로 나타낸다. (아래 전체 체인에 대한 작용 부분에서 어떻게 사용자 지정의 새로운 체인을 만드는지 기술할 것이다.) 
+
+타겟이 사용자 지정의 체인인 규칙에 패킷이 맞으면 패킷은 사용자 지정의 체인을 따라 움직이게 된다. 그 체인이 패킷의 운명을 결정하지 못하면 그리고 그 체인에 따른 이송이 끝나면, 패킷은 현제 체인의 다음 규칙으로 돌아온다. 
+
+그림을 보자. 두개의 체인이 있고 그것이 입력과 테스트라는 사용자 지정의 체인이 라고 가정하자. 
+
+          `INPUT'                         `test'
+         ----------------------------    ----------------------------
+         | Rule1: -p ICMP -j DROP   |    | Rule1: -s 192.168.1.1    |
+         |--------------------------|    |--------------------------|
+         | Rule2: -p TCP -j test    |    | Rule2: -d 192.168.1.1    |
+         |--------------------------|    ----------------------------
+         | Rule3: -p UDP -j DROP    |
+         ----------------------------
+
+192.168.1.1 로부터 와서 1.2.3.4 로 향하는 TCP 패킷이 있다고 가정한다. 이것은 입력 체인으로 들어온다. Rule1 을 검사한다. 맞지 않음. Rule2 맞음. 그것의 타겟 은 테스트, 고로 다음 검사할 규칙은 테스트의 시작이다. 테스트의 Rule1 이 맞다. 그러나 이것이 타겟을 지정하지 않는다. 그러므로 다음 규칙이 검사된다. Rule 2. 맞지 않다. 그 체인의 끝에 도달했다. 다시 입력 체인으로 돌아가서 Rule3 을 검사 한다. 그것도 맞지 않다. 
+
+여기서 패킷의 이동경로를 그림으로 나타냈다. 
+
+                                v    __________________________
+         `INPUT'                |   /    `test'                v
+        ------------------------|--/    -----------------------|----
+        | Rule1                 | /|    | Rule1                |   |
+        |-----------------------|/-|    |----------------------|---|
+        | Rule2                 /  |    | Rule2                |   |
+        |--------------------------|    -----------------------v----
+        | Rule3                 /--+___________________________/
+        ------------------------|---
+                                v
+
+사용자 지정의 체인에서 대를 사용자 지정의 체인으로 갈수 있다. (그러나 루프 를 돌수는 없다. 루프를 발견하게 되면 패킷은 DROP 된다.) 
+
+잘못 설정한 예 - 순서를 바꾸어야 정상적으로 작동할 것이다.
+iptables -A input -p tcp --dport 0:1023 -j DROP
+iptables -A input -p tcp --dport 80 -j ACCEPT
+
+***3.5 전체 체인에 대한 작용. 
+
+iptables의 유용한 기능주 하나는 여러 관계가 있는 규칙을 하나의 체인속으로 그룹화 하는 것이다. 체인의 이름은 어떤 것을 사용할 수도 있으나 미리 만들어 진 체인과의 혼동을 막기 위하여 소문자를 사용하기를 권한다. 체인의 이름은 16 자 까지 가능하다. 
+
+****새로운 체인 생성
+
+# iptables -N test
+
+****체인 제거
+'-X' 나 '--delete-chain' 사용
+
+# iptables -X test
+체인을 지우기 위해서는 체인이 비어있어야 하며 다른 규칙의 타겟이 아니어야 한다. 
+
+****체인 비우기
+'-F' ('--flush') 사용
+
+# iptables -F forward
+
+체인을 지정하지 않으면 모든 체인의 규칙이 지워진다. 
+
+****체인 규칙 나열하기
+'-L' 사용
+예)
+iptables -L INPUT
+iptables -t nat -L
+
+**4. NAT(Network Address Translation) 활용
+
+***4-1 NAT 이란
+SNAT(Source Nat), DNAT(Destination Nat)
+
+[PREROUTING](DNAT) --> Routing ------------> [POSTROUTING](SNAT) -->
+                         |                          ^
+                         |                          |
++- local Process ----------+   
+
+****NAT의 활용
+
+*****예1)MASQUERADING
+    iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+*****예2) 고정IP 하나로 내부호스트들에 대한 서비스하기
+
+    # soribada & dialpad for Sung-ho
+    iptables -A PREROUTING -t nat -p udp --dport 9068 -j DNAT --to 192.168.1.7:9068
+    iptables -A PREROUTING -t nat -p udp --dport 9067 -j DNAT --to 192.168.1.7:9067
+    iptables -A PREROUTING -t nat -p udp --dport 9066 -j DNAT --to 192.168.1.7:9066
+    iptables -A PREROUTING -t nat -p udp --dport 9065 -j DNAT --to 192.168.1.7:9065
+    iptables -A PREROUTING -t nat -p tcp --dport 51210 -j DNAT --to 192.168.1.7:51210
+    iptables -A PREROUTING -t nat -p udp --dport 51200 -j DNAT --to 192.168.1.7:51200
+    iptables -A PREROUTING -t nat -p udp --dport 51201 -j DNAT --to 192.168.1.7:51201
+    iptables -A PREROUTING -t nat -p tcp --dport 51210 -j DNAT --to 192.168.1.7:51210
+    iptables -A PREROUTING -t nat -p udp --dport 51200 -j DNAT --to 192.168.1.7:51200
+    iptables -A PREROUTING -t nat -p udp --dport 51201 -j DNAT --to 192.168.1.7:51201
+
+    # nanumi for Sung-ho
+    iptables -A PREROUTING -t nat -p udp --dport 9292 -j DNAT --to 192.168.1.7:9292
+    iptables -A PREROUTING -t nat -p tcp --dport 9292 -j DNAT --to 192.168.1.7:9292
+
+    # Winamp broadcast for Sung-ho
+    iptables -A PREROUTING -t nat -p udp --dport 8000 -j DNAT --to 192.168.1.7:8000
+    iptables -A PREROUTING -t nat -p tcp --dport 8000 -j DNAT --to 192.168.1.7:8000
+
+    # ftp for Bokyu
+    iptables -A PREROUTING -t nat -p udp --dport 2100 -j DNAT --to 192.168.1.5:2100
+    iptables -A PREROUTING -t nat -p tcp --dport 2100 -j DNAT --to 192.168.1.5:2100
+
+    # telnet for Bokyu
+    iptables -A PREROUTING -t nat -p udp --dport 2300 -j DNAT --to 192.168.1.5:2300
+    iptables -A PREROUTING -t nat -p tcp --dport 2300 -j DNAT --to 192.168.1.5:2300
+
+    # www for Bokyu
+    iptables -A PREROUTING -t nat -p udp --dport 8080 -j DNAT --to 192.168.1.5:8080
+    iptables -A PREROUTING -t nat -p tcp --dport 8080 -j DNAT --to 192.168.1.5:8080
+
+*****예3) 투명프록시
+
+111.111.111.112   <->   192.168.1.2
+111.111.111.113   <->   192.168.1.3
+111.111.111.114   <->   192.168.1.4
+
+내부 호스트의 Gateway 192.168.1.1
+
+/etc/network/interfaces
+------------------------------------------------------------------------
+# /etc/network/interfaces -- configuration file for ifup(8), ifdown(8)
+
+# The loopback interface
+# automatically added whe upgrading
+auto lo
+iface lo inet loopback
+
+# The first network card - this entry was created during the Debian installatio
+# (network, broadcast and gateway are optional)
+# automatically added whe upgrading
+
+auto eth0
+iface eth0 inet static
+      address 111.111.111.112
+      netmask 255.255.255.0
+      broadcast 111.111.111.255
+      network 111.111.111.0
+      gateway 111.111.111.1
+
+auto eth0:0
+iface eth0:0 inet static
+      address 111.111.111.113
+      netmask 255.255.255.0
+      broadcast 111.111.111.255
+      network 111.111.111.0
+
+auto eth0:1
+iface eth0:1 inet static
+      address 111.111.111.114
+      netmask 255.255.255.0
+      broadcast 111.111.111.255
+      network 111.111.111.0
+
+auto eth1
+iface eth1 inet static
+      address 192.168.1.1
+      netmask 255.255.255.0
+      broadcast 192.168.1.255
+      network 192.168.1.0
+
+auto eth1:0
+iface eth1:0 inet static
+      address 192.168.1.2
+      netmask 255.255.255.0
+      broadcast 192.168.1.255
+      network 192.168.1.0
+------------------------------------------------------------------------
+*nat
+-A PREROUTING -d 111.111.111.112 -j DNAT --to-destination 192.168.1.2
+-A PREROUTING -d 111.111.111.113 -j DNAT --to-destination 192.168.1.3
+-A PREROUTING -d 111.111.111.114 -j DNAT --to-destination 192.168.1.4     
+
+-A POSTROUTING -s 192.168.1.2 -j SNAT --to-source 111.111.111.102
+-A POSTROUTING -s 192.168.1.3 -j SNAT --to-source 111.111.111.103
+-A POSTROUTING -s 192.168.1.4 -j SNAT --to-source 111.111.111.104
+
+*****예4) 부하분산
+
+RoundRobin 방식에 의한 부하분산
+목적지 주소를 192.168.1.2 이나 192.168.1.3 또는 192.168.1.4로 바꾸기
+iptables -t nat -A PREROUTING -i eth1 -j DNAT --to 192.168.1.2-192.168.1.4
+
+
+**5. 시스템 부트시 초기화하기
+
+위에서 적용하였던 여러가지 Rule들을 저장하거나 복구하는 도구로서 iptables-save 와 iptables-restore 가 있다. 
+간단한 예를 살펴보면 
+# iptables-save > myRule
+
+아래는 생성된 myRule 파일이다.
+------------------------------------------------------------------------------------
+# Generated by iptables-save v1.2.3 on Sat Oct 27 15:06:49 2001
+*nat
+:PREROUTING ACCEPT [865:65046]
+:POSTROUTING ACCEPT [4:752]
+:OUTPUT ACCEPT [162:9841]
+-A PREROUTING -p udp -m udp --dport 9068 -j DNAT --to-destination 192.168.1.7:9068
+-A PREROUTING -p udp -m udp --dport 9067 -j DNAT --to-destination 192.168.1.7:9067
+-A PREROUTING -p udp -m udp --dport 9066 -j DNAT --to-destination 192.168.1.7:9066
+-A PREROUTING -p udp -m udp --dport 9065 -j DNAT --to-destination 192.168.1.7:9065
+-A PREROUTING -p tcp -m tcp --dport 51210 -j DNAT --to-destination 192.168.1.7:51210
+-A PREROUTING -p udp -m udp --dport 51200 -j DNAT --to-destination 192.168.1.7:51200
+-A PREROUTING -p udp -m udp --dport 51201 -j DNAT --to-destination 192.168.1.7:51201
+-A PREROUTING -p tcp -m tcp --dport 51210 -j DNAT --to-destination 192.168.1.7:51210
+-A PREROUTING -p udp -m udp --dport 51200 -j DNAT --to-destination 192.168.1.7:51200
+-A PREROUTING -p udp -m udp --dport 51201 -j DNAT --to-destination 192.168.1.7:51201
+-A PREROUTING -p udp -m udp --dport 9292 -j DNAT --to-destination 192.168.1.7:9292
+-A PREROUTING -p tcp -m tcp --dport 9292 -j DNAT --to-destination 192.168.1.7:9292
+-A PREROUTING -p udp -m udp --dport 8000 -j DNAT --to-destination 192.168.1.7:8000
+-A PREROUTING -p tcp -m tcp --dport 8000 -j DNAT --to-destination 192.168.1.7:8000
+-A PREROUTING -p udp -m udp --dport 2100 -j DNAT --to-destination 192.168.1.5:2100
+-A PREROUTING -p tcp -m tcp --dport 2100 -j DNAT --to-destination 192.168.1.5:2100
+-A PREROUTING -p udp -m udp --dport 2300 -j DNAT --to-destination 192.168.1.5:2300
+-A PREROUTING -p tcp -m tcp --dport 2300 -j DNAT --to-destination 192.168.1.5:2300
+-A PREROUTING -p udp -m udp --dport 8080 -j DNAT --to-destination 192.168.1.5:8080
+-A PREROUTING -p tcp -m tcp --dport 8080 -j DNAT --to-destination 192.168.1.5:8080
+-A POSTROUTING -o eth0 -j MASQUERADE
+COMMIT
+# Completed on Sat Oct 27 15:06:49 2001
+--------------------------------------------------------------------------------------
+                                               
+# iptables-restore myRule
+
+위의 과정은 현재 설정되어 있는 Rule 을 myRule 파일에 저장하고 다시 저장되었던 Rule 을 복구하는 방법이다. 
+하지만 이러한 방법보다는 필자의 경우는 다음과 같은 형식의 스크립트를 /etc/init.d/myRule 이라는 스크립트로 만들어서 저장하고 Runlevel 2 에서 이를 적용하여 사용하고 있다. 
+
+
+----------------------------------------------------------------------------
+/etc/init.d/myRule
+#/bin/sh
+
+case "$1" in
+    start)
+    echo "iptables myRule start"
+    iptables-restore /etc/myRule.conf
+stop)
+    echo "iptables myRule stop"
+    iptables -F
+    iptables -t nat -F
+    ;;
+restart)
+    echo "iptables stop"
+    iptables -F
+    iptables -t nat -F
+    echo "iptables start"
+    iptables-restore /etc/myRule.conf
+esac
+exit 0 
+----------------------------------------------------------------------------
+
+스크립트에서는 myRule.conf 파일을 읽어서 시스템 부트시 설정을 복구하고 있다. 
+myRule.conf 파일을 만드는 법은 아마도 다 아시리라는 생각을 한다. ^^;
+iptables-save 로 해서 만들경우의 단점은 아무래도 주석부분이 아닐까 한다. 
+즉 iptables-save로서 만든후에 부분부분 주석을 넣어놓는것도 좋은 방법중의 하나일 것이다. 
+
+**6. 방화벽 설정의 예 
+
+아래의 예는 조대원님(PCHarley)의 설정입니다. 참고로 첨부하였습니다. 
+----------------------------------------------------------------------
+#!/bin/sh
+
+###### TCP 변수 설정 ######
+
+# 외부로 서비스할 데몬의 포트 지정
+# 20 : ftp-data port 
+# 21 : ftp port
+# 22 : ssh port
+# 25 : smtp port
+# 80 : http port
+# 113 : auth ident port 
+TCP_ALLOWPORT="20 21 22 25 80 113"
+TCP_DENYPORT=1024
+
+# 특정 호스트에 특정 포트를 개방
+# 선별적인 호스트에 대하여 선별적인 서비스 오픈과 DNS Zone Transfer를 위해
+# 사용하면 편리  
+# <호스트ip주소>:<포트> 형식으로 사용
+#TCP_HOSTPERPORT=""
+
+# 출발지 포트로 오픈을 결정
+# 클라이언트 프로그램을 사용하기 위하여 1024 이하의 특정 포트를 개방 
+# 21 : ftp 서버 응답 포트
+# 22 : ssh 서버 응답 포트
+# 23 : telnet 서버 응답 포트
+# 25 : mail 서버 응답 포트
+# 43 : whois 응답 포트
+# 53 : dns 서버 응답 포트
+# 79 : finger 서버 응답 포트
+# 80 : httpd 서버 응답 포트
+# 110 : pop3 서버 응답 포트
+# 113 : AUTH 서버 응답 포트
+# 119 : nntp 서버 응답 포트
+# 443 : https 서버 응답 포트
+TCP_ALLOWSPORT="21 22 23 25 53 80 110 113 119 443" 
+
+###### UDP 변수 설정 #######
+
+# UDP의 경우에는 이 프로토콜의 특성상 위험한 서비스가 많다.
+# 이 프로토콜을 이용하는 서비스를 허용해야 할 경우에는 주의를 하는것이 좋다 
+
+# 외부로 서비스할 데몬의 포트
+#UDP_ALLOWPORT=""
+UDP_DENYPORT=1024
+
+# 특정 호스트에 특정 포트를 개방
+# 선별적인 호스트에 대하여 선별적인 서비스 오픈과 DNS Zone Transfer를 위해
+# 사용하면 편리  
+# <호스트ip주소>:<포트> 형식으로 사용
+#UDP_HOSTPERPORT=""
+
+# 출발지 포트로 오픈을 결정
+# 클라이언트 프로그램을 사용하기 위하여 1024 이하의 특정 포트를 개방 
+# 53 : dns 서버 응답 포트
+UDP_ALLOWSPORT="53"
+
+###### 디폴트변수 설정 ######
+
+IPTABLES=/sbin/iptables
+IPADD="<ip Address>"
+
+# 루트 권한으로 운영되는 포트들
+PRIVPORTS="0:1023" 
+
+# 일반 권한으로도 운영될수 있는 포트들
+UNPRIVPORTS="1024:65535" 
+
+
+# 리눅스 머신이 GATEWAY나 MASQ로 사용될 경우 spoof 공격이나 잘 알려진
+# 위험한 주소로 부터 오는 공격을 막기 위한 변수 설정
+LOOPBACK="127.0.0.0/8"
+BROADCAST_SRC="0.0.0.0"
+BROADCAST_DEST="255.255.255.255"
+CLASS_A="10.0.0.0/8"
+CLASS_B="172.0.0.0/8"
+CLASS_C="192.0.0.0/8"
+CLASS_D_MULTICAST="224.0.0.0/4"
+CLASS_E_RESERVED_NET="240.0.0.0/5"
+
+###### kernel tunable parameter ######
+
+# 어떤 인터페이스에서도 ping 에 반응하지 못하도록
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+
+# 브로드캐스트, 멀티캐스트 주소에 ICMP 메세지 보내는것 막기.
+# smuf 공격 방지
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+
+# ip 소스 라우팅을 방지(디폴트로 0이 되어 있지만 확실하게 하기 위함)
+# ip 소스 라우팅이 허용될 경우 모든 방화벽 설정이 필요없게 된다.
+for f in /proc/sys/net/ipv4/conf/*/accept_source_route
+do
+   echo 0 > $f 
+done
+
+# DOS(서비스 부인 공격)의 방법인 SYN Attack을 방지하기 위하여 TCP syncookies를 enable
+echo 1 > /proc/sys/net/ipv4/tcp_syncookies
+
+# icmp_redirect 메세지를 거부
+for f in /proc/sys/net/ipv4/conf/*/accept_redirects
+do
+    echo 0 > $f 
+done
+
+# gateway나 Masquerading 머신으로 사용한다면 이 옵션은 반드시 포함 하여야 한다.
+# echo 1 > /proc/sys/net/ipv4/ip_always_defrag
+
+# 정의되지 않은 에러 메세지를 막음
+echo 1 > /proc/sys/net/ipv4/icmp_ignore_bogus_error_responses
+
+# ip sppof 방지
+for pfile in /proc/sys/net/ipv4/conf/*/rp_filter
+do
+    echo 1 > $pfile
+done
+
+# Log Spoofed Packets, Source Routed Packets, Redirect Packets 등을 탐지하면 로그파일에 기록
+echo 1 > /proc/sys/net/ipv4/conf/all/log_martians
+
+##### 초기화 #####
+# 호스트가 X 윈도도 깔리지 않은 서버용으로 운영될 경우에는 OUTPUT 기본 정책도 
+# DROP으로 하는것이 안전하다.
+${IPTABLES} -F INPUT
+${IPTABLES} -P INPUT DROP
+${IPTABLES} -F OUTPUT
+${IPTABLES} -P OUTPUT ACCEPT
+${IPTABLES} -F FORWARD
+${IPTABLES} -P FORWARD DROP
+
+###### INPUT ######
+###### TCP ######
+
+# local loopback 허용
+${IPTABLES} -A INPUT -i lo -j ACCEPT
+
+# 1024 밑에 루트에 의해 서버가 사용할 포트 오픈
+for values in ${TCP_ALLOWPORT}
+do
+    ${IPTABLES} -A INPUT -i eth0 -p tcp --dport ${values} -j ACCEPT
+done
+
+# 특정 호스트로의 포트를 개방
+#for values in ${TCP_HOSTPERPORT}
+#do
+#   echo ${values} | {
+#   IFS=':' read hosts ports
+#        ${IPTABLES} -A INPUT -s ${hosts} -p tcp --dport ${ports} -j ACCEPT
+#        }
+#done
+
+# 출발 포트가 초기 접속이 아닌 경우 허가된 포트에 대해서만 허가
+for values in ${TCP_ALLOWSPORT}
+do
+    ${IPTABLES} -A INPUT -i eth0 -p tcp ! --syn --sport ${values} ! --dport ${PRIVPORTS} -j ACCEPT
+done
+
+# ftp 노말 모드의 경우 클라이언트에서 서버로 접속을 요청할 경우 서버의
+# 20포트에서 클라이언트로 초기 접속을 요청하므로 20번 포트에서 초기 접속을 
+# 허가해줘야함 이는 일종에 보안 구멍을 유발 하므로 passive mode 나 proxy를
+# 사용해서 이 hole을 막을는 것이 좋다
+# 만약 일반 모드로의 접속을 허용해야 한다면 잘 알려진 위험한 포트를 제외한
+# 나머지 포트로만 허용을 해야한다.
+
+# open window 포트로의 서비스 요구 거부
+${IPTABLES} -A INPUT -i eth0 -p tcp --sport 20 --dport 2000 -j LOG --log-prefix "To 20 From 2000 DROP"
+${IPTABLES} -A INPUT -i eth0 -p tcp --sport 20 --dport 2000 -j DROP
+# NFS 포트로의 서비스 요구 거부
+${IPTABLES} -A INPUT -i eth0 -p tcp --sport 20 --dport 2049 -j LOG --log-prefix "To 20 From 2049 DROP"
+${IPTABLES} -A INPUT -i eth0 -p tcp --sport 20 --dport 2049 -j DROP
+# xwindow 포트로의 서비스 요구 거부
+${IPTABLES} -A INPUT -i eth0 -p tcp --sport 20 --dport 6000:6010 -j LOG  --log-prefix "To 20 From 6000:6010 DROP"
+${IPTABLES} -A INPUT -i eth0 -p tcp --sport 20 --dport 6000:6010 -j DROP
+
+${IPTABLES} -A INPUT -i eth0 -p tcp --sport 20 --dport ${UNPRIVPORTS} -j ACCEPT
+
+# 1024:65535 포트는 초기 접속이 아닌경우 허가 - ftp passive mode와 apt-get
+# 에서 필요.
+# 1023이하 허용할 출발 포트는 사용하는 클라이언트에 따라 위에서 직접 지정
+
+${IPTABLES} -A INPUT -i eth0 -p tcp ! --syn --sport ${UNPRIVPORTS} --dport ${UNPRIVPORTS} -j ACCEPT
+
+###### UDP ######
+
+# 열어줄 포트 개방 1024 밑에 포트
+# for values in ${UDP_ALLOWPORT}
+# do
+#     ${IPTABLES} -A INPUT -p tcp --dport ${values} -j ACCEPT
+# done
+
+# 특정 호스트로의 포트를 개방
+# for values in ${UDP_HOSTPERPORT}
+# do
+#     echo ${values} | {
+#     IFS=':' read hosts ports
+#         ${IPTABLES} -A INPUT -s ${hosts} -p udp --dport ${ports} -j ACCEPT
+#         }
+# done
+
+# 상대편 포트를 보고 허가
+# UDP는 특성상 -syn같은 옵션으로 초기 접속을 제한할 수가 없다.
+# 그렇기때문에 UDP 프로토콜에 대해서는 허가할 서비스에 대해 상당한 주의가
+# 요망 된다.
+for values in ${UDP_ALLOWSPORT}
+do
+    ${IPTABLES} -A INPUT -i eth0 -p udp --sport ${values} ! --dport ${PRIVPORTS} -j ACCEPT
+done
+
+
+# ICMP
+
+# 죽음의 핑이라 불리는 DOS(서비스 거부)공격에 사용되는 프로토콜이다.
+# 내부 호스트에 이익이 되는것만을 선별해서 허용해야 한다.
+
+# echo-reply (pong) - 0
+# destination-unreachable - 3
+# source-quench - 4
+# redirect - 5
+# echo-request (ping) - 8
+# time-exceeded (ttl-exceeded) - 11
+# parameter-problem - 12
+
+# icmp 패킷 유형중 echo-reply(0)를 허가함 
+# 이 호스트가 외부 호스트로 ping을 사용하기 위해 pong은 허가
+${IPTABLES} -A INPUT -i eth0 -p icmp --icmp-type echo-reply -j ACCEPT
+
+# icmp 패킷 유형중 destination-unreachable(3) 을 허가함
+${IPTABLES} -A INPUT -i eth0 -p icmp --icmp-type destination-unreachable -j ACCEPT
+
+# icmp 패킷 유형중 source-quench(4) 를 허가함
+${IPTABLES} -A INPUT -i eth0 -p icmp --icmp-type source-quench -j ACCEPT 
+
+#  host에서 실행하는 traceroute 를 허용하기 위해 icmp time-exceeded(11)을
+# 허용 
+${IPTABLES} -A INPUT -i eth0 -p icmp --icmp-type time-exceeded -j ACCEPT
+
+# icmp 패킷 유형중 parameter-problem(12)을 허가함 
+${IPTABLES} -A INPUT -i eth0 -p icmp --icmp-type parameter-problem -j ACCEPT 
+
+
+
+###### deny 정책 #######
+# deny 정책을 하기전에 먼저 허가할 것을 명시해야만 한다.
+
+# ping을 이용한 DOS 공격에 대비하여 echo-request를 거부
+${IPTABLES} -A INPUT -i eth0 -p icmp --icmp-type echo-request -j LOG --log-prefix "PING REJECT"
+${IPTABLES} -A INPUT -i eth0 -p icmp --icmp-type echo-request -j REJECT
+
+# icmp-type redirect(5) 거부 
+# 이것이 허용되면 외부에서 이 호스트의 라우팅 테이블을 임의로 조작할 수가 있게 된다.
+${IPTABLES} -A INPUT -i eth0 -p icmp --icmp-type redirect -j LOG --log-prefix "icmp-type 5 DROP"
+${IPTABLES} -A INPUT -i eth0 -p icmp --icmp-type redirect -j DROP
+
+# 그외 허가 되지 않은 1023이하의 포트 모두를 막음
+${IPTABLES} -A INPUT -i eth0 -p tcp --dport 1:${TCP_DENYPORT} -j LOG --log-prefix "Under 1024 Tcp DROP"
+${IPTABLES} -A INPUT -i eth0 -p udp --dport 1:${TCP_DENYPORT} -j LOG --log-prefix "Under 1024 Udp DROP"
+${IPTABLES} -A INPUT -i eth0 -p tcp --dport 1:${TCP_DENYPORT} -j DROP
+${IPTABLES} -A INPUT -i eth0 -p udp --dport 1:${TCP_DENYPORT} -j DROP
+
+# 외부에서 허가된 tcp 접속 요청 제외한 모든 tcp접속 요청을 거부함
+${IPTABLES} -A INPUT -i eth0 -p tcp --syn -j LOG --log-prefix "TCP SYN REJECT" 
+${IPTABLES} -A INPUT -i eth0 -p tcp --syn -j REJECT
+
+
+# 그밖의 확인할수 없는 패킷을 모두 DROP
+${IPTABLES} -A INPUT -i eth0 -m state --state INVALID -j LOG --log-prefix "INVALID DROP"
+${IPTABLES} -A INPUT -i eth0 -m state --state INVALID -j DROP
+
+
+###### OUTPUT ######
+
+
+# local loopback 은 모든 패킷을 허용
+${IPTABLES} -A OUTPUT -o lo -j ACCEPT
+
+#ICMP OUTPUT DROP
+${IPTABLES} -A OUTPUT -o eth0 -p icmp --icmp-type echo-reply -j LOG --log-prefix "ICMP output DROP"
+${IPTABLES} -A OUTPUT -o eth0 -p icmp --icmp-type destination-unreachable -j LOG --log-prefix "ICMP output DROP"
+${IPTABLES} -A OUTPUT -o eth0 -p icmp --icmp-type time-exceeded -j LOG --log-prefix "ICMP output DROP"
+${IPTABLES} -A OUTPUT -o eth0 -p icmp --icmp-type echo-reply -j DROP
+${IPTABLES} -A OUTPUT -o eth0 -p icmp --icmp-type destination-unreachable -j DROP
+${IPTABLES} -A OUTPUT -o eth0 -p icmp --icmp-type time-exceeded -j DROP
+
+
+###### 사설 ip 및 기타 거부 ######
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_A} -j LOG --log-prefix "CLASS_A DROP"
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_A} -j LOG --log-prefix "CLASS_A DROP"
+${IPTABLES} -A OUTPUT -o eth0 -s ${CLASS_A} -j LOG --log-prefix "CLASS_A DROP"
+${IPTABLES} -A OUTPUT -o eth0 -d ${CLASS_A} -j LOG --log-prefix "CLASS_A DROP"
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_A} -j DROP
+${IPTABLES} -A INPUT -i eth0 -d ${CLASS_A} -j DROP
+${IPTABLES} -A OUTPUT -o eth0 -s ${CLASS_A} -j DROP
+${IPTABLES} -A OUTPUT -o eth0 -d ${CLASS_A} -j DROP
+
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_B} -j LOG --log-prefix "CLASS_B DROP" 
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_B} -j LOG --log-prefix "CLASS_B DROP"
+${IPTABLES} -A OUTPUT -o eth0 -s ${CLASS_B} -j LOG --log-prefix "CLASS_B DROP"
+${IPTABLES} -A OUTPUT -o eth0 -d ${CLASS_B} -j LOG --log-prefix "CLASS_B DROP"
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_B} -j DROP
+${IPTABLES} -A INPUT -i eth0 -d ${CLASS_B} -j DROP
+${IPTABLES} -A OUTPUT -o eth0 -s ${CLASS_B} -j DROP
+${IPTABLES} -A OUTPUT -o eth0 -d ${CLASS_B} -j DROP
+
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_C} -j LOG --log-prefix "CLASS_C DROP"
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_C} -j LOG --log-prefix "CLASS_C DROP"
+${IPTABLES} -A OUTPUT -o eth0 -s ${CLASS_C} -j LOG --log-prefix "CLASS_C DROP"
+${IPTABLES} -A OUTPUT -o eth0 -d ${CLASS_C} -j LOG --log-prefix "CLASS_C DROP"
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_C} -j DROP
+${IPTABLES} -A INPUT -i eth0 -d ${CLASS_C} -j DROP
+${IPTABLES} -A OUTPUT -o eth0 -s ${CLASS_C} -j DROP
+${IPTABLES} -A OUTPUT -o eth0 -d ${CLASS_C} -j DROP
+${IPTABLES} -A OUTPUT -o eth0 -d ${CLASS_C} -j DROP
+${IPTABLES} -A INPUT -i eth0 -s ${LOOPBACK} -j LOG --log-prefix "INPUT loopback DROP"
+${IPTABLES} -A OUTPUT -o eth0 -s ${LOOPBACK} -j LOG --log-prefix "INPUT loopback REJECT"
+${IPTABLES} -A INPUT -i eth0 -s ${LOOPBACK} -j DROP
+${IPTABLES} -A OUTPUT -o eth0 -s ${LOOPBACK} -j REJECT
+
+${IPTABLES} -A INPUT -i eth0 -s ${BROADCAST_DEST} -j LOG --log-prefix "Broadcast_dest DROP"
+${IPTABLES} -A INPUT -i eth0 -d ${BROADCAST_DEST} -j LOG --log-prefix "Broadcast_src DROP"
+${IPTABLES} -A INPUT -i eth0 -s ${BROADCAST_DEST} -j DROP
+${IPTABLES} -A INPUT -i eth0 -d ${BROADCAST_DEST} -j DROP
+
+# class D multicast address 거부
+# multicast 는 소스 주소로는 불법
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_D_MULTICAST} -j LOG --log-prefix "class D Multicast DROP"
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_D_MULTICAST} -j DROP
+
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_E_RESERVED_NET} -j LOG --log-prefix "class E reserved net DROP"
+${IPTABLES} -A INPUT -i eth0 -s ${CLASS_E_RESERVED_NET} -j DROP
+
+# refuse addresses defined as reserved by the IANA
+# 0.*.*.*, 1.*.*.*, 2.*.*.*, 5.*.*.*, 7.*.*.*, 23.*.*.*, 27.*.*.*
+# 31.*.*.*, 37.*.*.*, 39.*.*.*, 41.*.*.*, 42.*.*.*, 58-60.*.*.*
+# 65-95.*.*.*, 96-126.*.*.*, 197.*.*.*, 201.*.*.* (?), 217-223.*.*.*
+${IPTABLES} -A INPUT -i eth0 -s 1.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 2.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 5.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 7.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 23.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 27.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 31.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 37.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 39.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 41.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 42.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 58.0.0.0/7 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 60.0.0.0/8 -j LOG --log-prefix "IANA reserved DROP"
+${IPTABLES} -A INPUT -i eth0 -s 1.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 2.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 5.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 7.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 23.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 27.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 31.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 37.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 39.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 41.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 42.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 58.0.0.0/7 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 60.0.0.0/8 -j DROP
+
+#65: 01000001    - /3 includes 64 - need 65-79 spelled out
+${IPTABLES} -A INPUT -i eth0 -s 65.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 66.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 67.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 68.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 69.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 70.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 71.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 72.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 73.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 74.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 75.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 76.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 77.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 78.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 79.0.0.0/8 -j LOG --log-prefix "65-79 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 65.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 66.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 67.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 68.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 69.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 70.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 71.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 72.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 73.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 74.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 75.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 76.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 77.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 78.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 79.0.0.0/8 -j DROP
+
+#80: 01010000   - /4 masks 80-95
+${IPTABLES} -A INPUT -i eth0 -s 80.0.0.0/4 -j LOG --log-prefix "80-95 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 80.0.0.0/4 -j DROP
+
+# 96: 01100000    - /4 makses 96-111
+${IPTABLES} -A INPUT -i eth0 -s 96.0.0.0/4 -j LOG --log-prefix "96-111 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 96.0.0.0/4 -j DROP
+
+#126: 01111110    - /3 includes 127 - need 112-126 spelled out
+${IPTABLES} -A INPUT -i eth0 -s 112.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 113.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 114.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 115.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 116.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 117.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 118.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 119.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 120.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 121.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 122.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 123.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 124.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 125.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 126.0.0.0/8 -j LOG --log-prefix "112-126 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 112.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 113.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 114.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 115.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 116.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 117.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 118.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 119.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 120.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 121.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 122.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 123.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 124.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 125.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 126.0.0.0/8 -j DROP
+
+#217: 11011001    - /5 includes 216 - need 217-219 spelled out
+${IPTABLES} -A INPUT -i eth0 -s 217.0.0.0/8 -j LOG --log-prefix "217-219 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 218.0.0.0/8 -j LOG --log-prefix "217-219 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 219.0.0.0/8 -j LOG --log-prefix "217-219 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 217.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 218.0.0.0/8 -j DROP
+${IPTABLES} -A INPUT -i eth0 -s 219.0.0.0/8 -j DROP
+
+#223: 11011111    - /6 masks 220-223
+${IPTABLES} -A INPUT -i eth0 -s 220.0.0.0/6 -j LOG --log-prefix "220-223 DROP"
+${IPTABLES} -A INPUT -i eth0 -s 220.0.0.0/6 -j DROP
+
+----------------------------------------------------------------------
+
+**참고자료: 
+패킷필터링, 조대원
+리눅스 2.4 패킷필터링 하우투, Rusty Russel
+리눅스 2.4 NAT 하우투, Rusty Russel
+
+이 포스트를.. 
+덧글 쓰기  엮인글 쓰기 
+
+               우린 여기 서있잔아! 괜찮아! [펌] 패킷필터링~  
+                  우린 여기 서있잔아! 괜찮아! [펌] 패킷필터링~    
+  
+   
+
+
+   
+ 접근시도하는 IP 자동 블락하기 IPtables_Firewall  
+2005/07/22 18:40
+
+http://blog.naver.com/yunki798/40015522795
+ 
+더 윤키맨의 쪼가리 팁:
+
+ 
+
+안녕 리눅스로 유명한 김정균님의 oops.org의 mini-lecture 란에 올린 글이다.
+
+철저하게 oops-firewall을 기준으로 작성한 글이므로, iptables를 사용한다면
+
+/etc/sysconfig/iptables 파일을 통째로 재생성하는 방법으로 써보기 바란다.
+
+(............)
+
+ 
+
+--------------------------------------------------------------------
+
+ 
+
+안녕 리눅스를 아주 잘 쓰고 있는 허접 유저입니다. 매일 도움만 얻어가다가 
+간단한 스크립트를 하나 만들어서 올립니다.
+
+여건상 어쩔 수 없이 외부에서 접근하는 IP를 모두 블락시켜놓지 못하는 경우
+가 있습니다. 예를 들면 웹호스팅 서버의 경우 서버에 입주해 있는 유저들도 
+ssh등을 써야하기 때문에, 외부에서 접근하는 IP를 모두 막을 수 없는 일이 벌
+어집니다. 
+
+루트 로그인을 막아놓고 방화벽으로 필요없는 포트를 모두 막아놓는다 하더라
+도, 매일매일 무수히 접근시도를 하는 메세지들이 로그에 쌓이는걸 보니(하루
+에 수천번 접속 시도를 합니다...) 짜증이 살짝 솟구쳐서-_- 아래와 같은 스크
+립트를 만들게 되었습니다.
+포트센트리는 의도하지 않았던 결과가 자주나와 아예 염두에 두지 않았습니다-
+_-;
+
+간단히 말해 5번 로그인 실패하는 IP를 user.conf에 추가시킵니다.
+이것을 crontab에 등록해, 하루에 한번씩 oops-firewall을 리스타트시키는 것
+으로 사용하고 있습니다. 
+
+----------------------------------------------------------------------
+#!/bin/bash
+# Script by Yunkiman
+
+days=`date +%d`
+
+for i in $( cat /var/log/messages | grep "Failed password for" | awk '$2 
+= $days {print $13}' | sort | uniq -c | awk '$1 > 5 {print $2}'); do
+echo "%-A INPUT -s $i -j DROP" >> /etc/oops-firewall/user.conf
+done
+----------------------------------------------------------------------
+
+참고로 for 문이 들어있는 문장은 do 까지가 한문장입니다.
+
+주된 내용은, messages 로그안에서 오늘 날짜에 대한 "Failed password for" 
+가 들어간 문장을 grep으로 모두 뽑아낸 다음, awk로 오늘 날짜에 해당하는 라
+인의 13번재 인자, 즉 IP주소만을 뽑아냅니다.
+
+그리고 sort하고(안해도 됨) uniq -c 명령으로 중복되는 라인을 싹 제거하고 -
+c 옵션으로 중복되는 수를 카운트해서 IP 앞에 표시합니다. 이유는 몇번 로그
+인 시도를 실패했는지 수를 헤아리기 위해서입니다.
+
+또 그 결과의 첫번째 인자를(첫번째 인자가 중복 로그인 실패 IP의 카운트 수
+가 되므로) awk로 판단하여, 5보다 숫자가 크면 두번째 인자인 IP 주소만 뽑아
+냅니다. 숫자 5는 마음대로 설정하셔서 쓰시면 되겠습니다. 5번 로그인 실패했
+다는 의미입니다.
+
+그 다음 해당 IP를 /etc/oops-firewall/user.conf 파일에 추가하게 됩니다.
+
+
+이후에는 크론탭에 밤 11:50분 경에 위의 스크립트를 실행하고, 바로 oops-
+firewall을 리스타트 하게 해놓았습니다.
+
+편하신대로 수정해서 쓰시면 되겠습니다.
+좀 더 보완하면 깔끔하게도 될 것 같은데 귀찮아서 하루에 한번 등록하는걸로 
+쓰고 있습니다 -0-;;;;
+
+보완할 점이 있으면 리플달아주시면 알랍붸붸입니다 

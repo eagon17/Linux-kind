@@ -1,0 +1,18 @@
+타 유저 연결 끊기:
+
+1. 연결 가능한 서버에 연결
+2. Administrative Tools - Terminal Services Manager
+3. kr 오른클릭 - connect to computer
+4. 연결 희망 서버 연결
+5. 연결되어있는 유저 오른클릭 - Reset
+
+
+DHCP 서버 IP 등록방법:
+
+1. Administrative Tools - DHCP
+2. INET Only VLAN 999
+3. Address Leases
+4. IP address 로 sort
+5. Guest IP 보고
+6. Reservations - Guest IP 오른클릭 - 등록정보
+7. MAC address 등록

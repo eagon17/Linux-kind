@@ -1,0 +1,20 @@
+/etc/mrtg/mrtg.cfg
+/etc/httpd/conf.d/mrtg.conf
+/etc/httpd/conf/httpd.conf
+
+/var/www/mrtg
+/var/www/html/mrtg
+
+
+/usr/bin/cfgmaker --global 'workdir: /var/www/mrtg/' 10.129.195.179
+
+cfgmaker --global 'WorkDir: /var/www/html/mrtg' --output /etc/mrtg/mrtg.cfg public@localhost
+
+indexmaker --output=/var/www/html/mrtg/index.html /etc/mrtg/mrtg.cfg
+
+cp -av /var/www/html/mrtg/*.png /var/www/html/mrtg/
+
+Use of uninitialized value in hash element at /usr/bin/indexmaker line 352
+
+
+wndrnrtmxk

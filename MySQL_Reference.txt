@@ -1,0 +1,453 @@
+**** Some MySQL commands *************************************************
+
+$create database [DB_name];
+
+$GRANT ALL PRIVILEGES ON `[DB_name]`.* TO '[user_name]'@'%';
+
+
+$mysql -u[user_name] -p [DB_name] < [DBStructure.txt]
+
+Caution: / or \\ must be used to locate the local file.
+ex: c:/[file_name]
+ex: c:\\[file_name]
+
+$show tables;
+
+
+
+mysql> SHOW DATABASES;
+
+  mysql> USE wbluhm;
+
+  mysql> SHOW TABLES;
+
+  mysql> CREATE TABLE dummy ( first_name CHAR(20) , last_name CHAR(20) );
+
+  mysql> SHOW TABLES;
+
+  mysql> DESCRIBE dummy;
+
+  mysql> DROP TABLE dummy;
+
+  mysql> SHOW TABLES;
+  
+  mysql> exit;
+  
+
+
+1. Accessing MySQL (back to top)
+
+Accessing MySQL on the command line
+
+log into your workstation
+
+edit .alias in vi
+
+
+% vi .alias
+
+enter the following in vi:
+
+
+alias mysql /users/science/wilfred/local/mysql/bin/mysql
+
+
+save and quit vi editor
+
+:wq 
+
+(The last three steps need to be performed only once.)
+
+Type
+
+% source .alias
+
+% mysql -h multivac
+
+Or 
+
+log into multivac (used to be spirit)
+
+ssh multivac 
+
+and type:
+
+% source .alias
+
+% mysql
+
+The database that you can use is the same one as your username, plus samp_db (currently, more may be granted later).
+
+You may create tables, drop tables, etc. inside your own database. samp_db or others which you may browse may not be deleted, or dropped.
+
+Accessing MySQL from any machine
+
+
+Your_Shell% mysql -h multivac.sdsc.edu -u wbluhm --password="" wbluhm
+
+(This assumes that you have the client installed on your machine and the PATH set properly.) 
+
+Executing MySQL scripts on the command line (outside of MySQL)
+
+
+% mysql wbluhm < myscript.sql
+
+% mysql -t wbluhm < myscript.sql
+
+
+Accessing MySQL from Perl or Java APIs
+
+
+--------------------------------------------------------------------------------
+
+
+Perl Example: JavaBooks.pl
+# queries the books table in database wbluhm on multivac
+
+use DBI;
+use strict;
+
+my ($dsn) = "DBI:mysql:wbluhm:multivac.sdsc.edu"; # data source name
+my ($user_name) = "wbluhm";  # user name
+my ($password) = "";         # password
+my ($dbh, $sth);             # database and statement handles
+my (@ary);                   # array for rows returned by query
+
+# connect to database
+$dbh = DBI->connect ($dsn, $user_name, $password, { RaiseError => 1 });
+
+# issue query
+my $query = qq{ SELECT title, author, comment
+                FROM books
+                WHERE topic="Java" };
+$sth = $dbh->prepare ( $query );
+$sth->execute ();
+
+# read results of query, then clean up
+while (@ary = $sth->fetchrow_array ())
+{
+        print join (" | ", @ary), "\n";
+}
+$sth->finish ();
+
+$dbh->disconnect ();
+exit (0);
+
+
+
+--------------------------------------------------------------------------------
+
+
+Java Example: JavaBooks.java
+// queries the books table in database wbluhm on multivac
+
+import java.sql.*;
+public class JavaBooks {
+    public static void main(String[] args) {
+
+        try {
+            Class.forName("org.gjt.mm.mysql.Driver").newInstance();
+        }
+        catch (Exception E) {
+            System.err.println("Unable to load driver");
+            E.printStackTrace();
+        }
+
+        try {
+            Connection C = DriverManager.getConnection(
+              "jdbc:mysql://multivac.sdsc.edu/wbluhm","wbluhm","");
+            Statement Stmt = C.createStatement();
+
+            ResultSet RS = Stmt.executeQuery
+            ("SELECT title, author, comment " +
+             " FROM books WHERE topic=\"Java\"");
+
+            while (RS.next()) {
+                 System.out.print("\"" + RS.getString(1) + "\"");
+                 System.out.print(" by " + RS.getString(2));
+                 System.out.println(": " + RS.getString(3));
+            }
+            C.close();
+            RS.close();
+            Stmt.close();
+        }
+        catch (SQLException E) {
+            System.out.println("SQLException: " + E.getMessage());
+            System.out.println("SQLState:     " + E.getSQLState());
+            System.out.println("VendorError:  " + E.getErrorCode());
+        }
+    }
+}
+
+
+
+--------------------------------------------------------------------------------
+
+2. Creating Tables (back to top)
+
+Basic commands on mysql command line:
+
+  % mysql
+
+  mysql> SHOW DATABASES;
+
+  mysql> USE wbluhm;
+
+  mysql> SHOW TABLES;
+
+  mysql> CREATE TABLE dummy ( first_name CHAR(20) , last_name CHAR(20) );
+
+  mysql> SHOW TABLES;
+
+  mysql> DESCRIBE dummy;
+
+  mysql> DROP TABLE dummy;
+
+  mysql> SHOW TABLES;
+  
+  mysql> exit;
+  
+  % 
+
+Creating tables from .sql scripts
+
+
+--------------------------------------------------------------------------------
+
+
+SQL script example: create_books.sql
+
+-- creates the table books in database wbluhm
+
+CREATE TABLE books
+(
+    title          CHAR(50)    NOT NULL,
+    author         CHAR(30)    NOT NULL,
+    publisher      CHAR(30),
+    topic          CHAR(20),
+    comment        CHAR(100),
+    price          FLOAT
+)
+
+
+
+--------------------------------------------------------------------------------
+
+  % mysql wbluhm < create_books.sql
+
+For more examples, see some of the scripts from the samp_db database in
+
+
+  /users/science/wbluhm/mysql/create_*.sql
+
+
+Column types
+
+Some basic column types: INTEGER, FLOAT, CHAR, DATE, TIME, BLOB
+
+Complete table of all column types on mysql.com 
+
+3. Inserting Data (back to top)
+
+Basic commands on mysql command line:
+
+  % mysql
+
+  mysql> USE wbluhm;
+  
+  mysql> SELECT * FROM books;
+  
+  mysql> INSERT INTO books 
+      -> VALUES ("My Life", "Mickey Mouse", "Disney", 
+      ->         "Biography", "What can I say?", 9.95);
+  
+  mysql> SELECT * FROM books;
+  
+  mysql> DELETE FROM books WHERE title="My Life";
+  
+  mysql> SELECT * FROM books;
+  
+  mysql> exit;
+  
+  %
+
+Inserting data with .sql scripts:
+
+
+--------------------------------------------------------------------------------
+
+
+SQL script example: populate_books.sql
+
+-- populates the books table
+
+INSERT INTO books 
+  VALUES ("MySQL", "Paul DuBois", "New Riders", "MySQL", 
+          "Excellent book, but doesn't cover Java API", 49.99);
+
+INSERT INTO books
+  VALUES ("Beginning XML", "David Hunter", "Wrox", "XML",
+          "Well recommended, fairly comprehensive", 39.99);
+
+INSERT INTO books 
+  VALUES ("Java How to Program", "Paul Deitel", "Prentice Hall", "Java",
+          "Good textbook, extremely detailed", 68.00);
+
+INSERT INTO books
+  VALUES ("Thinking in Java", "Bruce Eckel", "Prentice Hall", "Java",
+          "Well written, free on the web", 0.00); 
+
+INSERT INTO books
+  VALUES ("The Java Programming Language", "Ken Arnold", "Addison Wesley", "Java",
+          "Considered to be from the source", 37.95);
+
+INSERT INTO books
+  VALUES ("Learning Perl", "Randal Schwartz", "O'Reilly", "Perl",
+          "Not a bad start", 29.95);
+
+INSERT INTO books
+  VALUES ("Programming Perl", "Larry Wall", "O'Reilly", "Perl",
+          "Usually considered THE reference", 44.95);
+
+INSERT INTO books
+  VALUES ("Effective Perl Programming", "Joseph Hall", "Addison Wesley", "Perl",
+          "Great tips, not for beginners", 34.95);
+
+
+
+--------------------------------------------------------------------------------
+
+  % mysql wbluhm < populate_books.sql
+  
+  % mysql wbluhm
+  
+  mysql> SELECT * FROM books;
+  
+  mysql> DELETE FROM books; 
+  
+  mysql> SELECT * FROM books;
+  
+  mysql> exit;
+  
+  %
+
+Inserting data from files
+
+
+--------------------------------------------------------------------------------
+
+
+data file: books.data
+
+MySQL   Paul DuBois     New Riders      MySQL   ...     49.99
+Beginning XML   David Hunter    Wrox    XML     ...     39.99
+...
+Effective Perl Programming      Joseph Hall     Perl    ...     34.95
+
+
+
+--------------------------------------------------------------------------------
+
+
+  % mysql
+  
+  mysql> USE wbluhm
+  
+  mysql> LOAD DATA INFILE '/users/science/wbluhm/mysql/books.data'
+      -> INTO TABLE books
+      -> FIELDS TERMINATED BY '\t'
+      -> LINES TERMINATED BY '\n'
+      -> IGNORE 0 LINES
+      -> (title, author, publisher, topic, comment, price);
+
+  mysql> SELECT * FROM books;
+
+  mysql> exit;
+  
+  %
+
+
+4. Querying Data (back to top)
+
+Basic commands on mysql command line:
+
+  % mysql
+
+  mysql> USE wbluhm;
+  
+  mysql> SELECT * FROM books;
+ 
+  mysql> SELECT title, price 
+      -> FROM books
+      -> ;
+  
+  mysql> SELECT title, author
+      -> FROM books
+      -> WHERE topic="Java";
+  
+  mysql> SELECT title, author, price 
+      -> FROM books
+      -> WHERE topic="Java"
+      -> ORDER BY price; 	  
+
+  mysql> SELECT title, author, price 
+      -> FROM books
+      -> WHERE topic="Java"
+      -> ORDER BY price DESC;
+
+  mysql> USE samp_db;
+  
+  mysql> SHOW TABLES;
+  
+  mysql> DESCRIBE president;
+  
+  mysql> SELECT last_name, first_name, birth
+      -> FROM president
+      -> WHERE death IS NULL
+      -> ORDER BY last_name;
+	  
+  mysql> DESCRIBE student;
+  
+  mysql> DESCRIBE absence;
+  
+  mysql> SELECT student.name, absence.date
+      -> FROM student JOIN absence
+      -> WHERE student.student_id = absence.student_id;
+  
+  mysql> exit;
+  
+  % 
+
+Querying data with .sql scripts:
+
+
+--------------------------------------------------------------------------------
+
+
+SQL script example: select_java_books.sql
+
+SELECT title, author, price FROM books 
+WHERE  topic="Java" 
+ORDER BY price;
+
+
+
+--------------------------------------------------------------------------------
+
+  % mysql wbluhm < select_java_books.sql
+  
+  % mysql -t wbluhm < select_java_books.sql
+
+Querying data from APIs
+
+See the Perl and Java code examples in section 1. 
+
+5. Practice (back to top)
+
+  % cp /users/science/wbluhm/mysql/* .
+
+6. References (back to top)
+
+Full on-line documentation on mysql.com 
+On-line tutorial on mysql.com 
+"MySQL" by Paul DuBois, New Riders (list price: $49.99) - book link on amazon.com 

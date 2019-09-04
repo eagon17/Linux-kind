@@ -1,0 +1,27 @@
+First, install BerkeleyDB 3.2.9:
+
+Download db-3.2.9 from here:
+     http://www.sleepycat.com/update/snapshot/db-3.2.9.tar.gz
+
+Copy db-3.2.9.tar.gz to /usr/local/src
+     tar zxvf db-3.2.9.tar.gz
+Download the two patches for 3.2.9 from here:
+     Patch #1
+     Patch #2
+or from:
+     http://www.sleepycat.com/update/3.2.9/patch.3.2.9.html
+(Save the patches to /usr/local/src/db-3.2.9)
+
+Build and install BerkeleyDB:
+     cd /usr/local/src/db-3.2.9
+(The 'pwd' command should show /usr/local/src/db-3.2.9)
+     patch -p0 < patchdb.3.2.9-1
+     patch -p0 < patchdb.3.2.9-2
+     cd build_unix
+     ../dist/configure
+     make
+     make install
+     cd ../..
+     echo /usr/local/BerkeleyDB.3.2/lib >> /etc/ld.so.conf
+     ldconfig
+

@@ -1,0 +1,198 @@
+
+
+******************** MySQL 설치 후 오류 관련 ****************
+
+Neither host 'localhost.localdomain' nor 'localhost' could be looked up with
+/usr/local/mysql/bin/resolveip
+Please configure the 'hostname' command to return a correct hostname.
+If you want to solve this at a later stage, restart this script with
+the --force option 
+
+위와같은 오류가 보일 시:
+
+/etc/hosts
+
+파일을
+
+10.129.195.24	MySQL-5
+127.0.0.1	localhost
+
+이런 식으로 고쳐줌.
+
+************************************************************************
+
+
+
+소스 컴파일 하는 방법을 물어보시는거군요...
+
+일단 컴파일 순서입니다.
+
+1. 압축된 소스 해제
+
+mysql을 예를 들어보면 보통 mysql-4.0.12.tar.gz 라는 파일이 있다고 할때 압축해제 방법은
+
+# tar xvzf mysql-4.0.12.tar.gz 
+
+라고 입력하시면 압축이 풀리실 겁니다.
+
+ 
+
+2. 압축을 풀면 mysql-4.0.12라는 디렉토리가 생기게 되는데 그 디렉토리로 이동합니다.
+
+# cd mysql-4.0.12
+
+이동후 컴파일 환경을 설정해줍니다.
+
+ 
+
+아래와 같이 입력하시고 Enter키 사뿐히 눌러주세요! ^^
+
+# ./configure --prefix=/usr/local/mysql-4.0.12 --localstatedir=/usr/local/mysql-4.0.12/data --with-charset=euc-kr
+
+
+대략 위와 같이 간단하게 설정해줍니다.
+
+설명을 하자면
+
+--prefix=/usr/local/mysql-4.0.12 ---> 설치디렉토리경로를 지정해줍니다.
+
+--localstatedir=/usr/local/mysql-4.0.12/data ---> 데이터베이스 파일들이 저장될 경로입니다.
+
+--with-charset=euc-kr ---> 문자셋을 지정해 줍니다(euc_kr 인지 euc-kr 인지 좀 헷갈리는군요~ ㅋㅋ)
+
+ 
+
+3. configure 가 끝나면 컴파일을 합니다. 컴파일 하는 방법은 매우 간단합니다.
+
+# make
+
+ 
+
+4. make로 컴파일한 파일들을 설치 디렉토리로 복사합니다.
+
+# make install
+
+ 
+
+5. 설정파일 복사
+
+make install이 끝난후 설정파일을 /etc/ 로 복사해줍니다.
+
+# cp /usr/local/mysql-4.0.12/share/mysql/my-medium.cnf /etc/my.cnf
+
+ 
+
+6. 기본 DB생성
+
+# /usr/local/mysql-4.0.12/bin/mysql_install_db
+
+!!! 주의 딱 한번만 실행
+
+ 
+
+7. Mysql 운영 사용자 생성 및 기타 설정 
+
+ 
+
+!! 홈디렉토리가 필요없으므로 -M옵션을 줍니다.
+
+# useradd -M mysql 
+
+
+ 
+
+data 디렉토리를 mysql이라는 사용자 권한으로 바꾸어 주어야 합니다.
+
+# chown -R mysql:mysql /usr/local/mysql-5.0.24/data 
+
+
+ 
+
+아무곳에서나 mysql 및 mysqldump 명령어를 실행가능하게 심볼릭 링크를 걸어줍니다.
+
+# ln -s /usr/local/mysql-4.0.12/bin/mysql /usr/bin/
+
+# ln -s /usr/local/mysql-4.0.12/bin/mysqldump /usr/bin/
+
+
+ 
+
+mysql 데몬을 실행시킵니다.
+
+# /usr/local/mysql-4.0.12/bin/mysqld_safe &
+
+
+ 
+
+mysql root 비밀번호를 설정합니다.
+
+# /usr/local/mysql-4.0.12/bin/mysqladmin -u root password "암호"
+
+
+
+
+
+7. 마지막으로 리부팅시 mysql이 자동으로 올라올수 있도록 /etc/rc.local에 등록해줍니다.
+
+# echo "/usr/local/mysql-4.0.12/bin/mysqld_safe &" >> /etc/rc.local
+
+ 
+
+이상으로 mysql 설치방법을 마치겠습니다.
+
+지우는 방법은 /usr/local/mysql-4.0.12 디렉토리를 날려버리면 끝입니다.
+
+물론 mysql데몬은 중지시킨후 하셔야 겠죠?
+
+
+
+**************** root 로 로그인 **************
+MySQL 에 접근시 
+
+ 
+
+C:\Users\junki>mysql -uroot -papmsetup
+ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+ 
+
+에러는 계정 권한문제이므로 root 계정이 mysql을 실행할 권한이 없어서 생기는 것이다.
+
+비밀번호를 지정하지 않으셨을 경우
+
+ 
+
+>mysql -u root  
+
+ 
+
+일케 해서 접속해보자~
+
+ 
+
+만일 비밀번호가 지정되어 있다면
+
+ 
+
+>mysql -u root -p [엔터]
+
+Enter password: [비밀번호입력]
+
+ 
+
+그러면될꺼다.
+
+ 
+
+비밀번호 변경은
+
+ 
+
+mysql> use mysql
+Database changed
+mysql> update user set password=password('apmsetup') where user='root';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+[출처] ERROR 1045 : Access denied for user 'root'@'localhost' (using password: YES)|작성자 하동하동
+
+**************************************************************

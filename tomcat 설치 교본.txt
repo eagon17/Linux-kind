@@ -1,0 +1,120 @@
+* Java Servlet Container 
+JVM 상에서 WEB 서비스를 위한 Java Servlet API를 구현하여 서비스 해주는 Java Program으로, 
+Servlet Container는 Client의 http 요청을 웹서버를 통해 전달받아서 Application Servlet에 전달하고, 
+Servlet의 http 응답 메시지를 웹서버에게 전달해서 Client로 돌려주는 역할을 한다. 
+
+* Servlet Container의 종류 
+1) Sun Microsystems 제공 Servlet Container 
+JSDK(Java Servlet Development Kit) 
+JSWDK(JavaServer Web Development Kit) 
+J2EE(Java2 SDK, Enterprise Edition) 
+Java Web Server(iPlanet Web Server) 
+
+2) Apache 제공 Servlet Container 
+Apache JServ, Tomcat 
+
+3) 기타 Servlet Container 
+JRun/JRun Pro, Resin, WebLogic, Web Sphere, IAS 
+
+* Tomcat 
+Tomcat은 Apache Software Foundation의 Jakarta 프로젝트의 일환으로 개발중인 소프트웨어입니다. 
+Tomcat은 Java Servlet과 Java Server Page를 사용할 수 있도록 하는 Servlet Container이며 
+독립적으로 웹서버의 기능을 수행합니다. 
+그러나 일반 html 문서도 Servlet Container를 통해 번역되므로 수행속도가 느리고 
+웹서버로서의 기능에 제한이 있으므로 보통 다양한 모듈과 막강한 기능을 가지고 있는 
+Apache 웹서버와 연동하여 사용합니다. 
+
+배포본은 binary와 source 형식으로 제공됩니다. 여기서는 바이너리 배포본의 설치만 설명합니다. 
+
+The Apache Jakarta Project 홈페이지의 Downloads 부분에 있는 CVS repositories는 
+현재 개발중인 소스들을 확인하고 다운로드 받을 수 있는 페이지입니다. 
+
+(CVS는 Concurrent Version System의 약어로 오픈소스 프로젝트에서 개발중인 소스의 버전을 관리해주는 시스템입니다. 
+CVS에 대한 자세한 사항은 이 문서의 성격과 다르므로 언급하지 않겠습니다. 
+자세한 사항은 CVS 매뉴얼을 참고하기 바랍니다.) 
+
+
+
+0. 바이너리 설치 
+
+http://jakarta.apache.org/site/binindex.cgi에서 Tomcat 5.0.16의 tarball 형식의 배포본을 다운로드 받습니다. 
+
+배포파일 jakarta-tomcat-5.0.16.tar.gz 
+
+적당한 위치(설치하고자 하는 경로)에서 압축을 풀어줍니다. 
+바이너리 배포본은 압축을 풀어줌으로 기본적인 설치가 완료된 것입니다. 
+
+shell> cp jakarta-tomcat-5.0.16.tar.gz /usr/local/share 
+shell> cd /usr/local/share 
+shell> tar xvfz jakarta-tomcat-5.0.16.tar.gz 
+
+Jakarta-tomcat-5.0.16 디렉토리가 생성되고 압축이 풀립니다. 
+실행파일이 들어있는 디렉토리로 이동해서 Tomcat을 실행시켜봅니다. 
+
+shell> cd /usr/local/share/Jakarta-tomcat-5.0.16/bin 
+shell> ./startup.sh 
+또는 
+shell> ./catalina.sh start 
+
+Using CATALINA_BASE: /usr/local/share/jakarta-tomcat-5.0.16 
+Using CATALINA_HOME: /usr/local/share/jakarta-tomcat-5.0.16 
+Using CATALINA_TMPDIR: /usr/local/share/jakarta-tomcat-5.0.16/temp 
+Using JAVA_HOME: /usr/java/j2sdk1.4.2_03 
+
+위의 메시지가 나오면 Tomcat이 정상적으로 작동하는 것입니다. 클라이언트에서 웹브라우저를 통해 다음의 주소로 접속합니다. 
+
+http://localhost:8080 또는 http://설치한서버의주소:8080 
+
+정상적으로 Tomcat이 작동하고 있다면 브라우저에 Tomcat 관련 문서가 나타날 것입니다. 
+
+만일, 정상적으로 작동하지 않는다면 J2SE의 설치가 제대로 이루어지지 않았거나 PATH 설정이 올바르게 이루어지지 않아서입니다. /etc/profile을 에디터로 열어서 J2SE 설치 시 PATH 설정한 부분을 확인해 봅니다. 
+
+Tomcat은 bin 디렉토리의 catalina.sh 또는 startup.sh 파일을 실행시켜서 작동시킵니다. 
+
+shell> pwd 
+/usr/local/share/jakarta-tomcat-5.0.16/bin 
+shell> ./catalina.sh start 
+또는 
+shell> ./startup.sh 
+
+Tomcat의 Shut down은 catalina.sh 또는 shutdown.sh 파일을 이용합니다. 
+
+shell> ./catalina.sh stop 
+또는 
+shell> ./shutdown.sh 
+
+마지막으로 PATH를 설정해줍니다. PATH 설정은 /etc/profile을 편집하여 이루어집니다. 
+/etc/profile을 에디터로 열어서 J2SE 설치 시 PATH 설정한 부분에 다음을 추가합니다. 
+
+shell> vi /etc/profile 
+
+JAVA_HOME=/usr/java/j2sdk1.4.2_03 
+CATALINA_HOME=/usr/local/share/jakarta-tomcat-5.0.16 
+PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin 
+export JAVA_HOME CATALINA_HOME 
+
+변경된 설정을 시스템에 적용시킵니다. 
+
+shell> source /etc/profile 
+
+PATH를 설정해주었으므로 임의의 위치에서 Tomcat을 실행시킬 수 있습니다. 
+
+Tomcat이 현재 운영 중이라면 Shut down을 하고 다시 실행시킵니다. 
+
+shell> ps -el 
+
+……………………………………………………………………………………………………. 
+0 S 0 1012 1 0 85 0 - 61602 schedu ? 00:00:12 java 
+……………………………………………………………………………………………………. 
+
+shell> catalina.sh stop 
+또는 
+shell> shutdown.sh 
+
+shell> catalina.sh start 
+또는 
+shell> startup.sh 
+
+설치가 완료되었습니다. 
+ 
+  

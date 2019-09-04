@@ -1,0 +1,6 @@
+ip access-list extended VLAN800_GhostKR_IN_2008_06_17
+ permit tcp host 10.129.198.66 host Ghost_RDP_PC eq 3389
+ permit tcp host 10.129.198.67 host Ghost_RDP_PC eq 3389
+ permit tcp host 10.129.198.66 host Ghost_Server
+ permit tcp host 10.129.198.67 host Ghost_Server
+ deny   ip any any

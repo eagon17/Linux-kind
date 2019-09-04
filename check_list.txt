@@ -1,0 +1,11 @@
+1. /var/log/secure
+	/var/log/message
+
+2. netstat -nap
+ps -ef
+
+3. etc/passwd
+
+4. /root
+
+5. init.d

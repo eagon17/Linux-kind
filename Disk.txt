@@ -1,0 +1,4 @@
+# cat /proc/scsi/scsi
+# cat /proc/ide/ide0/hda/model
+# cat /proc/sys/dev/cdrom/info
+# cat /proc/sys/dev/cdrom/info

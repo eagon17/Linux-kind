@@ -1,0 +1,282 @@
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# [ 정통 HOWTO ] Tomcat5.0.X + Apache2.0.X + mod_JK 인스톨 
+#                               http://blog.naver.com/couplewith.do
+#                                                      2004. 11. 20
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ 
+
+    차 례
+
+ 
+
+1. 환경 설정
+2. jdk install
+3. apache install
+4. tomcat install
+5. mod_jk install
+6. 환경 설정 
+    httpd.conf,  workers2.properties, jk2.properties
+7. 서비스 구동
+
+ 
+
+1. 환경 설정
+#>>/etc/profile  or .bash_profile for USER's
+# profile 파일에 아래 내용을 적어 두면 시스템 전사용자가 사용할수 있고
+# 각 user별 .bash_profile 에 적어두면 해당 사용자만 적용이된다.
+# 그리고 설치된 Shell 의 종류벌로 한다면 /etc/bashrc 파일에 적어두어면
+# bash 셀을 사용하는 전 User가 들이 환경 변수를 부여 받는다.
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 인터넷을 뒤지다 보면 아래와 같은 환경 변수 설정 하는 부분이 많이 있다.
+#
+# [주의 사항]은 httpd2 를 쓸경우 아래와 같이 반드시 APACHE2_HOME 라고 해야한다.
+# APACHE_HOME 라고 설정하고 설치하면 tomcat_connector가 설치가 안된다
+# 필자는 모르고 설정 하고 하다가 Apache 1.3 requires apr to built from source, use --with-apr and --with-apr-util
+# 에러가 나오는 바람에 애를 먹었었다.
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+### For WebServer
+export JAVA_HOME=/usr/java/java
+export APACHE2_HOME=/usr/local/apache2
+export CATALINA_HOME=/usr/local/tomcat
+export CLASSPATH=$JAVA_HOME/lib/tools.jar:$JAVA_HOME/lib/activation.jar:$JAVA_HOME/lib/mail.jar:$CATALINA_HOME/common/lib/servlet.jar
+export PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin:$APACHE2_HOME/bin:.
+
+
+2. jdk install
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#install JAVA SDK
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+sh j2sdk-1_4_2_05-linux-i586-rpm.bin
+
+rpm -Uvh j2sdk-1_4_2_05-linux-i586.rpm
+
+
+cd /usr/java
+ln -s j2sdk1.4.2_05 java
+
+
+3. apache install
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Install HTTP
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 파일 앞축을 풀고 컴파일을 하면 되는데
+# 다양한 옵션을 주다보니 에러 해결을 위해 옵션을 바꾸는 것이 번거롭다.
+# 그래서 필자는 아래 install-httpd.sh 과 같은 스크립트를 많이 쓴다.
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  
+tar xvzf httpd-2.0.52.tar.gz
+
+>> install-httpd.sh
+ cd httpd-2.0.52
+ make clean
+ ./configure \
+
+  --prefix=/usr/local/apache2 \
+  --with-mpm=prefork \
+  --disable-status \
+  --disable-asis \
+
+  --disable-cgi \
+  --disable-userdir \
+  --enable-speling=shared \
+  --enable-rewrite=shared \
+  --enable-modules=so
+ make
+ make install
+
+
+설치 확인
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ /usr/local/apache2/bin/httpd -t 
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 컴파일 옵션에서 disable 된 모듈들이 많다.
+ 대부분 오류가 해당 모듈이 적재되지 않아, 환경 파일이 맞지 않아 생긴 오류일 것이다.
+ 아래 httpd.conf 수정 하는 부분을 참고 하면 오류가 해결 될 것이다.
+
+
+4. tomcat install
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Install - tomcat
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+cd /usr/local/src/jakarita
+mv jakarta-tomcat-5.5.4 /usr/local
+cd  /usr/local
+ln -s jakarta-tomcat-5.5.4 tomcat
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ENV 변수 설정
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+### Fro WebServer
+export JAVA_HOME=/usr/java/java
+export APACHE_HOME=/usr/local/apache2
+export CATALINA_HOME=/usr/local/tomcat
+export CLASSPATH=$JAVA_HOME/lib/tools.jar:$JAVA_HOME/lib/activation.jar:$JAVA_HOME/lib/mail.jar:$CATALINA_HOME/common/lib/servlet.jar
+export PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin:$APACHE_HOME/bin:.
+
+ 
+
+
+ 
+5. mod_jk install
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# install jakarta-tomcat-connectors-jk2
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 주의 사항 위에서도 언급 했지만 중간부터 읽는 이를 위해 당부한다.
+# httpd2.x를 설치하면서 환경변수에 APACHE_HOME를 명시하면 아래와 같은 에러만 나오고 설치가 안된다. 
+# Apache 1.3 requires apr to built from source, use --with-apr and --with-apr-util
+# 반드시 APACHE2_HOME=apche_dest_dir 로 변수 명을 바꾸어야 한다.
+# 참고로 필자는 jakarta-tomcat-connectors-jk2-2.0.4-src/jk/native2/configure 파일을 디버깅 한결과
+#  알아낸 문제 인만큼 상당한 고행을 겪었다.
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>tar xvzf jakarta-tomcat-connectors-jk2-src-current.tar.gz
+>cd jakarta-tomcat-connectors-jk2-2.0.4-src/
+>cd jk/native2
+>./buildconf.sh
+
+#[ apache 2.X.X ]
+>./configure --with-apxs2=/usr/local/apache2/bin/apxs
+>  make
+>  cd ../build/jk2/apache2
+>  apxs -n jk2 -i mod_jk2.so
+
+#[ apache 1.3.X ]
+>./configure --with-apxs=/usr/local/apache/bin/apxs   \
+             --with-apr=/usr/local/src/httpd-1.3.X/srclib/apr \
+             --with-apr-util=/usr/local/src/httpd-1.3.X/srclib/apr-util 
+
+>  make
+>  cd ../build/jk2/apache13
+>  apxs -n jk2 -i mod_jk2.so
+#   DSO로 로딩 되도록 컴파일 한 모듈을 등록 한다.
+
+# 설치 확인
+>  ls usr/local/apache2/modules/mod_jk.so
+
+ 
+
+6. 환경 설정
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+## add httpd.conf
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#    httpd의 모듈이 일부만 컴파일 되어 있다 따라서 필요 없는 모듈은 
+#    apache 1.3버전의 httpd.conf 와 같이 적용 하거나 삭제 하면 된다. 
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    
+      1. userdir 모듈이 로딩 되지 않아 주석 처리 하거나 다음과 같이 처리한다.
+      #---------------------------------------------------------------------
+ UserDir public_html  
+
+->> to Change
+ 
+     UserDir public_html
+ 
+
+      2. autoindex 모듈이 로딩 되지 않아 주석 처리 하거나 다음과 같이 처리한다.
+      #---------------------------------------------------------------------
+ #
+ # IndexOptions: Controls the appearance of server-generated directory
+ # listings.
+ #
+ IndexOptions FancyIndexing VersionSort
+            ========= 중략  ========
+ ReadmeName README.html
+ HeaderName HEADER.html
+
+ #
+ # IndexIgnore is a set of filenames which directory indexing should ignore
+ # and not include in the listing.  Shell-style wildcarding is permitted.
+ #
+ IndexIgnore .??* *~ *# HEADER* README* RCS CVS *,v *,t
+
+->> to Change
+ 
+  #
+  # IndexOptions: Controls the appearance of server-generated directory
+  # listings.
+  #
+  IndexOptions FancyIndexing VersionSort
+
+              ========= 중략  ========
+
+  ReadmeName README.html
+  HeaderName HEADER.html
+
+  #
+  # IndexIgnore is a set of filenames which directory indexing should ignore
+  # and not include in the listing.  Shell-style wildcarding is permitted.
+  #
+  IndexIgnore .??* *~ *# HEADER* README* RCS CVS *,v *,t
+
+ 
+
+      3. add line -->>
+      #---------------------------------------------------------------------
+  LoadModule jk2_module modules/mod_jk2.so
+
+ 
+
+ 
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# HTTP jk2 환경 파일 수정  :
+#     /user/local/apache2/conf/workers2.properties
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ [shm]
+ file=/usr/local/apache2/logs/jk2.shm
+ size=1048576
+ 
+ [channel.socket:localhost:8009]
+ port=8009
+ host=127.0.0.1
+ 
+ 
+ # Defile The Worker
+ [ajp13:localhost:8009]
+ channel=channel.socket:localhost:8009
+ 
+ # Anounce Status Worker
+ # [status:status]
+ 
+ # Announce Uri mapping
+ [uri:/examples/*]
+ worker=ajp13:localhost:8009
+ 
+ # Uri mapping
+ [uri:/*]
+ worker=ajp13:localhost:8009
+ 
+ # Uri status
+ [uri:/status/*]
+ worker=status:status
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 톰캣 JK2 환경 파일 수정 : 
+# /usr/local/tomcat/conf/jk2.properties
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ channelSocket.port=8009
+ shm.file=/usr/local/apache2/logs/jk2.shm
+ apr.jniModeSo=inprocess
+
+
+7. 서비스 구동
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# START TOMCAT
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/usr/local/apache2/bin/apachectl restart
+
+[root@stage2 tomcat]# $CATALINA_HOME/bin/startup.sh
+Using CATALINA_BASE:   /usr/local/tomcat
+Using CATALINA_HOME:   /usr/local/tomcat
+Using CATALINA_TMPDIR: /usr/local/tomcat/temp
+Using JAVA_HOME:       /usr/java/java
+

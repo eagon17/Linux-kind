@@ -1,0 +1,51 @@
+
+
+Sh int status
+
+이게 포트 설정 상태 보는거
+
+ 
+
+Conf t
+
+이게 설정 들어가는 명령어
+
+Int range fa2/44
+
+Fa 2/44 번 포트 레인지로 설정
+
+Switch access VLAN 999
+
+이게 Vlan 설정
+
+description this-is-discription
+설명 설정
+
+ 
+
+End 이게 마지막
+
+ 
+
+ 
+
+Sh proc status
+
+프로세스 상태
+
+Sh proc CPU 
+
+시피유 상태
+
+ 
+*********************** trunk 설정 *******************
+
+interface GigabitEthernet0/24
+ switchport trunk encapsulation dot1q
+ switchport mode access
+ switchport access vlan 510
+ switchport voice vlan 710
+ mls qos trust cos
+ spanning-tree portfast
+
+*******************************************************

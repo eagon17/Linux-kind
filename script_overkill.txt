@@ -1,0 +1,58 @@
+date > log-overkill-$HOSTNAME
+
+echo ============= /var/log/secure ============= >> log-overkill-$HOSTNAME
+tac /var/log/secure >> log-overkill-$HOSTNAME
+
+echo ============= /var/log/messages ============= >> log-overkill-$HOSTNAME
+tac /var/log/messages >> log-overkill-$HOSTNAME
+
+echo ============= /etc/passwd ============= >> log-overkill-$HOSTNAME
+tac /etc/passwd >> log-overkill-$HOSTNAME
+
+echo ============= /etc/shadow ============= >> log-overkill-$HOSTNAME
+tac /etc/shadow >> log-overkill-$HOSTNAME
+
+echo ============= netstat -nap ============= >> log-overkill-$HOSTNAME
+netstat -nap >> log-overkill-$HOSTNAME
+
+echo ============= ps -ef ============= >> log-overkill-$HOSTNAME
+ps -ef >> log-overkill-$HOSTNAME
+
+echo ============= uname -a ============= >> log-overkill-$HOSTNAME
+uname -a >> log-overkill-$HOSTNAME
+
+echo ============= ls -al /etc/rc.d/init.d ============= >> log-overkill-$HOSTNAME
+ls -al /etc/rc.d/init.d >> log-overkill-$HOSTNAME
+
+echo ============= ls -al /etc/cron.d/ ============= >> log-overkill-$HOSTNAME
+ls -al /etc/cron.d/ >> log-overkill-$HOSTNAME
+
+echo =============  ls -al /etc/cron.daily/ ============= >> log-overkill-$HOSTNAME
+ls -al /etc/cron.daily/ >> log-overkill-$HOSTNAME
+
+echo =============  ls -al /etc/cron.hourly/ ============= >> log-overkill-$HOSTNAME
+ls -al /etc/cron.hourly/ >> log-overkill-$HOSTNAME
+
+echo =============  ls -al /etc/cron.monthly/ ============= >> log-overkill-$HOSTNAME
+ls -al /etc/cron.monthly/ >> log-overkill-$HOSTNAME
+
+echo =============  ls -al /etc/cron.weekly/ ============= >> log-overkill-$HOSTNAME
+ls -al /etc/cron.weekly/ >> log-overkill-$HOSTNAME
+
+echo =============  cat /etc/cron.deny ============= >> log-overkill-$HOSTNAME
+cat /etc/cron.deny >> log-overkill-$HOSTNAME
+
+echo =============  crontab -l ============= >> log-overkill-$HOSTNAME
+crontab -l >> log-overkill-$HOSTNAME
+
+echo =============  ssh -V ============= >> log-overkill-$HOSTNAME
+ssh -V 2>> log-overkill-$HOSTNAME
+
+echo =============  /sbin/iptables -L ============= >> log-overkill-$HOSTNAME
+/sbin/iptables -L >> log-overkill-$HOSTNAME
+
+echo =============  /usr/local/apache2/bin/httpd -V ============= >> log-overkill-$HOSTNAME
+/usr/local/apache2/bin/httpd -V >> log-overkill-$HOSTNAME
+
+echo =============  ls -al -h /usr/local/apache2/logs ============= >> log-overkill-$HOSTNAME
+ls -al -h /usr/local/apache2/logs >> log-overkill-$HOSTNAME

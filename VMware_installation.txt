@@ -1,0 +1,89 @@
+
+
+******************** Setting up VMware server ********************
+
+yum install ntsysv
+yum install ncurses-devel
+yum install gcc-c++
+yum install make
+yum install libxml2-devel
+yum install libpng-devel
+yum install libart_lgpl-devel
+yum install freetype-devel
+yum install vixie-cron crontabs
+yum install zlib
+yum install jpeg
+yum install gd
+yum install glibc
+yum install xinetd libx11-6 libx11-dev libxtst6 xlibs-dev xinetd wget ssh openssh-server
+yum install libX*
+
+
+yum update kernel
+yum update kernel-PAE
+uname -a
+yum install kernel-devel kernel-headers
+yum install kernel kernel-PAE
+
+** restart **
+
+tar zxvf VMware-server-1.0.6-91891.tar.gz
+cd vmware-server-distrib/
+./vmware-install.pl
+
+may use all default values except:
+
+/usr/src/kernels/2.6.18-128.1.6.el5PAE-i686/include
+Port must be 902, if not, must use <IP>:90x to connect.
+
+
+
+vmware-config.pl to reconfigure the server
+/etc/vmware/vm-list
+
+
+
+This program cannot tell for sure, but you may need to upgrade libc5 to glibc 
+before you can run VMware Server.
+
+******************** In the repair mode ********************
+
+mount -n -o remount /
+
+
+
+******************** Setting up VMware server MUI ********************
+
+download VMware-mui-1.0.4-56528.tar.gz
+
+tar zxvf VMware-mui-1.0.4-56528.tar.gz
+cd vmware-mui-distrib
+./vmware-install.pl
+
+for configuration:
+/usr/bin/vmware-config-mui.pl
+
+go to
+
+https://localhost:8333/
+
+
+
+
+
+
+
+
+
+********************* Trouble shooting ******************
+
+if MUI or Console give you the following error:
+
+511 Error connecting to /usr/sbin/vmware-serverd process
+
+try:
+service httpd.vmware restart
+
+if not:
+kill -9 xxxx (vmware-serverd pid)
+WARNING: this will restart the machine!!

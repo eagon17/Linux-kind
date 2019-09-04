@@ -1,0 +1,39 @@
+
+
+*********** Before adding HDD **************
+
+Last login: Mon Sep  1 18:21:41 2008 from kr0246.kr.blizzard.net
+[eagon17@Cacti-2 ~]$ sudo su -
+Password:
+[root@Cacti-2 ~]# cd /dev
+[root@Cacti-2 dev]# ll hd*
+brw-r----- 1 root disk  3, 0 Sep  1 18:27 hda
+brw-r----- 1 root disk  3, 1 Sep  1 18:28 hda1
+brw-r----- 1 root disk  3, 2 Sep  1 18:27 hda2
+brw-rw---- 1 root disk 22, 0 Sep  1 18:28 hdc
+[root@Cacti-2 dev]# ls hd*
+hda  hda1  hda2  hdc
+[root@Cacti-2 dev]# 
+
+
+
+
+
+
+
+
+
+*********** After adding HDD **************
+
+
+
+hda  hda1  hda2  hdb  hdc
+[root@Cacti-2 dev]# ll hd*
+brw-r----- 1 root disk  3,  0 Sep  1 18:31 hda
+brw-r----- 1 root disk  3,  1 Sep  1 18:32 hda1
+brw-r----- 1 root disk  3,  2 Sep  1 18:31 hda2
+brw-r----- 1 root disk  3, 64 Sep  1 18:31 hdb
+brw-rw---- 1 root disk 22,  0 Sep  1 18:32 hdc
+[root@Cacti-2 dev]# ls hd*
+hda  hda1  hda2  hdb  hdc
+[root@Cacti-2 dev]# 
